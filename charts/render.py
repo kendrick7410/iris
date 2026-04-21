@@ -41,6 +41,29 @@ def render_charts(fiches_dir: Path, output_dir: Path) -> list:
 
     for fiche_path in sorted(fiches_dir.glob("*.json")):
         fiche = json.loads(fiche_path.read_text(encoding="utf-8"))
+
+        # Special case: macro_brief fiche renders one KPI card per KPI entry
+        if fiche.get("section_type") == "macro_brief":
+            for kpi in fiche.get("kpis", []):
+                key = kpi.get("key", "").replace("_yoy", "")
+                chart_id = f"macro_kpi_{key}"
+                svg_path = output_dir / f"{chart_id}.svg"
+                try:
+                    kpi_card.render(
+                        label=kpi.get("label", ""),
+                        primary_value=kpi.get("primary_value"),
+                        primary_unit=kpi.get("primary_unit", ""),
+                        delta_value=kpi.get("delta_value") or 0.0,
+                        delta_unit=kpi.get("delta_unit", ""),
+                        direction=kpi.get("direction", "flat"),
+                        output_path=svg_path,
+                    )
+                    produced.append(svg_path)
+                    logger.info(f"KPI card {chart_id} → {svg_path}")
+                except Exception as e:
+                    logger.error(f"KPI card {chart_id} failed: {e}")
+            continue
+
         chart_ids = fiche.get("charts", [])
         year = int(fiche["period"]["month"].split("-")[0])
         data = fiche.get("data", {})
