@@ -1,0 +1,46 @@
+{
+  "section_type": "sales",
+  "period": {
+    "month": "2026-01",
+    "publication_date": "2026-04-17",
+    "window": "January 2026",
+    "window_months": 1,
+    "window_ordinal": null,
+    "note": "Turnover data lags production by ~1 month. Latest available: January 2026 vs February 2026 for output."
+  },
+  "data": {
+    "current": {
+      "value": 90.8,
+      "unit": "index 2021=100",
+      "period": "2026-01",
+      "s_adj": "SCA"
+    },
+    "previous_year": {
+      "value": 98.2,
+      "period": "2025-01",
+      "delta_pct": -7.5
+    },
+    "pre_crisis_avg": null,
+    "ytd": null,
+    "by_country": {
+      "DE": { "current": 89.3, "previous_year": 97.1, "yoy_pct": -8.0 },
+      "FR": { "current": 101.3, "previous_year": 104.5, "yoy_pct": -3.1 },
+      "IT": { "current": 94.2, "previous_year": 101.0, "yoy_pct": -6.7 },
+      "NL": { "current": 79.0, "previous_year": 92.1, "yoy_pct": -14.2 },
+      "ES": { "current": 97.6, "previous_year": 104.8, "yoy_pct": -6.9 },
+      "BE": { "current": 88.5, "previous_year": 101.9, "yoy_pct": -13.2 },
+      "PL": { "current": 104.6, "previous_year": 118.5, "yoy_pct": -11.7 }
+    },
+    "by_sector": {
+      "C": { "label": "Total manufacturing", "current": 115.4, "previous_year": 117.5, "yoy_pct": -1.8 },
+      "C20": { "label": "Chemicals", "current": 90.8, "previous_year": 98.2, "yoy_pct": -7.5 }
+    },
+    "source": "Cefic analysis based on Eurostat data (sts_intv_m, 2026)"
+  },
+  "charts": ["turnover_index_2021_2026", "turnover_yoy_by_country"],
+  "editorial_context": {
+    "latest_structural_break": "March 2022",
+    "notable_events": ["US tariff measures since March 2025"],
+    "pre_crisis_reference": "2014-2019 average"
+  }
+}
