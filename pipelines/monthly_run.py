@@ -28,15 +28,17 @@ load_dotenv(PROJECT_ROOT / ".env")
 import click
 
 from data.fetchers import eurostat, comext
-from analysis.indicators import build_fiches
+from analysis.indicators import build_fiches, build_macro_brief_fiche
 from editorial_engine.draft import draft_section
 from editorial_engine.summary import draft_summary
+from editorial_engine.macro_brief import draft_macro_brief
 from charts.render import render_charts
 
 logger = logging.getLogger("iris")
 
 STEPS = ["fetch", "process", "draft", "visualize", "build", "commit"]
 SECTION_ORDER = ["output", "prices", "sales", "trade_exports", "trade_imports"]
+PIPELINE_VERSION = "0.2.0"   # L5 — macro brief enabled; v1 editions stay at 0.1.0
 
 
 def setup_logging():
@@ -91,62 +93,80 @@ def step_process(month: str, cache_dir: Path) -> list:
 
 
 def step_draft(month: str, fiches: list, dry_run: bool) -> tuple:
-    """Step 3: Draft editorial sections + summary."""
+    """Step 3: Draft editorial sections. Summary/macro-brief are step 3.5."""
     system_prompt_path = PROJECT_ROOT / "context-prep" / "editorial" / "system.md"
-    summary_prompt_path = PROJECT_ROOT / "editorial_engine" / "summary_prompt.md"
     drafts_dir = PROJECT_ROOT / "editorial" / "drafts" / month
     sections_dir = drafts_dir / "sections"
     log_path = drafts_dir / "llm_log.jsonl"
     sections_dir.mkdir(parents=True, exist_ok=True)
 
     section_paths = []
-    failed_sections = []
+    # Skip macro_brief fiche here — it is produced at step 3.5 from the drafted sections
+    section_fiches = [f for f in fiches
+                      if json.loads(f.read_text(encoding="utf-8"))["section_type"] != "macro_brief"]
 
-    for fiche_path in fiches:
-        fiche_data = json.loads(fiche_path.read_text(encoding="utf-8"))
-        section_type = fiche_data["section_type"]
-
+    for fiche_path in section_fiches:
         result = draft_section(fiche_path, system_prompt_path, sections_dir, log_path)
         if result:
             section_paths.append(result)
-        else:
-            failed_sections.append(section_type)
 
-    # Check if output section succeeded (required)
     output_present = any("output" in str(p) for p in section_paths)
     if not output_present:
         logger.error("Output section failed — edition cannot proceed")
         return section_paths, None, "failed"
-
     if len(section_paths) < 2:
         logger.error(f"Only {len(section_paths)} sections produced, need ≥2")
         return section_paths, None, "failed"
 
-    # Generate summary
-    summary_path, summary_quality = draft_summary(
-        section_paths, summary_prompt_path, drafts_dir, log_path, month
+    return section_paths, None, "ok"
+
+
+def step_macro_brief(month: str, fiches: list, section_paths: list) -> tuple:
+    """Step 3.5: Build macro_brief fiche and draft the macro brief.
+
+    Returns (macro_md_path, quality). Falls back to summary mode if the
+    macro brief overlay prompt is absent (backward compatibility for v1).
+    """
+    system_prompt_path = PROJECT_ROOT / "context-prep" / "editorial" / "system.md"
+    macro_prompt_path = PROJECT_ROOT / "editorial" / "prompts" / "macro_brief.md"
+    summary_prompt_path = PROJECT_ROOT / "editorial_engine" / "summary_prompt.md"
+    drafts_dir = PROJECT_ROOT / "editorial" / "drafts" / month
+    fiches_dir = PROJECT_ROOT / "data" / "processed" / month / "fiches"
+    log_path = drafts_dir / "llm_log.jsonl"
+
+    # Backward-compat: if no macro_brief prompt file, fall back to v1 summary
+    if not macro_prompt_path.exists():
+        logger.info("No macro_brief prompt — falling back to summary (v1 mode)")
+        return draft_summary(section_paths, summary_prompt_path, drafts_dir, log_path, month)
+
+    # Assemble macro_brief fiche
+    cache_dir = PROJECT_ROOT / "data" / "cache" / month
+    macro_fiche = build_macro_brief_fiche(fiches_dir, cache_dir)
+
+    # Draft macro brief
+    macro_path, quality = draft_macro_brief(
+        fiche_path=macro_fiche,
+        system_prompt_path=system_prompt_path,
+        macro_prompt_path=macro_prompt_path,
+        section_paths=section_paths,
+        output_dir=drafts_dir,
+        log_path=log_path,
+        month=month,
     )
-
-    # Consolidate edition
-    if summary_path:
-        edition_path = _consolidate(summary_path, section_paths, drafts_dir, month)
-    else:
-        edition_path = None
-
-    return section_paths, edition_path, summary_quality
+    return macro_path, quality
 
 
-def _consolidate(summary_path: Path, section_paths: list, drafts_dir: Path, month: str) -> Path:
-    """Assemble summary + sections into edition.md."""
-    summary_content = summary_path.read_text(encoding="utf-8")
-    # Strip frontmatter from summary
-    if summary_content.startswith("---"):
-        end = summary_content.find("---", 3)
+def _consolidate(opening_path: Path, section_paths: list, drafts_dir: Path, month: str) -> Path:
+    """Assemble opening (macro brief or legacy summary) + sections into edition.md."""
+    opening_content = opening_path.read_text(encoding="utf-8")
+    # Strip frontmatter
+    if opening_content.startswith("---"):
+        end = opening_content.find("---", 3)
         if end != -1:
-            summary_content = summary_content[end + 3:].strip()
+            opening_content = opening_content[end + 3:].strip()
 
-    edition = f"---\nmonth: {month}\npublication_date: {datetime.now().strftime('%Y-%m-%d')}\n---\n\n"
-    edition += summary_content + "\n\n---\n\n"
+    edition = f"---\nmonth: {month}\npublication_date: {datetime.now().strftime('%Y-%m-%d')}\npipeline_version: {PIPELINE_VERSION}\n---\n\n"
+    edition += opening_content + "\n\n---\n\n"
 
     # Sort sections by canonical order
     sorted_paths = sorted(section_paths, key=lambda p: SECTION_ORDER.index(p.stem)
@@ -214,10 +234,16 @@ def write_manifest(month: str, sections: list, summary_quality: str, fiches: lis
         fiche = json.loads(fp.read_text(encoding="utf-8"))
         data_periods[fiche["section_type"]] = fiche["data"]["current"]["period"]
 
+    macro_prompt_path = PROJECT_ROOT / "editorial" / "prompts" / "macro_brief.md"
+    macro_prompt_hash = None
+    if macro_prompt_path.exists():
+        macro_prompt = macro_prompt_path.read_text(encoding="utf-8")
+        macro_prompt_hash = hashlib.sha256(macro_prompt.encode()).hexdigest()[:16]
+
     manifest = {
         "month": month,
         "publication_date": datetime.now().strftime("%Y-%m-%d"),
-        "pipeline_version": "0.1.0",
+        "pipeline_version": PIPELINE_VERSION,
         "sections_produced": section_names,
         "sections_skipped": {s: "data_unavailable" for s in skipped},
         "summary_quality": summary_quality or "n/a",
@@ -225,6 +251,7 @@ def write_manifest(month: str, sections: list, summary_quality: str, fiches: lis
         "prompt_hashes": {
             "system_md": hashlib.sha256(system_prompt.encode()).hexdigest()[:16],
             "summary_prompt_md": hashlib.sha256(summary_prompt.encode()).hexdigest()[:16],
+            "macro_brief_prompt_md": macro_prompt_hash,
         },
         "llm_model_used": {
             "sections": "claude-sonnet-4-20250514",
@@ -273,14 +300,26 @@ def main(month, dry_run, only_step, force):
             fiches_dir = PROJECT_ROOT / "data" / "processed" / month / "fiches"
             fiches = list(fiches_dir.glob("*.json")) if fiches_dir.exists() else []
 
-        # 3. DRAFT
+        # 3. DRAFT (sections only)
         if not only_step or only_step == "draft":
-            logger.info("--- STEP 3: DRAFT ---")
-            sections, edition_path, summary_quality = step_draft(month, fiches, dry_run)
-            if summary_quality == "failed":
+            logger.info("--- STEP 3: DRAFT (sections) ---")
+            sections, _, draft_status = step_draft(month, fiches, dry_run)
+            if draft_status == "failed":
                 logger.error("Edition draft failed (output missing or <2 sections)")
                 write_manifest(month, sections, "failed", fiches)
                 sys.exit(2)
+
+            # 3.5 MACRO BRIEF (or summary fallback)
+            logger.info("--- STEP 3.5: MACRO BRIEF ---")
+            opening_path, summary_quality = step_macro_brief(month, fiches, sections)
+
+            # Consolidate
+            drafts_dir = PROJECT_ROOT / "editorial" / "drafts" / month
+            if opening_path:
+                edition_path = _consolidate(opening_path, sections, drafts_dir, month)
+            else:
+                edition_path = None
+                summary_quality = summary_quality or "failed"
         else:
             sections = []
             edition_path = PROJECT_ROOT / "editorial" / "drafts" / month / "edition.md"
