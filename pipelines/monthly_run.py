@@ -98,6 +98,47 @@ def _drafts_dir(month: str, variant: str | None = None) -> Path:
     return PROJECT_ROOT / "editorial" / "drafts" / name
 
 
+FRAGMENTED_EUROPE_RE = re.compile(
+    r"[Tt]hese\s+chemical\s+\w+\s+trends\s+by\s+country\s+show\s+a\s+fragmented\s+Europe\.?",
+)
+
+
+def _enforce_fragmented_europe_cap(section_paths: list) -> dict:
+    """Enforce §5.3 condition 4: the phrase is used at most once per edition.
+
+    Iterates section files in draft order; keeps the first occurrence and
+    strips subsequent ones (and the sentence that contains them). Returns a
+    report dict with counts per section so the post-run report can show what
+    the LLM produced before enforcement.
+    """
+    per_section = {}
+    seen = False
+    for path in sorted(section_paths, key=lambda p: p.name):
+        text = path.read_text(encoding="utf-8")
+        matches = FRAGMENTED_EUROPE_RE.findall(text)
+        per_section[path.stem] = {"occurrences_before": len(matches),
+                                   "occurrences_after": 0, "stripped": False}
+        if not matches:
+            continue
+        if not seen:
+            # First edition occurrence — keep it, count it.
+            seen = True
+            per_section[path.stem]["occurrences_after"] = 1
+            continue
+        # Strip ALL occurrences in this file (it's a repeat in the edition).
+        new_text = FRAGMENTED_EUROPE_RE.sub("", text)
+        # Clean up dangling spaces / empty lines created by the strip.
+        new_text = re.sub(r"[ \t]+\n", "\n", new_text)
+        new_text = re.sub(r"\n{3,}", "\n\n", new_text)
+        path.write_text(new_text, encoding="utf-8")
+        per_section[path.stem]["stripped"] = True
+        logger.warning(
+            f"§5.3 enforcement: stripped {len(matches)}× 'fragmented Europe' "
+            f"closing from {path.name} (already used earlier in this edition)."
+        )
+    return {"per_section": per_section, "edition_uses_phrase": seen}
+
+
 def step_draft(month: str, fiches: list, dry_run: bool, variant: str | None = None) -> tuple:
     """Step 3: Draft editorial sections. Summary/macro-brief are step 3.5."""
     system_prompt_path = PROJECT_ROOT / "context-prep" / "editorial" / "system.md"
@@ -116,6 +157,10 @@ def step_draft(month: str, fiches: list, dry_run: bool, variant: str | None = No
         if result:
             section_paths.append(result)
 
+    # §5.3 condition 4 — once-per-edition enforcement for "fragmented Europe".
+    enforcement = _enforce_fragmented_europe_cap(section_paths)
+    _log_enforcement(drafts_dir, enforcement)
+
     output_present = any("output" in str(p) for p in section_paths)
     if not output_present:
         logger.error("Output section failed — edition cannot proceed")
@@ -125,6 +170,12 @@ def step_draft(month: str, fiches: list, dry_run: bool, variant: str | None = No
         return section_paths, None, "failed"
 
     return section_paths, None, "ok"
+
+
+def _log_enforcement(drafts_dir: Path, enforcement: dict) -> None:
+    """Persist the enforcement report alongside the edition for traceability."""
+    out = drafts_dir / "enforcement_report.json"
+    out.write_text(json.dumps(enforcement, indent=2), encoding="utf-8")
 
 
 def step_macro_brief(month: str, fiches: list, section_paths: list,
