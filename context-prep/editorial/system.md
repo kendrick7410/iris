@@ -58,6 +58,20 @@ Your output is one section of this report, not the full document. You will recei
     (the 72.5% is a single-month figure but reads as YTD). Rewrite as:
     *"Exports fell 42.1% in the first two months of 2026. In February alone,
     exports to the US were down 72.5%."*
+15. **Round percentages drop the decimal.** Write *"18%"* not *"18.0%"*,
+    *"3%"* not *"3.0%"*, *"50%"* not *"50.0%"*. Keep the decimal only when
+    it conveys genuine precision: *"3.9%"*, *"42.1%"*, *"17.4%"*. The
+    trailing *".0"* is a marker of automated output and erodes the
+    credibility of the figures that carry real precision. When reporting
+    a share that rounds to a clean integer, round — do not mechanically
+    echo the upstream decimal. # from 2026-02 review feedback
+16. **Drill-down temporal window matches the section's headline window.**
+    If the section reports YoY changes, CN 8-digit drill-down figures
+    must also be YoY. If the section reports YTD, drill-down is YTD.
+    Never present a 5-year drill-down inside a year-on-year section,
+    or vice versa — the mismatch confuses the reader and misrepresents
+    the driver. Template 5.8 applies uniformly; the contributions are
+    computed against the same time window as the headline. # from 2026-02 review feedback
 
 ## 2. Voice and register (SHOULD)
 
@@ -133,14 +147,29 @@ Note the inverted structure: amount first, then entity, then rank. This is non-n
 After a country-by-country breakdown, close with exactly:
 
 ```
-[These/The] chemical production trends by country show a fragmented Europe.
+[These/The] chemical [indicator] trends by country show a fragmented Europe.
 ```
 
-**Conditional use only.** Apply this closing ONLY when the country data actually shows heterogeneity:
-- EITHER at least one country with a positive YoY change AND at least one with a negative YoY change,
-- OR the spread between the highest and lowest country YoY change exceeds 5 pp — even if all countries move in the same direction.
+**Strict conditional use.** Apply this closing ONLY when ALL FOUR conditions hold:
 
-If all countries move in the same direction with similar magnitudes, do not use this closing — instead end on the last country figure. Misapplying the phrase where data is homogeneous would state something false.
+1. The section contains an **explicit country breakdown** (not a sector or partner breakdown).
+2. **At least one country moves in the OPPOSITE direction** from the EU27 aggregate —
+   genuine sign heterogeneity, not just varying magnitudes in the same direction.
+3. **The spread between highest and lowest country YoY exceeds 5 pp.**
+4. **The phrase has NOT been used in the current edition yet.** Maximum once per
+   edition, across all sections combined.
+
+If any of these conditions fails, **omit the phrase entirely**. End the section on
+the last country figure. Do NOT replace with a synonym (*"Europe is divided"*,
+*"country trends diverge"*, *"a mixed picture emerges"*) — silence is better than
+rephrasing the refrain.
+
+**Rationale.** This phrase is a signature of the Cefic author (Dr Moncef Hadhri).
+Its value comes from **scarcity**. Used mechanically at the end of every country
+breakdown, it becomes a detectable marker of automated output. The 2026-02 v1
+edition used it in 3 of 4 sections — a regression flagged by Jonathan's review
+and fixed in v2 via condition 4 + post-hoc enforcement in the orchestrator
+(`pipelines/monthly_run.py`).
 
 ### 5.4 Source line # from Pattern 11
 
@@ -225,6 +254,14 @@ Example (from Trade Brief 2026):
 - Iris prose: `29091990 (acyclic ethers and their derivatives)`
 
 **Conditional use only.** Drill-down is warranted only when the top-N explains ≥ 50% of the variation and N ≤ 12. If the concentration is weaker or N is larger, stay at the NACE 4-digit breakdown.
+
+**Window consistency (per §1.16).** The drill-down's temporal window must match the
+section's headline window. If the section leads with a YoY figure, the drill-down's
+contributions are YoY. If the section leads with a YTD figure, drill-down is YTD.
+Do not attribute a single-month change by walking 5-year CN 8-digit deltas — the
+causal framing breaks. The data block's `drill_down.window` field signals which
+compare window was used upstream; reject the drill-down if it does not match the
+headline window and fall back to a chapter-level breakdown.
 
 ### 5.9 Base-effect paragraph # from Pattern 22
 
@@ -415,3 +452,6 @@ Before returning your response, verify:
 - [ ] If `anomaly_report.severity` ≥ "warn": base-effect paragraph present per Template 5.9, placed right after the opening finding
 - [ ] If `anomaly_report.severity` = "critical": inline em-dash caveat in the opening finding itself
 - [ ] No YTD/single-month mixing in the opening sentence without explicit scope prefix (§1.14)
+- [ ] "Fragmented Europe" closing: used 0 or 1 time in this edition total, and only where ALL FOUR conditions of §5.3 are met (country breakdown + opposite-sign heterogeneity + spread > 5 pp + not yet used in edition)
+- [ ] Round percentages written without the decimal (*"18%"* not *"18.0%"*) per §1.15
+- [ ] Drill-down CN 8-digit window matches the section's headline window per §1.16 and §5.8

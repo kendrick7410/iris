@@ -76,6 +76,22 @@ Depuis `editorial/drafts/2026-02/RETROSPECTIVE.md` :
 
 6. ~~**Base-effect / anomaly detection absent du pipeline.**~~ **Résolu le 2026-04-21** (post-incident édition 2026-02). Module `analysis/anomaly_detector.py` ajouté avec 5 détecteurs (D1 Comext/IPI divergence, D2 value/volume divergence, D3 Z-score sur base N-1, D4 concentration top-2 partenaires, D5 comparaison N-2). Enrichissement automatique des fiches par `enrich_with_anomalies()` dans `analysis/indicators.py`. Patches `system.md` §1.13 (anomaly disclosure MUST), §1.14 (temporal scope consistency), §5.9 (base-effect template), pattern SYNTHESIS #22. Édition 2026-02-v1 conservée en l'état (snapshot d'origine), 2026-02-v2 régénérée dans `editorial/drafts/2026-02-v2/` avec paragraphe base-effect automatique + incise em-dash dans le titre trade_exports. Trace d'investigation dans `context-prep/investigation/2026-02-trace.md`. Pipeline regen : `python pipelines/monthly_run.py --month YYYY-MM --variant vN --force`.
 
+## ⚠️ Known issues
+
+**Edition 2026-02 contains an un-caveated false signal.** The headline *"exports -42.1%"*
+is arithmetically correct but reflects a base effect (US tariff front-loading in Q1 2025
+plus a one-off Swiss shipment in Feb 2025) rather than a genuine commercial rupture.
+Full investigation in `context-prep/investigation/2026-02-trace.md`.
+
+**Editorial tic detected.** The phrase *"these chemical X trends by country show a
+fragmented Europe"* appears in 3 of 4 sections of edition 2026-02, making it a refrain
+rather than a conditional closing (Pattern 7 of SYNTHESIS.md). Partially addressed
+on 2026-04-21 via stricter §5.3 conditions + post-hoc once-per-edition enforcement in
+`pipelines/monthly_run.py`.
+
+**Edition 2026-02 should NOT be shown to external stakeholders** until regenerated
+with the base-effect guard (see `editorial/drafts/2026-02-v2/edition.md`).
+
 ## 5. Ce qui reste à faire (roadmap)
 
 ### 5.0 — PRIORITÉ 1 : git init + premier commit structuré du repo Iris
