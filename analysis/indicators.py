@@ -234,9 +234,68 @@ def build_fiches(cache_dir: Path, month: str) -> list:
         logger.info(f"Fiche {section_type} saved to {out}")
         produced.append(out)
 
-    # Check trade availability
+    # Trade fiches (from Comext)
+    trade_file = cache_dir / "trade.json"
     trade_marker = cache_dir / "trade_unavailable.json"
-    if trade_marker.exists():
-        logger.info("Trade data unavailable — trade sections skipped")
+    if trade_file.exists():
+        for section_type in ("trade_exports", "trade_imports"):
+            fiche = _build_trade_fiche(trade_file, section_type)
+            if fiche is None:
+                continue
+            out = processed_dir / f"{section_type}.json"
+            out.write_text(json.dumps(fiche, indent=2), encoding="utf-8")
+            logger.info(f"Fiche {section_type} saved to {out}")
+            produced.append(out)
+    elif trade_marker.exists():
+        reason = json.loads(trade_marker.read_text(encoding="utf-8")).get("reason", "unknown")
+        logger.info(f"Trade data unavailable — trade sections skipped ({reason})")
 
     return produced
+
+
+def _build_trade_fiche(trade_file: Path, section_type: str) -> dict:
+    """Convert cache/trade.json (raw aggregates) into a section fiche (schema §10)."""
+    raw = json.loads(trade_file.read_text(encoding="utf-8"))
+    flow_key = "exports" if section_type == "trade_exports" else "imports"
+    flow = raw.get("flows", {}).get(flow_key)
+    if not flow or not flow.get("current"):
+        return None
+
+    month = raw["month"]
+    year, month_num = month.split("-")
+    month_num = int(month_num)
+    month_names = ["January", "February", "March", "April", "May", "June",
+                   "July", "August", "September", "October", "November", "December"]
+    window = (f"{month_names[0]}-{month_names[month_num - 1]} {year}"
+              if month_num > 1 else f"{month_names[0]} {year}")
+    window_ordinal = _ordinal(month_num) if month_num > 1 else None
+
+    return {
+        "section_type": section_type,
+        "period": {
+            "month": month,
+            "publication_date": date.today().isoformat(),
+            "window": window,
+            "window_months": month_num,
+            "window_ordinal": window_ordinal,
+        },
+        "data": {
+            "current": {
+                **flow["current"],
+                "unit_value": "€ bn",
+                "unit_volume": "kt",
+                "scope": raw.get("scope", "Extra-EU27 trade"),
+            },
+            "previous_year": flow["previous_year"],
+            "ytd": flow["ytd"],
+            "by_partner": flow["by_partner"],
+            "by_chapter": flow["by_chapter"],
+            "source": f"Cefic analysis based on Comext data (Eurostat, {date.today().year})",
+        },
+        "charts": [],
+        "editorial_context": {
+            "latest_structural_break": "March 2022",
+            "notable_events": ["US tariff measures since March 2025"],
+            "scope_note": raw.get("scope", ""),
+        },
+    }
