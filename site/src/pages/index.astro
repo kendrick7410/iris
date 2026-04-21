@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const editions = await getCollection('editions');
+const sorted = editions.sort((a, b) => b.id.localeCompare(a.id));
+---
+<Layout title="Iris — Cefic Chemical Industry Monthly Report">
+  <section class="cefic-hero">
+    <h1>Iris</h1>
+    <p class="subtitle">Monthly Chemical Trends — Cefic analysis based on Eurostat data</p>
+  </section>
+
+  <h2>Editions</h2>
+  {sorted.length === 0 ? (
+    <p>No editions published yet.</p>
+  ) : (
+    <ul class="cefic-edition-list">
+      {sorted.map(e => (
+        <li><a href={`/editions/${e.id}`}>{e.id}</a></li>
+      ))}
+    </ul>
+  )}
+</Layout>

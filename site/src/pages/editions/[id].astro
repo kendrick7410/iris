@@ -1,0 +1,25 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const editions = await getCollection('editions');
+  return editions.map(entry => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Layout title={`Iris — Edition ${entry.id}`}>
+  <a class="cefic-back-link" href="/">&larr; Back to all editions</a>
+  <section class="cefic-hero">
+    <h1>Edition {entry.id}</h1>
+    <p class="subtitle">Published {entry.data.publication_date}</p>
+  </section>
+  <article class="cefic-edition-body">
+    <Content />
+  </article>
+</Layout>

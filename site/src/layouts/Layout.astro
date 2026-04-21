@@ -1,0 +1,75 @@
+---
+import '../styles/cefic-tokens.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Monthly Chemical Trends — Cefic analysis based on Eurostat data' } = Astro.props;
+---
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/favicon-32x32.png" type="image/png" />
+  <title>{title}</title>
+  <script is:inline>
+    (function () {
+      const stored = localStorage.getItem('iris-theme');
+      const theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body>
+  <header class="cefic-navbar">
+    <div class="cefic-navbar-inner">
+      <a class="cefic-navbar-brand" href="/">
+        <img src="/cefic-logo.png" alt="Cefic" />
+        <span class="cefic-navbar-title">Iris</span>
+      </a>
+      <nav class="cefic-navbar-nav">
+        <a href="/">Editions</a>
+        <a href="https://cefic.org" target="_blank" rel="noopener">Cefic.org</a>
+        <button class="cefic-theme-toggle" id="cefic-theme-toggle" type="button" aria-label="Toggle dark mode">
+          <span id="cefic-theme-label">Light</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="cefic-container">
+    <slot />
+  </main>
+
+  <footer class="cefic-footer">
+    <div>© {new Date().getFullYear()} Cefic — European Chemical Industry Council</div>
+    <div>
+      <a href="https://cefic.org" target="_blank" rel="noopener">cefic.org</a>
+      {' · '}
+      Data: Eurostat, Comext
+    </div>
+  </footer>
+
+  <script is:inline>
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('cefic-theme-toggle');
+      const label = document.getElementById('cefic-theme-label');
+      const syncLabel = () => {
+        label.textContent = root.dataset.theme === 'dark' ? 'Dark' : 'Light';
+      };
+      syncLabel();
+      btn.addEventListener('click', () => {
+        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        root.dataset.theme = next;
+        localStorage.setItem('iris-theme', next);
+        syncLabel();
+      });
+    })();
+  </script>
+</body>
+</html>
