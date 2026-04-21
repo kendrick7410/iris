@@ -1,28 +1,31 @@
 {
   "month": "2026-02",
   "publication_date": "2026-04-21",
-  "pipeline_version": "0.1.0",
-  "sections_produced": [],
-  "sections_skipped": {
-    "output": "data_unavailable",
-    "prices": "data_unavailable",
-    "sales": "data_unavailable",
-    "trade_exports": "data_unavailable",
-    "trade_imports": "data_unavailable"
-  },
-  "summary_quality": "unknown",
+  "pipeline_version": "0.2.0",
+  "sections_produced": [
+    "output",
+    "prices",
+    "sales",
+    "trade_exports",
+    "trade_imports"
+  ],
+  "sections_skipped": {},
+  "summary_quality": "ok",
   "data_periods": {
     "output": "2026-02",
     "prices": "2026-02",
-    "sales": "2026-01"
+    "sales": "2026-01",
+    "trade_exports": "2026-02",
+    "trade_imports": "2026-02"
   },
   "prompt_hashes": {
-    "system_md": "0b06dd5dcc4d2445",
-    "summary_prompt_md": "5efd22f5a6c7d8f0"
+    "system_md": "defd396461b8afb7",
+    "summary_prompt_md": "5efd22f5a6c7d8f0",
+    "macro_brief_prompt_md": "e3ca2689c8a80026"
   },
   "llm_model_used": {
     "sections": "claude-sonnet-4-20250514",
     "summary": "claude-sonnet-4-20250514"
   },
-  "built_at": "2026-04-21T07:10:08.426636+00:00"
+  "built_at": "2026-04-21T11:54:34.069613+00:00"
 }

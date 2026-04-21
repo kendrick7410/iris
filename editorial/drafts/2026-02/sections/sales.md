@@ -5,15 +5,15 @@ charts:
   - turnover_index
   - turnover_yoy_country
 period: 2026-01
-generated_at: 2026-04-18T13:29:02.537972+00:00
+generated_at: 2026-04-21T11:54:01.225829+00:00
 model: claude-sonnet-4-20250514
 ---
 
-## EU27 chemical sales index at 90.8 in January 2026
+## EU27 chemical sales fell by 7.5% in January 2026
 
-EU27 chemical sales reached an index level of 90.8 in January 2026 (2021=100, seasonally adjusted). The sector underperformed total manufacturing, which recorded 123.2, and pharmaceuticals at 123.2.
+EU27 chemical sales decreased by 7.5% in January 2026 in comparison to January 2025. The sales index reached 90.8 (2021=100), marking the steepest decline among major manufacturing sectors. Total manufacturing sales fell by 1.8% over the same period, while pharmaceuticals dropped by 24.4%.
 
-Poland reported the highest chemical sales index at 104.6, followed by Spain (98.1) and Italy (94.2). France recorded 101.3, while Germany stood at 89.3, Belgium at 88.5, and the Netherlands at 79.0.
+Germany experienced the steepest decline at 8.0%, followed by Belgium (13.2%) and the Netherlands (14.2%). France reported the smallest decrease at 3.1%, while Italy fell by 6.7%, Spain by 6.4%, and Poland by 11.7%. These chemical sales trends by country show a fragmented Europe.
 
 {{chart:turnover_index}}
 Source: Cefic analysis based on Eurostat data (2026)
