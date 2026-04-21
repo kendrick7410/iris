@@ -253,6 +253,162 @@ def build_fiches(cache_dir: Path, month: str) -> list:
     return produced
 
 
+def build_macro_brief_fiche(fiches_dir: Path, cache_dir: Path) -> Path:
+    """Assemble the macro_brief fiche from existing fiches + trade.json.
+
+    Reads output / prices / trade_exports / trade_imports fiches and picks 3 or 4
+    KPIs: output YoY, trade balance YoY, producer prices YoY, capacity
+    utilisation YoY (if available). Computes headline flags for Pareto
+    concentration and volume/value divergence.
+
+    Returns Path to macro_brief.json (in fiches_dir).
+    """
+    kpis = []
+    headline = {}
+
+    # KPI 1 — Output YoY (from output fiche)
+    out_path = fiches_dir / "output.json"
+    if out_path.exists():
+        out = json.loads(out_path.read_text(encoding="utf-8"))
+        cur = out["data"]["current"]
+        pr = out["data"].get("previous_year") or {}
+        delta = pr.get("delta_pct")
+        if delta is not None:
+            kpis.append({
+                "key": "output_yoy",
+                "label": "Chemical output",
+                "primary_value": cur.get("value"),
+                "primary_unit": cur.get("unit", "index 2021=100"),
+                "delta_value": delta,
+                "delta_unit": "% YoY",
+                "direction": _direction(delta),
+                "source_fiche": "output",
+            })
+
+    # KPI 2 — Trade balance YoY (exports - imports, from trade fiches)
+    exp_path = fiches_dir / "trade_exports.json"
+    imp_path = fiches_dir / "trade_imports.json"
+    if exp_path.exists() and imp_path.exists():
+        exp = json.loads(exp_path.read_text(encoding="utf-8"))
+        imp = json.loads(imp_path.read_text(encoding="utf-8"))
+        exp_cur = exp["data"]["current"].get("value_eur_bn") or 0
+        imp_cur = imp["data"]["current"].get("value_eur_bn") or 0
+        exp_prev = exp["data"]["previous_year"].get("value_eur_bn") or 0
+        imp_prev = imp["data"]["previous_year"].get("value_eur_bn") or 0
+        balance_cur = round(exp_cur - imp_cur, 2)
+        balance_prev = round(exp_prev - imp_prev, 2)
+        balance_delta = round(balance_cur - balance_prev, 2)
+        kpis.append({
+            "key": "trade_balance_yoy",
+            "label": "Trade balance",
+            "primary_value": balance_cur,
+            "primary_unit": "€ bn",
+            "delta_value": balance_delta,
+            "delta_unit": "€ bn YoY",
+            "direction": _direction(balance_delta),
+            "source_fiche": "trade_exports|trade_imports",
+        })
+
+    # KPI 3 — Producer prices YoY (from prices fiche)
+    pri_path = fiches_dir / "prices.json"
+    if pri_path.exists():
+        pri = json.loads(pri_path.read_text(encoding="utf-8"))
+        cur = pri["data"]["current"]
+        pr = pri["data"].get("previous_year") or {}
+        delta = pr.get("delta_pct")
+        if delta is not None:
+            kpis.append({
+                "key": "prices_yoy",
+                "label": "Producer prices",
+                "primary_value": cur.get("value"),
+                "primary_unit": cur.get("unit", "index 2021=100"),
+                "delta_value": delta,
+                "delta_unit": "% YoY",
+                "direction": _direction(delta),
+                "source_fiche": "prices",
+            })
+
+    # KPI 4 — Capacity utilisation YoY (optional, from capacity fiche if present)
+    cap_path = fiches_dir / "capacity.json"
+    if cap_path.exists():
+        cap = json.loads(cap_path.read_text(encoding="utf-8"))
+        cur = cap.get("data", {}).get("current") or {}
+        pr = cap.get("data", {}).get("previous_year") or {}
+        delta = pr.get("delta_pp") if pr.get("delta_pp") is not None else pr.get("delta_pct")
+        if delta is not None:
+            kpis.append({
+                "key": "capacity_yoy",
+                "label": "Capacity utilisation",
+                "primary_value": cur.get("value"),
+                "primary_unit": cur.get("unit", "%"),
+                "delta_value": delta,
+                "delta_unit": "pp YoY",
+                "direction": _direction(delta),
+                "source_fiche": "capacity",
+            })
+
+    # Headline data — Pareto concentration (from exports fiche)
+    if exp_path.exists():
+        exp = json.loads(exp_path.read_text(encoding="utf-8"))
+        partners = exp["data"].get("by_partner") or []
+        if partners:
+            top5_share = round(sum((p.get("share_pct") or 0) for p in partners[:5]), 1)
+            if top5_share >= 50:
+                top5_labels = [p.get("label", p.get("partner", "")) for p in partners[:5]]
+                headline["concentration_pareto"] = {
+                    "top_n": 5,
+                    "share_pct": top5_share,
+                    "entities": top5_labels,
+                    "scope": f"top-5 export partners cover {top5_share}% of value",
+                }
+
+    # Headline data — volume/value divergence (from exports fiche YoY)
+    if exp_path.exists():
+        exp = json.loads(exp_path.read_text(encoding="utf-8"))
+        pr = exp["data"].get("previous_year") or {}
+        dv = pr.get("delta_pct_value")
+        dvol = pr.get("delta_pct_volume")
+        if dv is not None and dvol is not None and abs(dv - dvol) >= 3:
+            headline["volume_value_divergence"] = {
+                "volume_pct": dvol,
+                "value_pct": dv,
+                "gap_pp": round(dv - dvol, 1),
+                "scope": "exports, year-on-year",
+            }
+
+    # Period — pick from any available fiche
+    period = None
+    for p in (out_path, pri_path, exp_path, imp_path):
+        if p.exists():
+            period = json.loads(p.read_text(encoding="utf-8"))["period"]
+            break
+
+    fiche = {
+        "section_type": "macro_brief",
+        "period": period or {"month": "unknown"},
+        "kpis": kpis,
+        "headline_data": headline,
+        "source": "Cefic analysis based on Eurostat data and Comext (" +
+                  str(date.today().year) + ")",
+    }
+
+    out = fiches_dir / "macro_brief.json"
+    out.write_text(json.dumps(fiche, indent=2), encoding="utf-8")
+    logger.info(f"Macro brief fiche saved to {out} ({len(kpis)} KPIs, "
+                f"{len(headline)} headline flags)")
+    return out
+
+
+def _direction(delta):
+    if delta is None:
+        return "flat"
+    if delta > 0.1:
+        return "up"
+    if delta < -0.1:
+        return "down"
+    return "flat"
+
+
 def _build_trade_fiche(trade_file: Path, section_type: str) -> dict:
     """Convert cache/trade.json (raw aggregates) into a section fiche (schema §10)."""
     raw = json.loads(trade_file.read_text(encoding="utf-8"))
