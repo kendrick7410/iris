@@ -52,6 +52,19 @@ def _log_call(log_path: Path, entry: dict):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+def _any_anomaly_in_fiches(fiches_dir: Path) -> bool:
+    """True if any fiche in the directory carries severity ≥ warn."""
+    for fp in fiches_dir.glob("*.json"):
+        try:
+            f = json.loads(fp.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        ar = f.get("anomaly_report") or {}
+        if ar.get("severity") in ("warn", "critical"):
+            return True
+    return False
+
+
 def _strip_heading(text: str) -> tuple:
     """Return (heading_line, body_text). Heading is the first '## ...' line."""
     lines = text.strip().split("\n")
@@ -66,7 +79,12 @@ def _strip_heading(text: str) -> tuple:
     return heading, body
 
 
-def _quality_check(text: str) -> dict:
+def _quality_check(text: str, anomaly_active: bool = False) -> dict:
+    """Gate the macro brief against Cefic register rules.
+
+    `anomaly_active=True` relaxes the upper word bound to 150 so the mandatory
+    base-effect caveat (§1.13 of system.md) fits within budget.
+    """
     heading, body = _strip_heading(text)
     words = len(body.split())
     bullets = len(re.findall(r"^[-*] ", body, re.MULTILINE))
@@ -74,19 +92,24 @@ def _quality_check(text: str) -> dict:
     banned = [c for c in BANNED_CONNECTORS if c in body.lower()]
     has_heading = bool(heading)
 
+    word_floor = 80
+    word_ceiling = 150 if anomaly_active else 120
+
     return {
         "heading": heading,
         "has_heading": has_heading,
         "words": words,
-        "words_ok": 80 <= words <= 120,
+        "words_ok": word_floor <= words <= word_ceiling,
         "bullets": bullets,
         "bullets_ok": bullets == 0,
         "numbers": numbers,
         "numbers_ok": numbers >= 3,
         "banned_found": banned,
         "banned_ok": len(banned) == 0,
-        "pass": (has_heading and 80 <= words <= 120 and bullets == 0
-                 and numbers >= 3 and len(banned) == 0),
+        "anomaly_active": anomaly_active,
+        "word_ceiling": word_ceiling,
+        "pass": (has_heading and word_floor <= words <= word_ceiling
+                 and bullets == 0 and numbers >= 3 and len(banned) == 0),
     }
 
 
@@ -106,7 +129,7 @@ def _build_user_message(fiche_path: Path, section_paths: list) -> str:
 
 
 def _generate(user_msg: str, system_prompt: str, macro_prompt: str,
-              model: str, log_path: Path) -> tuple:
+              model: str, log_path: Path, anomaly_active: bool = False) -> tuple:
     """Call API and return (text, quality_check)."""
     http_client = httpx.Client(verify=False)
     client = anthropic.Anthropic(http_client=http_client)
@@ -121,7 +144,7 @@ def _generate(user_msg: str, system_prompt: str, macro_prompt: str,
             messages=[{"role": "user", "content": user_msg}],
         )
         text = resp.content[0].text
-        qc = _quality_check(text)
+        qc = _quality_check(text, anomaly_active=anomaly_active)
         _log_call(log_path, {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "section_type": "macro_brief",
@@ -168,9 +191,11 @@ def draft_macro_brief(
     system_prompt = system_prompt_path.read_text(encoding="utf-8")
     macro_prompt = macro_prompt_path.read_text(encoding="utf-8")
     user_msg = _build_user_message(fiche_path, section_paths)
+    anomaly_active = _any_anomaly_in_fiches(fiche_path.parent)
 
-    logger.info("Generating macro brief with Sonnet...")
-    sonnet_text, sonnet_qc = _generate(user_msg, system_prompt, macro_prompt, SONNET, log_path)
+    logger.info(f"Generating macro brief with Sonnet (anomaly_active={anomaly_active})...")
+    sonnet_text, sonnet_qc = _generate(user_msg, system_prompt, macro_prompt, SONNET,
+                                        log_path, anomaly_active=anomaly_active)
 
     if sonnet_text and sonnet_qc and sonnet_qc["pass"]:
         logger.info(f"Macro brief quality OK: {sonnet_qc['words']} words")
@@ -180,7 +205,8 @@ def draft_macro_brief(
         logger.warning(f"Sonnet macro brief failed quality: {sonnet_qc}")
 
     logger.info("Falling back to Opus for macro brief...")
-    opus_text, opus_qc = _generate(user_msg, system_prompt, macro_prompt, OPUS, log_path)
+    opus_text, opus_qc = _generate(user_msg, system_prompt, macro_prompt, OPUS,
+                                    log_path, anomaly_active=anomaly_active)
 
     if opus_text and opus_qc and opus_qc["pass"]:
         logger.info(f"Opus macro brief quality OK: {opus_qc['words']} words")

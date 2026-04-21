@@ -28,6 +28,36 @@ Your output is one section of this report, not the full document. You will recei
     - Index values: dimensionless (e.g. "98.4"), with baseline in caption when first introduced
     - Capacity utilisation: `%` on the value itself (e.g. "74.0%")
     # from Style Guide §14.2
+13. **Anomaly disclosure is mandatory.** When the data block includes
+    `anomaly_report.severity` equal to `"warn"` or `"critical"`, the section
+    MUST include a base-effect paragraph that:
+    - explicitly names the anomaly (e.g. *"unusually elevated 2025 base"*, *"one-off shipment in February 2025"*),
+    - cites the evidence from `anomaly_report.evidence` (numbers, Z-score, partner share, N-2 delta — whichever flags fired),
+    - offers an alternative comparison (vs N-2, vs pre-anomaly baseline, vs 5-year window).
+
+    The paragraph is placed **immediately after the opening finding**, before any
+    breakdown. It is NOT a conclusion (§1.4 still applies — the section ends on
+    the last data point, not on a synthesising wrap-up).
+
+    The paragraph MUST NOT soften the headline figure. The headline stays
+    verbatim — only its interpretation is qualified. Use Template 5.9.
+
+    If `severity` = `"critical"`, the opening finding itself MUST carry an
+    inline caveat before the full base-effect paragraph, e.g.
+    *"EU27 chemical exports fell 42.1% in value — a figure distorted by an
+    anomalous 2025 base — with …"*.
+14. **Temporal scope consistency within a sentence.** If the opening finding
+    cites a YTD figure (e.g. *"in the first N months of YYYY"*), all figures
+    in the same sentence or in the immediately adjacent sentences MUST also
+    be YTD, OR be explicitly prefixed with their temporal scope
+    (*"in February"*, *"for the month"*, *"in the single month of February"*).
+
+    Do not juxtapose a YTD headline figure with single-month partner-level
+    figures without explicit framing. Example of the forbidden pattern:
+    *"Exports fell 42.1% in the first two months, with the US down 72.5%."*
+    (the 72.5% is a single-month figure but reads as YTD). Rewrite as:
+    *"Exports fell 42.1% in the first two months of 2026. In February alone,
+    exports to the US were down 72.5%."*
 
 ## 2. Voice and register (SHOULD)
 
@@ -196,6 +226,49 @@ Example (from Trade Brief 2026):
 
 **Conditional use only.** Drill-down is warranted only when the top-N explains ≥ 50% of the variation and N ≤ 12. If the concentration is weaker or N is larger, stay at the NACE 4-digit breakdown.
 
+### 5.9 Base-effect paragraph # from Pattern 22
+
+When the data block carries `anomaly_report.severity` ≥ `"warn"`, insert a
+base-effect paragraph **immediately after the opening finding** and before any
+country/partner breakdown. This is the MUST from §1.13.
+
+**Scaffold — fill placeholders from `anomaly_report.evidence`:**
+
+```
+[This figure / The X.X% decline] reflects an unusually [high/low] base in
+[comparison period], driven by [concrete cause from evidence — e.g. "pre-tariff
+front-loading", "a one-off pharma shipment"]. [Evidence sentence with numbers:
+e.g. "EU exports to the US averaged €[X] bn/month in [prior year] but spiked
+to €[Y] bn in [month-year]"]. Against a [normal/N-2] base ([period]),
+[indicator] is [down/up] by approximately [Z.Z]%, a more representative
+indication of the underlying trend.
+```
+
+**Rules of use:**
+- Use `anomaly_report.suggested_caveat` as scaffolding if useful, but **rewrite
+  in Cefic voice** — third person institutional (§2.3), calibrated verbs from
+  the directional gradient (§3), approved connectors (§4). The suggested caveat
+  is a data sketch, not publication prose.
+- Name the concrete driver (front-loading, one-off shipment, strike, weather)
+  when `evidence.abnormal_prior_year_base.likely_driver` or
+  `editorial_context.notable_events` carries it. If no driver is documented,
+  write *"an anomalous base period"* without speculating.
+- Cite at least one numeric pair from the evidence (Z-score as a sigma count,
+  partner share, N-2 delta). Never a bare "abnormal" without a quantifier.
+- No hedging words (*"somewhat"*, *"arguably"*, *"possibly"*) — §3 still applies.
+- The paragraph is 2 to 4 sentences. Never longer.
+
+**Inline caveat when `severity = critical`** (§1.13 addendum):
+
+In addition to the paragraph, the opening finding itself carries an em-dash
+caveat between the figure and the explanation, e.g.:
+
+```
+EU27 chemical exports fell by [X.X]% in value in the first [N] months of
+[year] — a figure heavily influenced by an anomalous [prior-year window]
+base — reflecting [driver].
+```
+
 ## 6. Section structure
 
 ### 6.1 Chemical Trends-style section (for monthly indicator sections)
@@ -339,3 +412,6 @@ Before returning your response, verify:
 - [ ] All figures come from the provided data block — nothing invented
 - [ ] Dates are precise (month + year), no "recent years" or "post-pandemic"
 - [ ] British English spelling (utilisation, organisation, labour)
+- [ ] If `anomaly_report.severity` ≥ "warn": base-effect paragraph present per Template 5.9, placed right after the opening finding
+- [ ] If `anomaly_report.severity` = "critical": inline em-dash caveat in the opening finding itself
+- [ ] No YTD/single-month mixing in the opening sentence without explicit scope prefix (§1.14)

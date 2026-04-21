@@ -37,6 +37,7 @@ KEY_PARTNERS = ("US", "CN", "GB")
 DRILL_DOWN_MIN_COVERAGE = 0.50   # Pattern 21 trigger: top-5 must explain ≥ 50% of delta
 INTRA_EU_PARTNER = "EU27"
 FIVE_YEARS = 5
+MONTHLY_HISTORY_MONTHS = 36       # 3 years — covers N-2 for D5 + 12m Z-score for D3
 
 NACE4_LABELS = {
     "2011": "Industrial gases",
@@ -119,6 +120,12 @@ def read_parquet(month: str, cache_dir: Path) -> Path:
                 partners=partner_labels, chapters=chapter_labels,
                 cn_to_nace=cn_to_nace, product_labels=product_labels,
             ),
+        },
+        "monthly_history": {
+            "exports": _monthly_history(fact, flow=2, target=target_period,
+                                         months=MONTHLY_HISTORY_MONTHS),
+            "imports": _monthly_history(fact, flow=1, target=target_period,
+                                         months=MONTHLY_HISTORY_MONTHS),
         },
     }
 
@@ -257,6 +264,39 @@ def _aggregate_flow(fact, flow, target, previous, five_year_start,
         },
         "by_partner": by_partner,
         "by_chapter": by_chapter,
+    }
+
+
+def _monthly_history(fact, flow, target, months):
+    """Emit the monthly value_eur_bn series for EU27 total and top-10 partners
+    over the trailing `months` window ending at `target`.
+
+    Consumed by `analysis.anomaly_detector` for Z-score (D3) and N-2 (D5) checks.
+    Both years of the YoY comparison must sit inside the returned window.
+    """
+    import pandas as pd
+    start = target - pd.DateOffset(months=months - 1)
+    window = fact[(fact["flow"] == flow) & (fact["period"] >= start) &
+                  (fact["period"] <= target)]
+
+    # EU27 total (value sum / period)
+    eu27_total = (window.groupby("period")["value_in_euros"].sum() / 1e9).round(2)
+    eu27_total_dict = {p.strftime("%Y-%m"): float(v) for p, v in eu27_total.items()}
+
+    # Top-10 partners in the target month, then their monthly series over the window
+    target_slice = window[window["period"] == target]
+    top_partners = (target_slice.groupby("partner")["value_in_euros"].sum()
+                    .sort_values(ascending=False).head(TOP_N_PARTNERS).index)
+    by_partner = {}
+    for code in top_partners:
+        series = (window[window["partner"] == code]
+                  .groupby("period")["value_in_euros"].sum() / 1e9).round(2)
+        by_partner[str(code)] = {p.strftime("%Y-%m"): float(v) for p, v in series.items()}
+
+    return {
+        "window_months": months,
+        "eu27_total": eu27_total_dict,
+        "by_partner": by_partner,
     }
 
 

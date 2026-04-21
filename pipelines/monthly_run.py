@@ -92,10 +92,16 @@ def step_process(month: str, cache_dir: Path) -> list:
     return build_fiches(cache_dir, month)
 
 
-def step_draft(month: str, fiches: list, dry_run: bool) -> tuple:
+def _drafts_dir(month: str, variant: str | None = None) -> Path:
+    """Drafts directory, optionally suffixed by a variant tag for regen tests."""
+    name = f"{month}-{variant}" if variant else month
+    return PROJECT_ROOT / "editorial" / "drafts" / name
+
+
+def step_draft(month: str, fiches: list, dry_run: bool, variant: str | None = None) -> tuple:
     """Step 3: Draft editorial sections. Summary/macro-brief are step 3.5."""
     system_prompt_path = PROJECT_ROOT / "context-prep" / "editorial" / "system.md"
-    drafts_dir = PROJECT_ROOT / "editorial" / "drafts" / month
+    drafts_dir = _drafts_dir(month, variant)
     sections_dir = drafts_dir / "sections"
     log_path = drafts_dir / "llm_log.jsonl"
     sections_dir.mkdir(parents=True, exist_ok=True)
@@ -121,7 +127,8 @@ def step_draft(month: str, fiches: list, dry_run: bool) -> tuple:
     return section_paths, None, "ok"
 
 
-def step_macro_brief(month: str, fiches: list, section_paths: list) -> tuple:
+def step_macro_brief(month: str, fiches: list, section_paths: list,
+                     variant: str | None = None) -> tuple:
     """Step 3.5: Build macro_brief fiche and draft the macro brief.
 
     Returns (macro_md_path, quality). Falls back to summary mode if the
@@ -130,7 +137,7 @@ def step_macro_brief(month: str, fiches: list, section_paths: list) -> tuple:
     system_prompt_path = PROJECT_ROOT / "context-prep" / "editorial" / "system.md"
     macro_prompt_path = PROJECT_ROOT / "editorial" / "prompts" / "macro_brief.md"
     summary_prompt_path = PROJECT_ROOT / "editorial_engine" / "summary_prompt.md"
-    drafts_dir = PROJECT_ROOT / "editorial" / "drafts" / month
+    drafts_dir = _drafts_dir(month, variant)
     fiches_dir = PROJECT_ROOT / "data" / "processed" / month / "fiches"
     log_path = drafts_dir / "llm_log.jsonl"
 
@@ -219,7 +226,8 @@ def step_commit(month: str):
     commit_edition(month, PROJECT_ROOT)
 
 
-def write_manifest(month: str, sections: list, summary_quality: str, fiches: list):
+def write_manifest(month: str, sections: list, summary_quality: str, fiches: list,
+                   variant: str | None = None):
     """Write manifest.json for this edition."""
     system_prompt = (PROJECT_ROOT / "context-prep" / "editorial" / "system.md").read_text(encoding="utf-8")
     summary_prompt = (PROJECT_ROOT / "editorial_engine" / "summary_prompt.md").read_text(encoding="utf-8")
@@ -260,7 +268,7 @@ def write_manifest(month: str, sections: list, summary_quality: str, fiches: lis
         "built_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    out = PROJECT_ROOT / "editorial" / "drafts" / month / "manifest.json"
+    out = _drafts_dir(month, variant) / "manifest.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     logger.info(f"Manifest: {out}")
@@ -271,7 +279,11 @@ def write_manifest(month: str, sections: list, summary_quality: str, fiches: lis
 @click.option("--dry-run", is_flag=True, help="Skip commit step")
 @click.option("--only", "only_step", type=click.Choice(STEPS), help="Run only this step")
 @click.option("--force", is_flag=True, help="Overwrite existing cache")
-def main(month, dry_run, only_step, force):
+@click.option("--variant", default=None,
+              help="Optional variant tag (e.g. 'v2'). Drafts land in "
+                   "editorial/drafts/{month}-{variant}/ instead of overwriting "
+                   "the canonical edition directory.")
+def main(month, dry_run, only_step, force, variant):
     """Run the Iris monthly pipeline."""
     setup_logging()
     logger.info(f"=== Iris pipeline: {month} {'(dry-run)' if dry_run else ''} ===")
@@ -303,18 +315,18 @@ def main(month, dry_run, only_step, force):
         # 3. DRAFT (sections only)
         if not only_step or only_step == "draft":
             logger.info("--- STEP 3: DRAFT (sections) ---")
-            sections, _, draft_status = step_draft(month, fiches, dry_run)
+            sections, _, draft_status = step_draft(month, fiches, dry_run, variant)
             if draft_status == "failed":
                 logger.error("Edition draft failed (output missing or <2 sections)")
-                write_manifest(month, sections, "failed", fiches)
+                write_manifest(month, sections, "failed", fiches, variant)
                 sys.exit(2)
 
             # 3.5 MACRO BRIEF (or summary fallback)
             logger.info("--- STEP 3.5: MACRO BRIEF ---")
-            opening_path, summary_quality = step_macro_brief(month, fiches, sections)
+            opening_path, summary_quality = step_macro_brief(month, fiches, sections, variant)
 
             # Consolidate
-            drafts_dir = PROJECT_ROOT / "editorial" / "drafts" / month
+            drafts_dir = _drafts_dir(month, variant)
             if opening_path:
                 edition_path = _consolidate(opening_path, sections, drafts_dir, month)
             else:
@@ -322,7 +334,7 @@ def main(month, dry_run, only_step, force):
                 summary_quality = summary_quality or "failed"
         else:
             sections = []
-            edition_path = PROJECT_ROOT / "editorial" / "drafts" / month / "edition.md"
+            edition_path = _drafts_dir(month, variant) / "edition.md"
             summary_quality = "unknown"
 
         # 4. VISUALIZE
@@ -333,18 +345,21 @@ def main(month, dry_run, only_step, force):
         else:
             charts = []
 
-        # 5. BUILD
-        if not only_step or only_step == "build":
+        # 5. BUILD (skipped for variants — would overwrite canonical MDX)
+        if (not only_step or only_step == "build") and not variant:
             logger.info("--- STEP 5: BUILD ---")
             step_build(month, edition_path, charts)
+        elif variant:
+            logger.info(f"--- STEP 5: BUILD (skipped — variant={variant}) ---")
 
         # Manifest
-        write_manifest(month, sections, summary_quality, fiches)
+        write_manifest(month, sections, summary_quality, fiches, variant)
 
         # 6. COMMIT
         if not only_step or only_step == "commit":
-            if dry_run:
-                logger.info("--- STEP 6: COMMIT (skipped — dry-run) ---")
+            if dry_run or variant:
+                reason = "dry-run" if dry_run else f"variant={variant}"
+                logger.info(f"--- STEP 6: COMMIT (skipped — {reason}) ---")
             else:
                 logger.info("--- STEP 6: COMMIT ---")
                 step_commit(month)

@@ -32,7 +32,7 @@ No bullet list. No sub-headings. No trailing source line (the KPI cards carry th
 ## Rules specific to the macro brief
 
 1. **Heading is a declarative finding with a figure**, not a topic label. *"EU27 chemical output sits 18% below pre-crisis levels in February 2026"* ✓ — *"February 2026 report"* ✗. Follow Pattern 4 and `system.md` §2 rules 6 and 7.
-2. **Paragraph length: 80–120 words.** Below 80 = too thin, above 120 = too long. Count words, not characters. This budget is tighter than the section budget — stay within it.
+2. **Paragraph length: 80–120 words**, extended to **80–150 words** when any fiche (trade or other) carries `anomaly_report.severity` ≥ `"warn"`, to accommodate the mandatory base-effect caveat (§1.13 of system.md). Below the floor = too thin, above the ceiling = too long. Count words, not characters.
 3. **Minimum 3 distinct figures** in the paragraph. The KPI cards already carry their own numbers — the paragraph must add further numbers (country breakdown, sub-sector context, pre-crisis gap, trade partner rank, etc.), not paraphrase the cards.
 4. **Triple temporality is encouraged**, up to 3 windows (per `system.md` §2 rule 8). Long windows must be named in words: *"between 2020 and 2025"*, *"over the past five years"*, *"since March 2022"*. Never abbreviate to *"5Y"* or *"YoY"* in prose.
 5. **Pareto framing is conditional.** Use the concentration framing *"[X]% of [metric] is sourced from [N] entities"* (Pattern 19, `system.md` §5.6) **only** if `macro_brief.headline_data.concentration_pareto` is present in the fiche. If absent, do not force a concentration narrative.

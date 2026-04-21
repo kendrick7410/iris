@@ -15,6 +15,8 @@ import logging
 from datetime import date
 from pathlib import Path
 
+from analysis.anomaly_detector import detect_base_effects
+
 logger = logging.getLogger("iris.analysis")
 
 SECTION_TYPE_MAP = {
@@ -250,7 +252,91 @@ def build_fiches(cache_dir: Path, month: str) -> list:
         reason = json.loads(trade_marker.read_text(encoding="utf-8")).get("reason", "unknown")
         logger.info(f"Trade data unavailable — trade sections skipped ({reason})")
 
+    # Enrich fiches with anomaly reports (base-effect guard)
+    enrich_with_anomalies(produced, cache_dir)
+
     return produced
+
+
+def enrich_with_anomalies(fiche_paths: list, cache_dir: Path) -> None:
+    """Attach an `anomaly_report` block to each fiche.
+
+    The detector is pure; this wrapper assembles inputs per fiche:
+      - historical_series from cache/trade.json monthly_history (trade sections)
+        or from cache/{production,prices}.json (STS sections)
+      - related_indicators from sibling fiches (IPI YoY for trade, etc.)
+
+    Writes the enriched fiche back in place. No-op on fiches where no flags fire.
+    """
+    # Load trade cache once (used for trade fiches' historical series)
+    trade_file = cache_dir / "trade.json"
+    trade_history = {}
+    if trade_file.exists():
+        raw = json.loads(trade_file.read_text(encoding="utf-8"))
+        trade_history = raw.get("monthly_history", {})
+
+    # Index fiches by section type for cross-references
+    fiches_by_type = {}
+    for fp in fiche_paths:
+        try:
+            f = json.loads(fp.read_text(encoding="utf-8"))
+            fiches_by_type[f["section_type"]] = (fp, f)
+        except Exception as e:
+            logger.warning(f"Failed to load fiche {fp}: {e}")
+
+    related = _collect_related_indicators(fiches_by_type)
+
+    for section_type, (fp, fiche) in fiches_by_type.items():
+        hist = _historical_series_for(section_type, trade_history, fiches_by_type, cache_dir)
+        report = detect_base_effects(fiche, hist, related)
+        if report.flags:
+            fiche["anomaly_report"] = report.to_dict()
+            fp.write_text(json.dumps(fiche, indent=2), encoding="utf-8")
+            logger.info(
+                f"Anomaly report for {section_type}: severity={report.severity}, "
+                f"flags={report.flags}"
+            )
+
+
+def _collect_related_indicators(fiches_by_type: dict) -> dict:
+    """Gather cross-section YoY figures used by detectors (D1)."""
+    related = {}
+    out = fiches_by_type.get("output")
+    if out:
+        py = (out[1].get("data") or {}).get("previous_year") or {}
+        if py.get("delta_pct") is not None:
+            related["output_ipi_yoy_pct"] = py["delta_pct"]
+    pri = fiches_by_type.get("prices")
+    if pri:
+        py = (pri[1].get("data") or {}).get("previous_year") or {}
+        if py.get("delta_pct") is not None:
+            related["prices_ppi_yoy_pct"] = py["delta_pct"]
+    return related
+
+
+def _historical_series_for(section_type: str, trade_history: dict,
+                            fiches_by_type: dict, cache_dir: Path) -> dict:
+    """Return a {'eu27_total': {'YYYY-MM': value, ...}} structure per section."""
+    if section_type == "trade_exports":
+        return {
+            "eu27_total": (trade_history.get("exports") or {}).get("eu27_total", {}),
+            "by_partner": (trade_history.get("exports") or {}).get("by_partner", {}),
+        }
+    if section_type == "trade_imports":
+        return {
+            "eu27_total": (trade_history.get("imports") or {}).get("eu27_total", {}),
+            "by_partner": (trade_history.get("imports") or {}).get("by_partner", {}),
+        }
+    # STS sections: pull the EU27 monthly series from the cache JSON
+    cache_map = {"output": "production.json", "prices": "prices.json", "sales": "turnover.json"}
+    cache_name = cache_map.get(section_type)
+    if not cache_name:
+        return {}
+    cache_file = cache_dir / cache_name
+    if not cache_file.exists():
+        return {}
+    raw = json.loads(cache_file.read_text(encoding="utf-8"))
+    return {"eu27_total": raw.get("eu27") or {}}
 
 
 def build_macro_brief_fiche(fiches_dir: Path, cache_dir: Path) -> Path:

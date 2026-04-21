@@ -1,10 +1,10 @@
-# STATE.md — Point d'arrêt Iris (milestone L4 complet)
+# STATE.md — Point d'arrêt Iris (milestone L5 + base-effect guard)
 
 ## 1. État du projet
 
-- **Date de clôture :** 2026-04-18, fin de journée
-- **Iris** est un pipeline automatisé qui produit un rapport mensuel sur l'industrie chimique européenne pour Cefic. Il extrait des données Eurostat (+ Comext en prod), calcule des indicateurs (YoY, pre-crisis, benchmarks), génère les sections éditoriales via l'API Anthropic avec un system prompt calibré sur le registre Cefic, et publie le tout sur un site Astro statique. Déploiement cible : Yaghi (Linux), cron mensuel, Azure Static Web Apps.
-- **Phase actuelle :** **Livrable 4 terminé (A+B+C).** Première édition dry-run produite (février 2026, 3 sections sur 3 possibles, summary qualité "ok"). Prête pour review éditoriale humaine et itération.
+- **Date de clôture :** 2026-04-21, fin de journée (patch base-effect)
+- **Iris** est un pipeline automatisé qui produit un rapport mensuel sur l'industrie chimique européenne pour Cefic. Il extrait des données Eurostat (+ Comext en prod), calcule des indicateurs (YoY, pre-crisis, benchmarks), détecte les effets de base et anomalies commerciales via `analysis/anomaly_detector.py`, génère les sections éditoriales via l'API Anthropic avec un system prompt calibré sur le registre Cefic, et publie le tout sur un site Astro statique. Déploiement cible : Yaghi (Linux), cron mensuel, Azure Static Web Apps.
+- **Phase actuelle :** **Livrable 5 (macro brief) + patch base-effect terminés.** L'édition 2026-02-v1 est conservée en l'état (snapshot d'origine, sans caveat — dette documentée). L'édition 2026-02-v2 (dans `editorial/drafts/2026-02-v2/`) démontre le nouveau pipeline : flags D1+D2+D3+D4+D5 levés, severity=critical, paragraphe base-effect produit automatiquement, titre trade_exports porte l'incise em-dash §1.13. Prête pour validation Jonathan.
 
 ## 2. Carte complète des livrables
 
@@ -34,14 +34,19 @@
 | ARCHITECTURE.md | `context-prep/orchestrator/ARCHITECTURE.md` | Spec orchestrateur v1 patchée |
 | Style guide Cefic | `cefic_economic_outlook_style_guide.md` | 68 Ko, source primaire pour arbitrage ton / registre |
 | Feedback Jonathan | `p01.txt` | Réponses aux 3 questions éditoriales (charts, heading, phrases courtes) |
-| Édition février 2026 | `editorial/drafts/2026-02/edition.md` | Référence de qualité — la sortie à évaluer |
-| RETROSPECTIVE dry-run | `editorial/drafts/2026-02/RETROSPECTIVE.md` | Liste des 3 dettes techniques et des accrocs du run |
+| Édition février 2026 (v1, snapshot) | `editorial/drafts/2026-02/edition.md` | Référence historique — publiée **sans caveat base-effect** (incident à ne pas reproduire) |
+| Édition février 2026 (v2, post-patch) | `editorial/drafts/2026-02-v2/edition.md` | Référence qualité post-anomaly guard — à comparer avec v1 pour validation |
+| Trace investigation 2026-02 | `context-prep/investigation/2026-02-trace.md` | Analyse factuelle du bug, cause racine (front-loading pré-tarifs US Q1 2025) |
+| RETROSPECTIVE dry-run | `editorial/drafts/2026-02/RETROSPECTIVE.md` | Liste des 3 dettes techniques et des accrocs du run L4 |
 | Manifest édition | `editorial/drafts/2026-02/manifest.json` | Hashes prompts, périodes data, modèles LLM — traçabilité |
 | Fetchers Eurostat | `data/fetchers/eurostat.py` | Module stable, ne pas toucher sans raison |
-| Indicateurs | `analysis/indicators.py` | Module stable |
+| Fetcher Comext | `data/fetchers/comext.py` | Stable + émet `monthly_history` (36 mois) depuis 2026-04-21 |
+| Indicateurs | `analysis/indicators.py` | Stable, inclut `enrich_with_anomalies()` |
+| **Anomaly detector** | `analysis/anomaly_detector.py` | Module pur, 5 détecteurs D1-D5, AnomalyReport dataclass. Tests : `tests/test_anomaly_detector.py` (15 tests) |
 | Draft LLM | `editorial_engine/draft.py` | Module stable — note : chemin réel `editorial_engine/`, pas `editorial/` |
 | Summary LLM | `editorial_engine/summary.py` | Module stable, fallback Opus non encore déclenché |
-| Pipeline CLI | `pipelines/monthly_run.py` | Point d'entrée : `--month`, `--dry-run`, `--only`, `--force` |
+| Macro brief LLM | `editorial_engine/macro_brief.py` | Stable, word budget étendu 80-150 quand `anomaly_active=True` |
+| Pipeline CLI | `pipelines/monthly_run.py` | Point d'entrée : `--month`, `--dry-run`, `--only`, `--force`, `--variant` |
 | Commit helper | `scripts/commit_edition.py` | ⚠️ dépend d'un repo git dans Iris (inexistant aujourd'hui) |
 
 ## 4. Dettes techniques identifiées
@@ -68,6 +73,8 @@ Depuis `editorial/drafts/2026-02/RETROSPECTIVE.md` :
 4. **`scripts/commit_edition.py` ne peut pas fonctionner sans repo git dans Iris.** Le script tourne git depuis `project_root` et, en l'absence d'un `.git` local, remonte jusqu'au repo home de Jonathan (vide, sans commits → `git checkout -b` échoue). Bloquant pour l'automatisation Yaghi si on ne règle pas d'abord la section 5.0 ci-dessous.
 
 5. **Bug I15→I21 de nouveau à surveiller** après migration Yaghi : vérifier que `fetchers/eurostat.py` utilise bien `unit=I21` sur tous les datasets STS récents.
+
+6. ~~**Base-effect / anomaly detection absent du pipeline.**~~ **Résolu le 2026-04-21** (post-incident édition 2026-02). Module `analysis/anomaly_detector.py` ajouté avec 5 détecteurs (D1 Comext/IPI divergence, D2 value/volume divergence, D3 Z-score sur base N-1, D4 concentration top-2 partenaires, D5 comparaison N-2). Enrichissement automatique des fiches par `enrich_with_anomalies()` dans `analysis/indicators.py`. Patches `system.md` §1.13 (anomaly disclosure MUST), §1.14 (temporal scope consistency), §5.9 (base-effect template), pattern SYNTHESIS #22. Édition 2026-02-v1 conservée en l'état (snapshot d'origine), 2026-02-v2 régénérée dans `editorial/drafts/2026-02-v2/` avec paragraphe base-effect automatique + incise em-dash dans le titre trade_exports. Trace d'investigation dans `context-prep/investigation/2026-02-trace.md`. Pipeline regen : `python pipelines/monthly_run.py --month YYYY-MM --variant vN --force`.
 
 ## 5. Ce qui reste à faire (roadmap)
 

@@ -356,3 +356,30 @@ Caractéristiques invariantes :
 **Implication :** Template à ajouter au system prompt (§5.8), avec une **règle de troncation** : description > 40 caractères → garder le chapeau avant la première parenthèse/virgule, suivi de "…". Déclenchement conditionnel : drill-down produit seulement quand la concentration Pareto du delta est ≥ 50 % sur ≤ 12 codes. Sinon, le breakdown NACE 4 suffit.
 
 ---
+
+## 22. La mise en garde base-effect — le chiffre reste, l'interprétation se qualifie
+
+Le corpus Cefic traite implicitement les effets de base via la formulation *"in the first N months of YYYY compared to the same period of YYYY-1"* et l'ancrage pre-crisis. Mais il ne dispose pas d'un pattern explicite pour le cas où la **période de comparaison** elle-même est anormale (pic, creux, événement one-off). Pattern dérivé de l'incident d'édition 2026-02 : front-loading pré-tarifs US 2025 produit une base Feb 2025 à +4,8σ au-dessus de la moyenne 12 mois, ce qui mécaniquement fait ressortir une chute de −42 % en valeur en Feb 2026 que le lecteur sur-interprète comme une rupture commerciale aiguë.
+
+La logique : le chiffre de tête est arithmétiquement correct et reste intouché — le lecteur doit pouvoir retrouver le −42,1 % s'il compare aux autres éditions. Mais **la phrase qui porte le chiffre doit aussi porter la mise en garde**, et un paragraphe distinct doit décomposer l'anomalie avec des chiffres et proposer une base alternative.
+
+Signatures repérables d'un effet de base (détectables automatiquement par `analysis/anomaly_detector.py`) :
+
+1. Le chiffre commercial est violent (|ΔYoY| > 30 %) mais l'indicateur industriel indépendant (production, prix) ne co-bouge pas (|ΔYoY| < 10 %) — la secousse n'est pas réelle au niveau du secteur.
+2. La variation est concentrée sur ≤ 2 partenaires commerciaux qui portent > 75 % du delta — ce n'est pas une tendance sectorielle, c'est un mouvement bilatéral idiosyncratique.
+3. La base de comparaison (N-1) est à > 2 écarts-types au-dessus ou en-dessous de la moyenne mobile 12 mois qui la précède — la base elle-même est anormale, pas la valeur courante.
+4. La variation vs N-2 est plus de deux fois plus modeste que la variation vs N-1 — le N-1 est distordu par l'anomalie.
+5. L'écart value / volume est > 2× (value chute deux fois plus que volume) — effet prix ou mix-produit qui mérite d'être nommé.
+
+Exemples dans les corpus adjacents (pas dans le corpus Iris actuel) :
+
+- **F&F 2017** — après la chute pétrolière 2015-2016, les reports 2017 comparant aux bases 2015 produisaient mécaniquement des "rebonds" hyperboliques que les éditorialistes annotaient *"reflects a low 2015 base"*.
+- **Chemical Trends Q3 2021** — la base Q3 2020 (post-covid, creux) gonflait les variations annuelles de +30 à +40 % sur des indicateurs réellement stables. Les sections portaient toutes une mention *"reflects recovery from the unusually low 2020 Q3 base"*.
+
+Formulation Iris v2 (générée par le pipeline sur l'édition 2026-02-v2, validée registre Cefic) :
+
+> *"This figure reflects an unusually elevated base in February 2025, driven by pre-tariff front-loading ahead of US trade measures. EU27 exports averaged €22.3 bn/month in the 12 months preceding February 2025 but spiked to €31.6 bn in February 2025 — 4.8 standard deviations above the rolling mean. Against the February 2024 base (€20.2 bn), exports are down by approximately 10.1%, a more representative indication of the underlying trend."*
+
+**Implication :** Template ajouté au system prompt (§5.9), règle MUST §1.13 pour le déclenchement, règle MUST §1.14 pour la cohérence temporelle dans une même phrase (ne pas juxtaposer une tête YTD et des chiffres single-month sans préfixe explicite). Pipeline amont (`analysis/anomaly_detector.py`) calcule un `anomaly_report` attaché à la fiche ; severity ∈ {none, watch, warn, critical} est dérivée du nombre et de la combinaison de flags. La règle est **purement rédactionnelle** : pas d'altération du chiffre, pas d'adoucissement — le contexte de lecture passe avec le chiffre.
+
+---
