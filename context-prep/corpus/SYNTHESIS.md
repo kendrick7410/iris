@@ -2,6 +2,8 @@
 
 Extrait empiriquement de 6 publications : 4 chapitres Facts & Figures 2025 (Profile, Trade Development, Growth & Competitiveness, Energy Consumption) + 2 Chemical Trends Reports (Q3 2025, Q4 2025).
 
+**Addendum Livrable 5 (2026-04-21) :** Patterns 19–21 ajoutés à partir du deck Cefic Trade Policy IT du 2026-04-14 (`china_us_trade_brief_14042026.pptx`), qui introduit Pareto, dualité volume/valeur, et drill-down CN 8-digit. Cf. `context-prep/editorial/deck-reference-analysis.md`.
+
 ---
 
 ## 1. Le chiffre d'abord, l'interprétation après
@@ -298,3 +300,59 @@ Le corpus ne traite jamais explicitement de :
 3. **Révision depuis l'édition précédente :** Si un chiffre a été significativement révisé, le signaler une seule fois par un astérisque + note de bas de section : *"*Revised from [ancien chiffre] published in the [mois] edition, following Eurostat data revision."* Aligné sur le disclaimer F&F mais adapté au format mensuel.
 
 **Implication :** Ces trois règles doivent figurer dans le system prompt comme des non-négociables. La latence est le principal risque de "tell" pour un rapport automatisé — mal gérée, elle signale l'automatisation.
+
+---
+
+## 19. La structure Pareto : concentration comme diagnostic
+
+Le deck Trade Policy IT 2026-04 fait de la **concentration** (stock ou variation) un diagnostic à part entière — distinct du ranking (Pattern 6). Là où le ranking énumère un top-N ordonné, le Pareto énonce un ratio : *combien* de l'agrégat vient de *combien peu* d'entités. C'est un jugement structurel, pas un classement.
+
+- *"50% of volumes of imported chemicals are sourced from 5 countries"* (Trade Brief 2026, slide 7)
+- *"70% of the value of imported chemicals is sourced from 5 countries"* (Trade Brief 2026, slide 8)
+- *"5 groups of products (NACE 4-digit) make up over 80% of volumes imported into the EU from China in 2025"* (Trade Brief 2026, slide 11)
+- *"2 groups of products … make up over 70% of values imported into the EU from China in 2025"* (Trade Brief 2026, slide 16)
+- *"Half of the increase in imported volumes from China between 2020–2025 is explained by only a limited number of products"* (Trade Brief 2026, slide 13 title)
+- *"54% of the increase in volumes is caused by increases by 12 8-digit CN codes alone"* (Trade Brief 2026, slide 31)
+
+Deux variantes à distinguer :
+1. **Concentration du stock** — *"X% of [metric] is sourced from N [entities]"* — jugement sur la distribution actuelle.
+2. **Concentration de la variation** — *"X% of the increase is caused by N [entities]"* — jugement sur la mécanique du changement. Plus analytique, typiquement appariée avec un drill-down (Pattern 21).
+
+**Implication :** Template à ajouter au system prompt (§5.6). Déclenchement conditionnel recommandé — ne pas mobiliser Pareto quand la distribution est plate (top 5 < 40 %, top 3 NACE < 50 %), la formule perd son sens. Seuils raisonnables : concentration significative si top 5 ≥ 50 %, ou top 3 NACE ≥ 70 %, ou top-N explique ≥ 50 % d'une variation.
+
+---
+
+## 20. La dualité volume/valeur comme pont analytique
+
+Le deck porte un toggle `Volume | Value` sur chaque slide du focus pays, et produit symétriquement une variante volume et une variante value pour chaque analyse. La dualité n'est pas redondante : elle **porte un insight** — glissement vers la valeur ajoutée, effet prix, compression des marges. Elle devient intéressante quand les deux dimensions divergent.
+
+- *"Between 2010 and 2025: +79% change in imported volumes (million tonnes) of chemical products; +167% change in imported values (billion EUR) of chemical products"* (Trade Brief 2026, slide 3)
+- *"Between 2020 and 2025: −6,95 mln tonnes of change; −27,85 bn EUR of change"* (Trade Brief 2026, slide 10, China)
+- *"Between 2020 and 2025: −6,3 mln tonnes of change; +36,1 bn EUR of change"* (Trade Brief 2026, slide 20, US — divergence de signe)
+- *"Imports from China have increased by +81% in volumes and +182% in value"* (Trade Brief 2026, slide 30)
+- *"Imports from US have increased by +69% in volumes and +126% in value"* (Trade Brief 2026, slide 30)
+
+Le cas US 2020–2025 (volumes −6,3 mln t / valeurs +36,1 bn €) est analytiquement le plus fort : **divergence de signe**, c'est exactement le type d'observation qui justifie la dualité. En volumes seul ou valeur seule, l'observation serait incomplète.
+
+**Implication :** Template à ajouter au system prompt (§5.7). Règle d'usage :
+- **Sections trade : toujours** citer les deux dimensions, même si alignées.
+- **Sections output / prices / sales : conditionnel** — ne mobiliser la dualité que si la divergence est ≥ 3 pp entre volume et valeur. Sinon, mentionner une seule dimension pour ne pas alourdir.
+
+---
+
+## 21. Le drill-down CN 8-digit attribué
+
+Le deck ne se contente pas de breakdowns NACE 4 — il descend au CN 8-digit pour **attribuer une variation totale à un petit ensemble de produits identifiés par code**. C'est un pattern différent du breakdown sous-sectoriel : ici on ne ventile pas un total, on **explique** une variation.
+
+- *"31022100 — Ammonium sulphate … : +1,3 mln tonnes. 29091990 — Acyclic ethers and their halogenated … derivatives (excl. …) : +0,5 mln tonnes — this product was responsible for 28% of the change between the two years"* (Trade Brief 2026, slide 13, China volumes)
+- *"29339980 — Heterocyclic compounds with nitrogen hetero-atom[s] only (excl. …) : +7,6 bn EUR ; 29335995 — … : +5,7 bn EUR ; 29371900 — Polypeptide hormones … : +5,6 bn EUR"* (Trade Brief 2026, slide 18, China values)
+- *"29051100 — Methanol 'methyl alcohol' : +1,4 mln tonnes ; 29011000 — Saturated acyclic hydrocarbons : +1,2 mln tonnes ; 31028000 — Mixtures of urea and ammonium nitrate … : +0,5 mln tonnes ; 39014000 — Ethylene-alpha-olefin copolymers … : +0,4 mln tonnes"* (Trade Brief 2026, slide 23, US volumes)
+
+Caractéristiques invariantes :
+1. **Attribution quantitative** — chaque code porte sa contribution absolue (+X mln t ou +Y bn €). Optionnellement, un % de la variation totale pour le contributeur principal.
+2. **Liste courte, pilotée par un seuil** — 3 à 12 codes selon la case, dictés par le critère "top-N explique ≥ 50 % du delta". Jamais une liste exhaustive.
+3. **Description chimique dense** — le deck inclut la description Eurostat brute (*"Acyclic ethers and their halogenated, sulphonated, nitrated or nitrosated derivatives (excl. diethyl ether and tert-butyl ethyl ether [ETBE]…)"*). Acceptable en slide, **inacceptable en prose éditoriale** Iris où la longueur casse la densité.
+
+**Implication :** Template à ajouter au system prompt (§5.8), avec une **règle de troncation** : description > 40 caractères → garder le chapeau avant la première parenthèse/virgule, suivi de "…". Déclenchement conditionnel : drill-down produit seulement quand la concentration Pareto du delta est ≥ 50 % sur ≤ 12 codes. Sinon, le breakdown NACE 4 suffit.
+
+---

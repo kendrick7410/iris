@@ -39,6 +39,7 @@ Your output is one section of this report, not the full document. You will recei
 6. **Heading is a declarative finding, not a topic label.** ✅ "EU27 chemical exports value 3.8% below 2024 levels" ❌ "Chemical exports". Include a number when available. # from Pattern 4
 7. **Heading figure is the most editorially salient benchmark.** Use the YoY change when movement is material (|change| ≥ 2%). Use the pre-crisis gap when the structural finding dominates (YoY < 2% and pre-crisis gap ≥ 10%). Use a stability observation when both are muted (*"EU27 chemical production remains broadly stable in [month] [year]"*).
 7. **Segment labels follow the data block.** If the data block exposes indicators by CN chapter (e.g. "CN 29", "CN 38"), refer to them as such. Do not reconstruct Cefic segment groupings (petrochemicals, specialty, consumer, polymers) unless the data block explicitly provides them. In v1, most indicators will be reported by CN chapter; Cefic segments will come in v1.1 when the Comext ETL feeds Iris directly.
+8. **Triple temporality is acceptable.** Up to three distinct time windows per section: a long window (5 to 15 years, e.g. *"between 2010 and 2025"*), a medium window (year-on-year or quarter-on-quarter), and a pointwise reference (*"in February 2026"*, *"in the first two months of 2026"*). Each window must be made explicit in words — never rely on the reader to infer the window from context. Never stack more than three windows in a single section; beyond three, the prose becomes illegible. # from deck Trade Brief 2026
 
 ## 3. Directional vocabulary gradient (PREFER)
 
@@ -131,6 +132,69 @@ pre-crisis levels (2014–2019 [average])
 ```
 
 Never "before the crisis", "pre-pandemic", "pre-COVID".
+
+### 5.6 Pareto concentration # from Pattern 19
+
+Use when distribution is genuinely concentrated — not for flat breakdowns.
+
+```
+With [N] [entities] accounting for [X]% of [metric], [characterisation
+of concentration — e.g. "imports are concentrated in a narrow supplier base",
+"value is driven by a small product cluster"].
+```
+
+Alternative surface forms (for stock vs variation):
+
+```
+[X]% of [metric] is sourced from [N] [entities].                   # stock
+[X]% of the increase in [metric] is explained by [N] [entities].   # variation
+```
+
+**Conditional use only.** Trigger Pareto commentary only when one of these holds:
+- Top 5 partners cover ≥ 50% of the total (concentration of stock).
+- Top 3 NACE 4-digit categories cover ≥ 70% of the total (product concentration).
+- Top-N CN codes explain ≥ 50% of the year-on-year variation (concentration of change).
+
+If none of these thresholds is met, omit Pareto framing — a flat distribution is not a finding. Do not force *"50%"* when the actual share is *"38%"*; name the actual share and drop the framing.
+
+### 5.7 Volume/value duality # from Pattern 20
+
+For trade sections, cite both dimensions in a bridging sentence:
+
+```
+[Entity] [exports/imports] [rose/fell] by [X.X]% in volume and [Y.Y]% in
+value between [period_start] and [period_end], [qualifier reflecting the
+divergence — "reflecting a shift toward higher-value categories" |
+"despite lower average unit prices" | "driven by [contextual factor]"].
+```
+
+**Rules of use:**
+- **Trade sections (imports / exports / trade balance): always** cite both dimensions, even when aligned. The duality is the register.
+- **Output / prices / sales sections: conditional.** Bring the duality in only when the divergence between volume and value exceeds 3 percentage points. Otherwise a single dimension suffices.
+- When signs diverge (e.g. volumes down, value up), the duality is analytically strong — lead the section with it if possible.
+
+### 5.8 CN 8-digit drill-down # from Pattern 21
+
+For attributing a change to a small set of products, use:
+
+```
+[N] CN 8-digit codes account for [X]% of the change in [metric] between
+[period_start] and [period_end]: [code_1] ([short_description_1]), +[contribution_1];
+[code_2] ([short_description_2]), +[contribution_2]; [code_3] ([short_description_3]),
++[contribution_3][; ... up to N items].
+```
+
+**Truncation rule for product descriptions.** Comext returns chemical descriptions that can exceed 200 characters (e.g. *"Acyclic ethers and their halogenated, sulphonated, nitrated or nitrosated derivatives (excl. diethyl ether and tert-butyl ethyl ether [ETBE]…)"*). Truncate to **≤ 40 characters**:
+
+- Keep everything before the first parenthesis `(`, comma, or semicolon.
+- If still above 40 characters, keep the first 37 and append `"…"`.
+- Never paraphrase the chemical name — truncate, do not rewrite.
+
+Example (from Trade Brief 2026):
+- Raw: `29091990 — Acyclic ethers and their halogenated, sulphonated, nitrated or nitrosated derivatives (excl. diethyl ether …)`
+- Iris prose: `29091990 (acyclic ethers and their derivatives)`
+
+**Conditional use only.** Drill-down is warranted only when the top-N explains ≥ 50% of the variation and N ≤ 12. If the concentration is weaker or N is larger, stay at the NACE 4-digit breakdown.
 
 ## 6. Section structure
 
