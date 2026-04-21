@@ -426,6 +426,13 @@ def _build_trade_fiche(trade_file: Path, section_type: str) -> dict:
               if month_num > 1 else f"{month_names[0]} {year}")
     window_ordinal = _ordinal(month_num) if month_num > 1 else None
 
+    direction = "exports" if section_type == "trade_exports" else "imports"
+    # Waterfall chart is emitted only if at least one key partner has a drill_down.
+    # Stacked-bars NACE chart is deferred — requires by_year_by_nace aggregation
+    # in trade.json, planned for a follow-up commit.
+    has_drill = any(p.get("drill_down") for p in flow.get("by_partner", []))
+    chart_ids = [f"trade_{direction}_waterfall_cn8"] if has_drill else []
+
     return {
         "section_type": section_type,
         "period": {
@@ -444,14 +451,21 @@ def _build_trade_fiche(trade_file: Path, section_type: str) -> dict:
             },
             "previous_year": flow["previous_year"],
             "ytd": flow["ytd"],
+            "five_year_window": flow.get("five_year_window"),
             "by_partner": flow["by_partner"],
             "by_chapter": flow["by_chapter"],
+            "key_partners": raw.get("key_partners", []),
             "source": f"Cefic analysis based on Comext data (Eurostat, {date.today().year})",
         },
-        "charts": [],
+        "charts": chart_ids,
         "editorial_context": {
             "latest_structural_break": "March 2022",
             "notable_events": ["US tariff measures since March 2025"],
             "scope_note": raw.get("scope", ""),
+            "narrative_hints": {
+                "apply_volume_value_duality": True,
+                "apply_pareto_if_concentrated": True,
+                "apply_drilldown_for_key_partners": has_drill,
+            },
         },
     }
