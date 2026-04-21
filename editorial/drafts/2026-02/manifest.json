@@ -1,0 +1,28 @@
+{
+  "month": "2026-02",
+  "publication_date": "2026-04-21",
+  "pipeline_version": "0.1.0",
+  "sections_produced": [],
+  "sections_skipped": {
+    "output": "data_unavailable",
+    "prices": "data_unavailable",
+    "sales": "data_unavailable",
+    "trade_exports": "data_unavailable",
+    "trade_imports": "data_unavailable"
+  },
+  "summary_quality": "unknown",
+  "data_periods": {
+    "output": "2026-02",
+    "prices": "2026-02",
+    "sales": "2026-01"
+  },
+  "prompt_hashes": {
+    "system_md": "0b06dd5dcc4d2445",
+    "summary_prompt_md": "5efd22f5a6c7d8f0"
+  },
+  "llm_model_used": {
+    "sections": "claude-sonnet-4-20250514",
+    "summary": "claude-sonnet-4-20250514"
+  },
+  "built_at": "2026-04-21T07:10:08.426636+00:00"
+}
