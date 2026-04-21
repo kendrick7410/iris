@@ -1,0 +1,30 @@
+{
+  "per_section": {
+    "output": {
+      "occurrences_before": 0,
+      "occurrences_after": 0,
+      "stripped": false
+    },
+    "prices": {
+      "occurrences_before": 0,
+      "occurrences_after": 0,
+      "stripped": false
+    },
+    "sales": {
+      "occurrences_before": 1,
+      "occurrences_after": 1,
+      "stripped": false
+    },
+    "trade_exports": {
+      "occurrences_before": 0,
+      "occurrences_after": 0,
+      "stripped": false
+    },
+    "trade_imports": {
+      "occurrences_before": 1,
+      "occurrences_after": 0,
+      "stripped": true
+    }
+  },
+  "edition_uses_phrase": true
+}

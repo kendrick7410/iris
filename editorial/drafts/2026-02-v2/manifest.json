@@ -19,7 +19,7 @@
     "trade_imports": "2026-02"
   },
   "prompt_hashes": {
-    "system_md": "ddf9200c18edfbea",
+    "system_md": "435ec9a99a8ac5df",
     "summary_prompt_md": "5efd22f5a6c7d8f0",
     "macro_brief_prompt_md": "dce9ba856a2afcb4"
   },
@@ -27,5 +27,5 @@
     "sections": "claude-sonnet-4-20250514",
     "summary": "claude-sonnet-4-20250514"
   },
-  "built_at": "2026-04-21T14:46:52.863573+00:00"
+  "built_at": "2026-04-21T15:19:22.122042+00:00"
 }
