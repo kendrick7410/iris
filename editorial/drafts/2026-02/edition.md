@@ -6,7 +6,7 @@ pipeline_version: 0.2.0
 
 ## EU27 chemical exports fall 42% in February amid anomalous base effects
 
-The EU27 chemical industry reported a sharp contraction in the first two months of 2026, with exports falling 42.1% in value to €34.5 bn — a figure heavily distorted by pre-tariff front-loading in February 2025 that created an unusually high comparison base. Chemical output declined 3.9% year-on-year in February, reaching 79.3 on the 2021 index and sitting 18% below pre-crisis levels (2014–2019 average). Producer prices fell 2.8% year-on-year to 117.2, while sales dropped 7.5% in January to 90.8. The export decline was concentrated among the top-5 partners, which account for 50% of total value, with the United States alone contributing €25.1 bn of the €25.1 bn total decrease. Against a normalised February 2024 base, exports declined by approximately 10%, indicating underlying weakness beyond the statistical distortion.
+The EU27 chemical industry reported a sharp contraction in the first two months of 2026, with exports falling 42.1% in value to €34.5 bn — a figure heavily distorted by pre-tariff front-loading in February 2025 that created an unusually high comparison base. Chemical output declined 3.9% year-on-year in February, reaching 79.3 on the 2021 index and sitting 18% below pre-crisis levels (2014–2019 average). Producer prices fell 2.8% year-on-year to 117.2, while sales dropped 7.5% in January to 90.8. The export decline was concentrated among the top-5 partners, which account for 50% of total value, with the United States alone contributing €19 bn of the €25.1 bn total decrease. Against a normalised February 2024 base, exports declined by approximately 10%, indicating underlying weakness beyond the statistical distortion.
 
 ---
 
@@ -76,7 +76,7 @@ With 2 partners accounting for 95% of the absolute variation in export values, t
 
 From January to February 2026, EU27 chemical imports decreased by 12.0% in value compared to the same period in 2025. EU27 chemical imports fell by 18.5% in volume and 12.0% in value between January and February 2026, reflecting a shift toward higher-value categories. The EU27 chemical imports amounted to €33.5 bn in the first two months of 2026, down by €4.6 bn compared to 2025.
 
-With €4.4 bn, China is the primary source of imports of the EU27 area for chemicals, followed by the United States (€3.7 bn) and Switzerland (€1.9 bn). China and the United States both posted gains of 4.8% and 4.7% respectively in February, while Switzerland declined by 19.9%. South Korea experienced the steepest decline at 30.6%, followed by Japan (30.6%) and Saudi Arabia (20.0%).
+With €4.4 bn, China is the primary source of imports of the EU27 area for chemicals, followed by the United States (€3.7 bn) and Switzerland (€1.9 bn). China and the United States both posted gains of 4.8% and 4.7% respectively in February, while Switzerland declined by 19.9%. Japan experienced the steepest decline at 30.6%, followed by South Korea (29.1%) and Saudi Arabia (20%).
 
 Organic chemicals (CN 29) remained the largest import category at €9.2 bn, broadly stable with a marginal decline of 0.3%. Plastics and articles thereof (CN 39) fell sharply by 18.4% to €1.6 bn, while fertilisers (CN 31) plummeted by 47.2% to €0.4 bn.
 
