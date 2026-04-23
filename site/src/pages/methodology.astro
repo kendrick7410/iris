@@ -287,24 +287,42 @@ import Layout from '../layouts/Layout.astro';
     <h2 class="iris-methodology-h3">5. Scheduled jobs</h2>
     <ul class="iris-docs-list">
       <li>
-        <strong>Monthly edition run.</strong> The full pipeline fires once the Eurostat STS
-        release for month M is available (typically around the 15th of month M+2). No fixed
-        cron yet; triggered manually until the release-watcher is wired.
+        <strong>Comext ETL refresh.</strong> <code>0 6 * * 1</code> — every
+        <strong>Monday 06:00 CEST</strong>. Pulls the Eurostat Comext monthly archives,
+        loads them into Postgres, regenerates the chemistry-filtered
+        <code>comext_export.parquet</code>, and refreshes the downstream analysis cube.
+        The parquet becomes the trade-side input for Iris.
       </li>
       <li>
-        <strong>Comext ETL refresh.</strong> Weekly on Monday 06:00. The ETL regenerates the
-        chemistry-filtered trade parquet, so Iris picks up revised trade figures on the next
-        pipeline run.
+        <strong>Iris monthly edition run.</strong> <code>0 9 * * 2</code> — every
+        <strong>Tuesday 09:00 CEST</strong>, deliberately scheduled the morning after the
+        Comext refresh so the trade data is current. The job targets the M-2 window
+        (<code>date -d "-2 months" +%Y-%m</code>), matching the typical T+6 to T+8 week
+        Eurostat STS release calendar for production, prices, and turnover. The fetch step
+        re-runs once per new M-2 transition; subsequent Tuesdays within the same calendar
+        month short-circuit if the cache already exists, so the job is idempotent.
       </li>
       <li>
-        <strong>Selective regeneration.</strong> Three one-shot jobs cover the common
+        <strong>No active release-watcher.</strong> The Tuesday cron does not explicitly
+        poll Eurostat for new releases — it retries weekly and relies on the publishing
+        cadence being stable. A smarter freshness-check (comparing the latest published
+        reference month in each STS dataset against the local cache and triggering only
+        when something changed) is a known follow-up.
+      </li>
+      <li>
+        <strong>Selective regeneration.</strong> Three one-shot jobs cover common
         mid-edition adjustments without replaying the whole pipeline: macro brief only,
         macro brief + trade sections, or a fiche-enrichment pass that adds partner_drilldown
         and 60-month historical series to existing fiches.
       </li>
       <li>
-        <strong>PDF refresh.</strong> A standalone job regenerates the edition PDF when
-        the print-layout changes without the content having moved.
+        <strong>PDF refresh.</strong> A standalone job regenerates the edition PDF when the
+        print-layout changes without the content having moved.
+      </li>
+      <li>
+        <strong>Logs.</strong> Pipeline output is appended to <code>logs/cron.log</code> on
+        each run. Failures surface in the file rather than in a dashboard; setting up a
+        cron-failure alert is on the short-term roadmap.
       </li>
     </ul>
 
