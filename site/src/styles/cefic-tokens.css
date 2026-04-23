@@ -1117,18 +1117,73 @@ body.ov-active .iris-footer { display: none; }
   .iris-footer-inner { grid-template-columns: 1fr; }
   .iris-kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .iris-cols { grid-template-columns: 1fr; }
+  .iris-chart-row { grid-template-columns: repeat(2, 1fr); }
+  .iris-partner-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
-  .iris-nav { gap: 0.75rem; }
+  .iris-header { padding: 0 0.75rem; height: 64px; }
+  :root { --nav-height: 64px; }
+  .iris-burger { width: 40px; height: 40px; margin-right: 0.5rem; }
+  .iris-brand { padding: 0.35rem 0.6rem 0.35rem 0.5rem; gap: 0.5rem; }
+  .iris-brand img { height: 24px; }
+  .iris-brand-stack { padding-left: 0.5rem; }
+  .iris-brand-mark { font-size: 1.05rem; }
+  .iris-brand-by { display: none; }
+
+  .iris-nav { gap: 0.5rem; }
   .iris-nav a { font-size: 0.85rem; }
   .iris-nav a[data-desktop] { display: none; }
+  .iris-back-link { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
+  .iris-back-link span { display: none; }
+  .iris-theme-toggle { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
+
   .iris-hero { padding-left: 1.5rem; padding-right: 1.5rem; }
   .iris-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+
+  /* Dashboard: scroll vertically, show all views linearly */
   body.ov-active { overflow: auto; height: auto; }
-  body.ov-active .iris-dashboard { position: static; padding: 1.5rem; }
+  body.ov-active .iris-dashboard { position: static; padding: 1.5rem 1rem; gap: 2rem; }
   body.ov-active .iris-footer { display: block; }
-  .iris-view { display: flex !important; margin-bottom: 3rem; }
+  .iris-view { display: flex !important; margin-bottom: 2.5rem; }
+
+  /* Hide the pill-tab switcher on mobile (views are linear scroll) */
+  .iris-view-tabs { display: none; }
+
+  /* Stack all grids to 1-column */
   .iris-kpi-grid { grid-template-columns: 1fr 1fr; }
+  .iris-chart-row { grid-template-columns: 1fr; }
+  .iris-partner-grid { grid-template-columns: 1fr; }
+  .iris-cols { grid-template-columns: 1fr; gap: 1rem; }
+
+  /* Charts allowed to grow when stacked */
+  .iris-chart-row .iris-chart { max-height: none; }
+  .iris-chart-row .iris-chart img { max-height: 260px; }
+
+  /* Panels readable on mobile */
+  .iris-panel { padding: 1rem; overflow: visible; }
+  .iris-panel-title { font-size: 1rem; }
+  .iris-view-title { font-size: 1.3rem; line-height: 1.15; }
+  .iris-view-header { gap: 0.5rem; flex-wrap: wrap; }
+  .iris-view-subtitle { font-size: 0.8rem; }
+
   .iris-bar-list li { grid-template-columns: 100px 1fr 60px; font-size: 0.8rem; }
+
+  /* KPI compact */
+  .iris-kpi-card { padding: 0.9rem 1rem; }
+  .iris-kpi-value { font-size: 1.4rem; }
+  .iris-kpi-label { font-size: 0.65rem; }
+  .iris-kpi-foot  { font-size: 0.7rem; }
+
+  /* Hero smaller */
+  .iris-hero h1 { font-size: clamp(2.5rem, 14vw, 4rem); }
+  .iris-hero-tagline { font-size: 1rem; }
+  .iris-hero-meta { gap: 1rem 1.5rem; }
+}
+
+@media (max-width: 420px) {
+  .iris-kpi-grid { grid-template-columns: 1fr; }
+  .iris-header { padding: 0 0.5rem; }
+  .iris-brand-stack { display: none; }
+  .iris-brand { padding: 0.3rem 0.5rem; }
 }
