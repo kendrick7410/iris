@@ -4,9 +4,18 @@ import '../styles/cefic-tokens.css';
 interface Props {
   title: string;
   description?: string;
+  variant?: 'landing' | 'dashboard' | 'page';
+  heroOverlap?: boolean;
 }
 
-const { title, description = 'Monthly Chemical Trends — Cefic analysis based on Eurostat data' } = Astro.props;
+const {
+  title,
+  description = 'Monthly Chemical Trends — Cefic analysis based on Eurostat data',
+  variant = 'page',
+  heroOverlap = false,
+} = Astro.props;
+
+const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
 ---
 <html lang="en">
 <head>
@@ -24,51 +33,96 @@ const { title, description = 'Monthly Chemical Trends — Cefic analysis based o
     })();
   </script>
 </head>
-<body>
-  <header class="cefic-navbar">
-    <div class="cefic-navbar-inner">
-      <a class="cefic-navbar-brand" href="/">
-        <img src="/cefic-logo.png" alt="Cefic" />
-        <span class="cefic-navbar-title">Iris</span>
-      </a>
-      <nav class="cefic-navbar-nav">
-        <a href="/">Editions</a>
-        <a href="https://cefic.org" target="_blank" rel="noopener">Cefic.org</a>
-        <button class="cefic-theme-toggle" id="cefic-theme-toggle" type="button" aria-label="Toggle dark mode">
-          <span id="cefic-theme-label">Light</span>
-        </button>
-      </nav>
-    </div>
+<body class={bodyClass}>
+  <header class={`iris-header ${heroOverlap ? 'is-transparent' : ''}`} id="iris-header" data-overlap={heroOverlap}>
+    {variant === 'dashboard' && (
+      <button class="iris-burger" id="iris-burger" type="button" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="4" y1="7"  x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
+      </button>
+    )}
+    <a class="iris-brand" href="/">
+      <img src="/cefic-logo.png" alt="Cefic" />
+      <span class="iris-brand-stack">
+        <span class="iris-brand-mark">Iris</span>
+        <span class="iris-brand-by">by Cefic</span>
+      </span>
+    </a>
+    <nav class="iris-nav">
+      {variant === 'dashboard' ? (
+        <a class="iris-back-link" href="/">All editions</a>
+      ) : (
+        <>
+          <a href="/" data-desktop>Editions</a>
+          <a href="https://cefic.org" target="_blank" rel="noopener" data-desktop>Cefic.org</a>
+        </>
+      )}
+      <button class="iris-theme-toggle" id="iris-theme-toggle" type="button" aria-label="Toggle dark mode">
+        <span id="iris-theme-label">Light</span>
+      </button>
+    </nav>
   </header>
 
-  <main class="cefic-container">
-    <slot />
-  </main>
+  <slot />
 
-  <footer class="cefic-footer">
-    <div>© {new Date().getFullYear()} Cefic — European Chemical Industry Council</div>
-    <div>
-      <a href="https://cefic.org" target="_blank" rel="noopener">cefic.org</a>
-      {' · '}
-      Data: Eurostat, Comext
-    </div>
-  </footer>
+  {variant !== 'dashboard' && (
+    <footer class="iris-footer">
+      <div class="iris-footer-inner">
+        <div>
+          <div class="iris-footer-brand">
+            <img src="/cefic-logo.png" alt="Cefic" />
+            <span class="iris-footer-brand-name">Iris</span>
+          </div>
+          <p>Monthly Chemical Trends — a Cefic publication monitoring the European chemical industry through Eurostat and Comext data.</p>
+        </div>
+        <div>
+          <div class="iris-footer-col-title">Publication</div>
+          <p><a href="/">All editions</a></p>
+          <p><a href="/">Methodology</a></p>
+          <p><a href="/">Data sources</a></p>
+        </div>
+        <div>
+          <div class="iris-footer-col-title">Cefic</div>
+          <p><a href="https://cefic.org" target="_blank" rel="noopener">cefic.org</a></p>
+          <p><a href="https://cefic.org/our-industry/" target="_blank" rel="noopener">Our industry</a></p>
+          <p><a href="https://cefic.org/media-corner/" target="_blank" rel="noopener">Media corner</a></p>
+        </div>
+      </div>
+      <div class="iris-footer-bottom">
+        <div>© {new Date().getFullYear()} Cefic — European Chemical Industry Council</div>
+        <div>Data: Eurostat · Comext</div>
+      </div>
+    </footer>
+  )}
 
   <script is:inline>
     (function () {
-      const root = document.documentElement;
-      const btn = document.getElementById('cefic-theme-toggle');
-      const label = document.getElementById('cefic-theme-label');
-      const syncLabel = () => {
-        label.textContent = root.dataset.theme === 'dark' ? 'Dark' : 'Light';
-      };
-      syncLabel();
+      const root  = document.documentElement;
+      const btn   = document.getElementById('iris-theme-toggle');
+      const label = document.getElementById('iris-theme-label');
+      if (!btn || !label) return;
+      const sync = () => { label.textContent = root.dataset.theme === 'dark' ? 'Dark' : 'Light'; };
+      sync();
       btn.addEventListener('click', () => {
-        const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-        root.dataset.theme = next;
-        localStorage.setItem('iris-theme', next);
-        syncLabel();
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('iris-theme', root.dataset.theme);
+        sync();
       });
+    })();
+
+    // Transparent header scroll behaviour (landing only)
+    (function () {
+      const header = document.getElementById('iris-header');
+      if (!header || header.dataset.overlap !== 'true') return;
+      const onScroll = () => {
+        if (window.scrollY > 120) header.classList.remove('is-transparent');
+        else                      header.classList.add('is-transparent');
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
     })();
   </script>
 </body>

@@ -1,0 +1,31 @@
+{
+  "month": "2025-12",
+  "publication_date": "2026-04-21",
+  "pipeline_version": "0.2.0",
+  "sections_produced": [
+    "output",
+    "prices",
+    "sales",
+    "trade_exports",
+    "trade_imports"
+  ],
+  "sections_skipped": {},
+  "summary_quality": "ok",
+  "data_periods": {
+    "output": "2025-12",
+    "prices": "2025-12",
+    "sales": "2025-12",
+    "trade_exports": "2025-12",
+    "trade_imports": "2025-12"
+  },
+  "prompt_hashes": {
+    "system_md": "defd396461b8afb7",
+    "summary_prompt_md": "5efd22f5a6c7d8f0",
+    "macro_brief_prompt_md": "e3ca2689c8a80026"
+  },
+  "llm_model_used": {
+    "sections": "claude-sonnet-4-20250514",
+    "summary": "claude-sonnet-4-20250514"
+  },
+  "built_at": "2026-04-21T11:44:49.188308+00:00"
+}

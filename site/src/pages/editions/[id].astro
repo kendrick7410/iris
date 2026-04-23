@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
   const editions = await getCollection('editions');
@@ -11,15 +11,326 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+
+const monthName = (id: string) => {
+  const [y, m] = id.split('-');
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+};
+
+// Mock view data — will be wired to real MDX in next pass
+const kpis = [
+  { label: 'EU27 chemical exports', value: '€34.5 bn', delta: '-42.1%', dir: 'neg', foot: 'Jan-Feb 2026, YoY' },
+  { label: 'Production index',      value: '79.3',     delta: '-3.9%',  dir: 'neg', foot: 'Feb 2026, 2021=100' },
+  { label: 'Producer prices',       value: '117.2',    delta: '-2.8%',  dir: 'neg', foot: 'Feb 2026, YoY' },
+  { label: 'Chemical sales',        value: '90.8',     delta: '-7.5%',  dir: 'neg', foot: 'Jan 2026, YoY' },
+];
+
+const countryPerf = [
+  { label: 'Netherlands', value: -9.6 },
+  { label: 'Italy',       value: -6.9 },
+  { label: 'Germany',     value: -3.5 },
+  { label: 'Spain',       value: -3.3 },
+  { label: 'Poland',      value: -2.1 },
+  { label: 'Belgium',     value: -1.2 },
+  { label: 'France',      value:  1.1 },
+];
+const maxMag = Math.max(...countryPerf.map(c => Math.abs(c.value)));
+
+const partners = [
+  { label: 'United States', value: '€19.0 bn', share: 76 },
+  { label: 'United Kingdom', value: '€1.8 bn',  share: 7 },
+  { label: 'Switzerland',    value: '€1.4 bn',  share: 6 },
+  { label: 'China',          value: '€1.2 bn',  share: 5 },
+  { label: 'Turkey',         value: '€0.9 bn',  share: 4 },
+];
 ---
-<Layout title={`Iris — Edition ${entry.id}`}>
-  <a class="cefic-back-link" href="/">&larr; Back to all editions</a>
-  <section class="cefic-hero">
-    <h1>Edition {entry.id}</h1>
-    <p class="subtitle">Published {entry.data.publication_date}</p>
-  </section>
-  <article class="cefic-edition-body">
-    <Content />
-  </article>
+<Layout
+  title={`Iris — ${monthName(entry.id)} edition`}
+  variant="dashboard"
+>
+  <!-- Drawer scrim -->
+  <div class="iris-drawer-scrim" id="iris-drawer-scrim"></div>
+
+  <!-- Drawer menu -->
+  <aside class="iris-drawer" id="iris-drawer" data-open="false" aria-hidden="true">
+    <div class="iris-drawer-header">
+      <h2 class="iris-drawer-title">{monthName(entry.id)}</h2>
+      <button class="iris-drawer-close" id="iris-drawer-close" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="iris-drawer-section">
+      <div class="iris-drawer-section-title">Start</div>
+      <button class="iris-drawer-item" data-view="overview" data-active="true">Overview</button>
+    </div>
+
+    <div class="iris-drawer-section">
+      <div class="iris-drawer-section-title">Main</div>
+      <button class="iris-drawer-item" data-view="macro">Macro brief</button>
+      <button class="iris-drawer-item" data-view="drilldown">Drill-down</button>
+    </div>
+
+    <div class="iris-drawer-section">
+      <div class="iris-drawer-section-title">Archive</div>
+      <a class="iris-drawer-item" href="/">← Back to all editions</a>
+    </div>
+  </aside>
+
+  <main class="iris-dashboard">
+    <div class="iris-view-tabs" role="tablist">
+      <button class="iris-view-tab" data-view="overview"  data-active="true" role="tab">Overview</button>
+      <button class="iris-view-tab" data-view="macro"     role="tab">Macro brief</button>
+      <button class="iris-view-tab" data-view="drilldown" role="tab">Drill-down</button>
+    </div>
+
+    <!-- ===== VIEW 1 · OVERVIEW ===== -->
+    <section class="iris-view" data-view="overview" data-active="true">
+      <header class="iris-view-header">
+        <div>
+          <div class="iris-view-eyebrow">Overview · {monthName(entry.id)}</div>
+          <h1 class="iris-view-title">EU27 chemical exports fall 42% amid anomalous base effects</h1>
+        </div>
+        <div class="iris-view-subtitle">Published {entry.data.publication_date}</div>
+      </header>
+
+      <div class="iris-kpi-grid">
+        {kpis.map(k => (
+          <div class="iris-kpi-card">
+            <div class="iris-kpi-label">{k.label}</div>
+            <div class="iris-kpi-value">{k.value}</div>
+            <div class={`iris-kpi-delta is-${k.dir}`}>{k.delta}</div>
+            <div class="iris-kpi-foot">{k.foot}</div>
+          </div>
+        ))}
+      </div>
+
+      <div class="iris-cols iris-view-body">
+        <div class="iris-panel">
+          <h3 class="iris-panel-title">Key takeaway</h3>
+          <p>
+            The EU27 chemical industry reported a sharp contraction in the first two months of 2026,
+            with exports falling <strong>42.1%</strong> in value to €34.5 bn — a figure heavily distorted by
+            pre-tariff front-loading in February 2025 that created an unusually high comparison base.
+          </p>
+          <p>
+            Chemical output declined <strong>3.9% year-on-year</strong> in February, reaching 79.3 on the 2021
+            index and sitting <strong>18% below pre-crisis levels</strong> (2014–2019 average).
+          </p>
+          <p>
+            Against a normalised February 2024 base, exports declined by approximately 10% —
+            indicating underlying weakness beyond the statistical distortion.
+          </p>
+        </div>
+
+        <div class="iris-panel">
+          <h3 class="iris-panel-title">Export decrease — top partners</h3>
+          <ul class="iris-bar-list">
+            {partners.map(p => (
+              <li>
+                <span class="iris-bar-label">{p.label}</span>
+                <span class="iris-bar-track">
+                  <span class="iris-bar-fill is-neg" style={`width:${p.share}%`}></span>
+                </span>
+                <span class="iris-bar-value">{p.value}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW 2 · MACRO BRIEF ===== -->
+    <section class="iris-view" data-view="macro">
+      <header class="iris-view-header">
+        <div>
+          <div class="iris-view-eyebrow">Macro brief · {monthName(entry.id)}</div>
+          <h1 class="iris-view-title">Output down 3.9%, 18% below pre-crisis levels</h1>
+        </div>
+        <div class="iris-view-subtitle">Production · Prices · Sales</div>
+      </header>
+
+      <div class="iris-kpi-grid">
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Output vs Feb 2025</div>
+          <div class="iris-kpi-value">-3.9%</div>
+          <div class="iris-kpi-delta is-neg">Index 79.3</div>
+          <div class="iris-kpi-foot">2021 = 100</div>
+        </div>
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Output vs pre-crisis</div>
+          <div class="iris-kpi-value">-18%</div>
+          <div class="iris-kpi-delta is-neg">vs 2014-2019 avg</div>
+          <div class="iris-kpi-foot">Persistent gap</div>
+        </div>
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Producer prices YoY</div>
+          <div class="iris-kpi-value">-2.8%</div>
+          <div class="iris-kpi-delta is-neg">Index 117.2</div>
+          <div class="iris-kpi-foot">Feb 2026</div>
+        </div>
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Sales YoY</div>
+          <div class="iris-kpi-value">-7.5%</div>
+          <div class="iris-kpi-delta is-neg">Index 90.8</div>
+          <div class="iris-kpi-foot">Jan 2026</div>
+        </div>
+      </div>
+
+      <div class="iris-cols iris-view-body">
+        <div class="iris-panel">
+          <h3 class="iris-panel-title">Sector context</h3>
+          <p>
+            Chemical production underperformed total manufacturing, which declined by just 0.4% in February.
+            Pharmaceuticals fell more sharply at 8.6%, while basic metals dropped 0.7% and motor vehicles
+            gained 2.0%.
+          </p>
+          <p>
+            EU27 chemical output averaged <strong>79.1</strong> in the first two months of 2026, down
+            1.7% compared to the same period in 2025. The sector remains structurally 18 points below
+            its 2014–2019 baseline — a gap that has not closed since the 2022 energy shock.
+          </p>
+        </div>
+
+        <div class="iris-panel">
+          <h3 class="iris-panel-title">Country output — YoY</h3>
+          <ul class="iris-bar-list">
+            {countryPerf.map(c => {
+              const pct = (Math.abs(c.value) / maxMag) * 100;
+              const neg = c.value < 0;
+              return (
+                <li>
+                  <span class="iris-bar-label">{c.label}</span>
+                  <span class="iris-bar-track">
+                    <span class={`iris-bar-fill ${neg ? 'is-neg' : ''}`} style={`width:${pct}%`}></span>
+                  </span>
+                  <span class="iris-bar-value">{c.value > 0 ? '+' : ''}{c.value.toFixed(1)}%</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW 3 · DRILL-DOWN ===== -->
+    <section class="iris-view" data-view="drilldown">
+      <header class="iris-view-header">
+        <div>
+          <div class="iris-view-eyebrow">Drill-down · {monthName(entry.id)}</div>
+          <h1 class="iris-view-title">United States alone drove 76% of the export contraction</h1>
+        </div>
+        <div class="iris-view-subtitle">Top partners · Base-effect adjusted</div>
+      </header>
+
+      <div class="iris-kpi-grid">
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">US contribution</div>
+          <div class="iris-kpi-value">€19.0 bn</div>
+          <div class="iris-kpi-delta is-neg">of €25.1 bn total decrease</div>
+          <div class="iris-kpi-foot">76% of the gap</div>
+        </div>
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Top-5 share</div>
+          <div class="iris-kpi-value">50%</div>
+          <div class="iris-kpi-delta is-neg">of total export value</div>
+          <div class="iris-kpi-foot">Partner concentration</div>
+        </div>
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Base-effect adjusted</div>
+          <div class="iris-kpi-value">-10%</div>
+          <div class="iris-kpi-delta is-neg">vs normalised Feb 2024</div>
+          <div class="iris-kpi-foot">Underlying weakness</div>
+        </div>
+        <div class="iris-kpi-card">
+          <div class="iris-kpi-label">Imports ranking</div>
+          <div class="iris-kpi-value">3rd</div>
+          <div class="iris-kpi-delta is-neg">US as import partner</div>
+          <div class="iris-kpi-foot">Shift from 2024</div>
+        </div>
+      </div>
+
+      <div class="iris-cols iris-view-body">
+        <div class="iris-panel">
+          <h3 class="iris-panel-title">What moved the needle</h3>
+          <p>
+            The <strong>€25.1 bn</strong> contraction in EU27 chemical exports was overwhelmingly driven
+            by the top-5 trading partners, which together account for half of total export value.
+            The <strong>United States</strong> alone contributed €19 bn of the decrease —
+            reflecting the <em>unwinding</em> of front-loaded February 2025 shipments ahead of anticipated
+            tariff actions.
+          </p>
+          <p>
+            Once the February 2025 distortion is stripped out, exports declined by roughly
+            <strong>10%</strong> against a normalised 2024 base — a smaller but still significant
+            decrease, pointing to weaker underlying demand rather than purely a statistical artefact.
+          </p>
+        </div>
+
+        <div class="iris-panel">
+          <h3 class="iris-panel-title">Contribution to the export gap</h3>
+          <ul class="iris-bar-list">
+            {partners.map(p => (
+              <li>
+                <span class="iris-bar-label">{p.label}</span>
+                <span class="iris-bar-track">
+                  <span class="iris-bar-fill is-neg" style={`width:${p.share}%`}></span>
+                </span>
+                <span class="iris-bar-value">{p.share}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script is:inline>
+    (function () {
+      const burger = document.getElementById('iris-burger');
+      const drawer = document.getElementById('iris-drawer');
+      const scrim  = document.getElementById('iris-drawer-scrim');
+      const closeBtn = document.getElementById('iris-drawer-close');
+      if (!drawer || !scrim) return;
+
+      const open  = () => {
+        drawer.setAttribute('data-open', 'true');
+        scrim.setAttribute('data-open', 'true');
+        drawer.setAttribute('aria-hidden', 'false');
+      };
+      const close = () => {
+        drawer.setAttribute('data-open', 'false');
+        scrim.setAttribute('data-open', 'false');
+        drawer.setAttribute('aria-hidden', 'true');
+      };
+
+      burger?.addEventListener('click', open);
+      closeBtn?.addEventListener('click', close);
+      scrim.addEventListener('click', close);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+
+      // View switching — shared by drawer items AND top tabs
+      const drawerItems = drawer.querySelectorAll('.iris-drawer-item[data-view]');
+      const tabs        = document.querySelectorAll('.iris-view-tab[data-view]');
+      const views       = document.querySelectorAll('.iris-view[data-view]');
+
+      const switchView = (target) => {
+        [...drawerItems, ...tabs].forEach(el => {
+          if (el.getAttribute('data-view') === target) el.setAttribute('data-active', 'true');
+          else el.removeAttribute('data-active');
+        });
+        views.forEach(v => {
+          if (v.getAttribute('data-view') === target) v.setAttribute('data-active', 'true');
+          else v.removeAttribute('data-active');
+        });
+      };
+
+      drawerItems.forEach(btn => btn.addEventListener('click', () => {
+        switchView(btn.getAttribute('data-view'));
+        close();
+      }));
+      tabs.forEach(btn => btn.addEventListener('click', () => {
+        switchView(btn.getAttribute('data-view'));
+      }));
+    })();
+  </script>
 </Layout>

@@ -1,0 +1,82 @@
+/* Iris Design Tokens
+   Original identity — inspired by institutional reporting conventions.
+   Not affiliated with Cefic visual identity.
+*/
+
+:root {
+  /* Palette — primary */
+  --iris-ink:         #2a2a2a;
+  --iris-ink-soft:    #5a5a5a;
+  --iris-ink-muted:   #8a8a8a;
+  --iris-paper:       #ffffff;
+  --iris-paper-warm:  #f4f2ef;
+  --iris-paper-cool:  #f1f3f6;
+  --iris-rule:        #e4e1dc;
+  --iris-rule-soft:   #efece7;
+
+  /* Palette — accents (oklch-derived, warm institutional) */
+  --iris-amber:       #c65d1e;
+  --iris-amber-soft:  #e8a155;
+  --iris-amber-deep:  #9a4412;
+
+  --iris-teal-1:      #2a7d82;
+  --iris-teal-2:      #4ea89e;
+  --iris-teal-3:      #7ab8a3;
+
+  --iris-blue-1:      #0a527a;
+  --iris-blue-2:      #1a7ca8;
+  --iris-blue-3:      #3fa4c9;
+
+  --iris-green-1:     #4a7a3a;
+  --iris-green-2:     #6b9d52;
+  --iris-green-3:     #a8c478;
+
+  /* Semantic data viz */
+  --iris-positive:    #6b9d52;   /* green for positive variation */
+  --iris-negative:    #c65d1e;   /* amber for negative (institutional, not alarmist) */
+  --iris-neutral:     #8a8a8a;
+
+  /* Series order (per Iris viz rules) */
+  --iris-series-1:    #0a527a;   /* blue 1 */
+  --iris-series-2:    #3fa4c9;   /* blue 3 */
+  --iris-series-3:    #2a7d82;   /* teal 1 */
+  --iris-series-4:    #7ab8a3;   /* teal 3 */
+  --iris-series-5:    #c65d1e;   /* amber */
+  --iris-series-6:    #6b9d52;   /* green */
+
+  /* Gradients (covers + dividers only) */
+  --iris-grad-dusk:   linear-gradient(135deg, #0a527a 0%, #1a7ca8 100%);
+  --iris-grad-meadow: linear-gradient(135deg, #2a7d82 0%, #6b9d52 100%);
+  --iris-grad-ember:  linear-gradient(135deg, #c65d1e 0%, #e8a155 100%);
+  --iris-grad-deep:   linear-gradient(135deg, #0a527a 0%, #2a2f4a 100%);
+
+  /* Typography */
+  --iris-serif: "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  --iris-sans:  "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --iris-mono:  "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  /* Scale — A4 landscape = 1123 × 794 at 96dpi */
+  --iris-gutter: 24px;
+  --iris-margin: 48px;
+
+  /* Grid columns (12-col at A4 landscape minus signature bar) */
+  --iris-col: calc((1123px - 64px - 96px - 11 * 16px) / 12);
+}
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Base resets scoped to iris pages */
+.iris-page {
+  font-family: var(--iris-sans);
+  color: var(--iris-ink-soft);
+  font-weight: 400;
+  line-height: 1.5;
+  font-feature-settings: "cv11", "ss01", "tnum";
+  -webkit-font-smoothing: antialiased;
+}
+
+.iris-page h1, .iris-page h2, .iris-page h3,
+.iris-page .serif { font-family: var(--iris-serif); }
+
+.iris-page .tnum { font-variant-numeric: tabular-nums; }

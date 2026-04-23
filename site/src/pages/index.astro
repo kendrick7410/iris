@@ -1,24 +1,170 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const editions = await getCollection('editions');
 const sorted = editions.sort((a, b) => b.id.localeCompare(a.id));
+
+const monthName = (id: string) => {
+  const [y, m] = id.split('-');
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+};
+const monthShort = (id: string) => {
+  const [y, m] = id.split('-');
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+};
+
+// Extract first H2 headline + first paragraph from raw MDX
+const contentRoot = path.resolve('src/content/editions');
+const readSummary = (id: string): { headline: string; excerpt: string } => {
+  try {
+    const raw = fs.readFileSync(path.join(contentRoot, `${id}.mdx`), 'utf8');
+    const body = raw.replace(/^---[\s\S]*?---/, '').trim();
+    const h2Match = body.match(/^##\s+(.+)$/m);
+    const headline = h2Match ? h2Match[1].trim() : `Edition ${id}`;
+    const afterH2 = h2Match ? body.slice(body.indexOf(h2Match[0]) + h2Match[0].length) : body;
+    const paraMatch = afterH2.trim().match(/^([^\n#][^\n]*(?:\n[^\n#][^\n]*)*)/);
+    const excerpt = paraMatch ? paraMatch[1].trim().replace(/\s+/g, ' ').slice(0, 240) + (paraMatch[1].length > 240 ? '…' : '') : '';
+    return { headline, excerpt };
+  } catch {
+    return { headline: `Edition ${id}`, excerpt: '' };
+  }
+};
+
+const featured = sorted[0];
+const rest     = sorted.slice(1);
+const featuredSummary = featured ? readSummary(featured.id) : null;
+
+const thumbVariants = ['', '--orange', '--green', '--blue'];
 ---
-<Layout title="Iris — Cefic Chemical Industry Monthly Report">
-  <section class="cefic-hero">
-    <h1>Iris</h1>
-    <p class="subtitle">Monthly Chemical Trends — Cefic analysis based on Eurostat data</p>
+<Layout
+  title="Iris — Monthly Chemical Trends | Cefic"
+  variant="landing"
+  heroOverlap
+>
+  <section class="iris-hero">
+    <div class="iris-hero-inner">
+      <div class="iris-hero-eyebrow">A Cefic publication</div>
+      <h1>Iris<em>.</em></h1>
+      <p class="iris-hero-tagline">
+        Delivering clarity to the chemical industry.
+      </p>
+      <div class="iris-hero-meta">
+        <div>
+          <span class="iris-hero-meta-label">Cadence</span>
+          <span class="iris-hero-meta-value">Monthly</span>
+        </div>
+        <div>
+          <span class="iris-hero-meta-label">Source</span>
+          <span class="iris-hero-meta-value">Eurostat · Comext</span>
+        </div>
+        <div>
+          <span class="iris-hero-meta-label">Latest</span>
+          <span class="iris-hero-meta-value">{featured ? monthShort(featured.id) : '—'}</span>
+        </div>
+        <div>
+          <span class="iris-hero-meta-label">Editions</span>
+          <span class="iris-hero-meta-value">{sorted.length}</span>
+        </div>
+      </div>
+    </div>
+    <div class="iris-hero-scroll">Scroll</div>
   </section>
 
-  <h2>Editions</h2>
-  {sorted.length === 0 ? (
-    <p>No editions published yet.</p>
-  ) : (
-    <ul class="cefic-edition-list">
-      {sorted.map(e => (
-        <li><a href={`/editions/${e.id}`}>{e.id}</a></li>
-      ))}
-    </ul>
+  {featured && featuredSummary && (
+    <section class="iris-section">
+      <div class="iris-section-header">
+        <div>
+          <div class="iris-section-eyebrow">Latest edition</div>
+          <h2 class="iris-section-title">{monthName(featured.id)}</h2>
+        </div>
+        <a class="iris-section-link" href={`/editions/${featured.id}`}>Read edition →</a>
+      </div>
+      <article class="iris-featured">
+        <div class="iris-featured-media">
+          <div>
+            <div class="iris-featured-label">Published {featured.data.publication_date}</div>
+          </div>
+          <div class="iris-featured-month">{monthShort(featured.id)}</div>
+        </div>
+        <div class="iris-featured-body">
+          <div>
+            <h3 class="iris-featured-title">{featuredSummary.headline}</h3>
+            {featuredSummary.excerpt && <p class="iris-featured-excerpt">{featuredSummary.excerpt}</p>}
+          </div>
+          <a class="iris-featured-cta" href={`/editions/${featured.id}`}>Open dashboard</a>
+        </div>
+      </article>
+    </section>
   )}
+
+  {rest.length > 0 && (
+    <section class="iris-section">
+      <div class="iris-section-header">
+        <div>
+          <div class="iris-section-eyebrow">Archive</div>
+          <h2 class="iris-section-title">All editions</h2>
+        </div>
+      </div>
+      <ul class="iris-editions-grid">
+        {rest.map((e, i) => {
+          const { headline } = readSummary(e.id);
+          const variant = thumbVariants[(i + 1) % thumbVariants.length];
+          return (
+            <li class="iris-edition-card">
+              <a href={`/editions/${e.id}`}>
+                <div class={`iris-edition-thumb iris-edition-thumb${variant}`}>
+                  <span class="iris-edition-thumb-month">{monthShort(e.id)}</span>
+                </div>
+                <div class="iris-edition-meta">
+                  <span class="iris-edition-meta-date">{e.data.publication_date}</span>
+                  <h3 class="iris-edition-meta-title">{headline}</h3>
+                </div>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+
+  <section class="iris-section">
+    <div class="iris-section-header">
+      <div>
+        <div class="iris-section-eyebrow">About</div>
+        <h2 class="iris-section-title">What Iris is</h2>
+      </div>
+    </div>
+    <div class="iris-pitch">
+      <div class="iris-pitch-body">
+        <p>
+          Iris turns the raw statistical pulse of European chemistry — <strong>production indices, producer prices, trade flows</strong> —
+          into a monthly narrative. Each edition opens with a macro brief, drills into the products, partners and sectors
+          that moved the needle, and closes with a retrospective check against prior reads.
+        </p>
+      </div>
+      <div class="iris-pitch-stats">
+        <div>
+          <div class="iris-pitch-stat-value">27</div>
+          <div class="iris-pitch-stat-label">EU member states tracked every month</div>
+        </div>
+        <div>
+          <div class="iris-pitch-stat-value">~1,400</div>
+          <div class="iris-pitch-stat-label">CN8 product codes in the Comext cube</div>
+        </div>
+        <div>
+          <div class="iris-pitch-stat-value">2014</div>
+          <div class="iris-pitch-stat-label">Baseline reference period for pre-crisis comparisons</div>
+        </div>
+        <div>
+          <div class="iris-pitch-stat-value">T+6w</div>
+          <div class="iris-pitch-stat-label">Typical lag between reference month and publication</div>
+        </div>
+      </div>
+    </div>
+  </section>
 </Layout>
