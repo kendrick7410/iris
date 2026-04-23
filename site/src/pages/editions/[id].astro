@@ -336,6 +336,15 @@ const hasPricesIdx   = chartExists('prices_index');
 const hasTurnoverIdx = chartExists('turnover_index');
 const hasOutputYoY   = chartExists('output_yoy_country');
 const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
+
+// Download PDF (present only if generated)
+const pdfRelPath = `public/downloads/${entry.id}.pdf`;
+const pdfExists  = (() => {
+  try { return fs.statSync(pdfRelPath).isFile(); }
+  catch { return false; }
+})();
+const pdfUrl     = `/downloads/${entry.id}.pdf`;
+const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
 ---
 <Layout
   title={`Iris: ${monthName(entry.id)} edition`}
@@ -364,10 +373,21 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
   </aside>
 
   <main class="iris-dashboard">
-    <div class="iris-view-tabs" role="tablist">
-      <button class="iris-view-tab" data-view="overview"  data-active="true" role="tab">Overview</button>
-      <button class="iris-view-tab" data-view="macro"     role="tab">Macro brief</button>
-      <button class="iris-view-tab" data-view="drilldown" role="tab">Drill-down</button>
+    <div class="iris-view-controls">
+      <div class="iris-view-tabs" role="tablist">
+        <button class="iris-view-tab" data-view="overview"  data-active="true" role="tab">Overview</button>
+        <button class="iris-view-tab" data-view="macro"     role="tab">Macro brief</button>
+        <button class="iris-view-tab" data-view="drilldown" role="tab">Drill-down</button>
+      </div>
+      {pdfExists && (
+        <a class="iris-download-btn" href={pdfUrl} download={pdfName}
+           aria-label={`Download ${monthName(entry.id)} edition as PDF`}>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 2v9M4 7l4 4 4-4M2 14h12" />
+          </svg>
+          <span>Download the report</span>
+        </a>
+      )}
     </div>
 
     <!-- ===== OVERVIEW ===== -->
