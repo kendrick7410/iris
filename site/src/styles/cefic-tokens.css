@@ -638,6 +638,328 @@ button { font-family: inherit; }
   margin-top: 0.25rem;
 }
 
+/* Methodology section (homepage long-form documentation) */
+.iris-methodology { padding-top: clamp(2rem, 4vw, 4rem); }
+.iris-methodology-intro {
+  font-family: var(--iris-serif);
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 820px;
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+.iris-methodology-h3 {
+  font-family: var(--iris-serif);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.iris-methodology-p {
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin-bottom: 1rem;
+  max-width: 820px;
+}
+
+.iris-methodology-note-inline {
+  margin: 1rem 0 0;
+  padding: 0.9rem 1.1rem;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--cefic-orange);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.iris-methodology-note-inline strong { color: var(--ink); }
+.iris-methodology-note-inline code {
+  background: var(--surface);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.85em;
+  border: 1px solid var(--rule);
+}
+
+.iris-methodology-note {
+  margin-top: 3rem;
+  padding: 1.2rem 1.4rem;
+  background: var(--surface-alt);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+.iris-methodology-note a {
+  color: var(--cefic-orange);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Source grid (data sources + code repos) */
+.iris-source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.iris-source-grid--compact { grid-template-columns: repeat(3, 1fr); }
+.iris-source-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.iris-source-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.iris-source-head h4 {
+  font-family: var(--iris-serif);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 0;
+}
+.iris-source-code {
+  font-family: var(--iris-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  background: var(--surface-alt);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.iris-source-card p {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+}
+.iris-source-card p code {
+  background: var(--surface-alt);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.88em;
+  border: 1px solid var(--rule);
+  font-family: var(--iris-mono);
+}
+.iris-source-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+.iris-source-filters span { display: inline-flex; gap: 0.3rem; align-items: baseline; }
+.iris-source-filters strong {
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.iris-source-filters code {
+  font-family: var(--iris-mono);
+  font-size: 0.85em;
+  background: var(--surface);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+.iris-source-nace-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.iris-source-nace-list li {
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed var(--rule);
+  line-height: 1.5;
+}
+.iris-source-nace-list li:last-child { border-bottom: none; }
+.iris-source-nace-list li em {
+  font-style: italic;
+  color: var(--ink-muted);
+}
+.iris-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  color: var(--cefic-orange);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--cefic-orange-300);
+  padding-bottom: 1px;
+  align-self: flex-start;
+}
+.iris-source-link:hover {
+  color: var(--cefic-orange-700);
+  border-bottom-style: solid;
+}
+.iris-source-link svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+/* Calculations grid */
+.iris-calc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.iris-calc-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.iris-calc-name {
+  font-family: var(--iris-serif);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.iris-calc-formula {
+  display: block;
+  font-family: var(--iris-mono);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  background: var(--surface-alt);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.iris-calc-card p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: 0;
+}
+.iris-calc-card p code {
+  font-family: var(--iris-mono);
+  font-size: 0.85em;
+  background: var(--surface-alt);
+  padding: 0.05rem 0.25rem;
+  border-radius: 2px;
+  border: 1px solid var(--rule);
+}
+
+/* Pipeline ordered list */
+.iris-pipeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: pipe;
+}
+.iris-pipeline li {
+  counter-increment: pipe;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--rule);
+  align-items: baseline;
+}
+.iris-pipeline li:first-child { border-top: none; padding-top: 0; }
+.iris-pipeline-step {
+  font-family: var(--iris-serif);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--cefic-orange);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  position: relative;
+}
+.iris-pipeline-step::before {
+  content: counter(pipe, decimal-leading-zero);
+  display: block;
+  font-family: var(--iris-serif);
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  margin-bottom: 2px;
+  text-transform: none;
+}
+.iris-pipeline li p {
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0;
+  font-size: 0.95rem;
+}
+.iris-pipeline li code {
+  font-family: var(--iris-mono);
+  font-size: 0.85em;
+  background: var(--surface-alt);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+.iris-pipeline li a {
+  color: var(--cefic-orange);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+}
+
+/* Generic docs list */
+.iris-docs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+.iris-docs-list li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.iris-docs-list li:last-child { border-bottom: none; }
+.iris-docs-list li strong { color: var(--ink); }
+.iris-docs-list li code {
+  font-family: var(--iris-mono);
+  font-size: 0.85em;
+  background: var(--surface-alt);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+.iris-docs-list li em {
+  font-style: italic;
+  color: var(--ink-muted);
+}
+.iris-docs-list li a {
+  color: var(--cefic-orange);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: 0.35rem;
+}
+.iris-docs-list li a:hover { color: var(--cefic-orange-700); }
+
 /* Landing pitch section */
 .iris-pitch {
   display: grid;
@@ -1460,6 +1782,11 @@ body.ov-active .iris-footer { display: none; }
   .iris-download-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
   .iris-download-btn span { display: inline; }
   .iris-waterfall-row { grid-template-columns: 1fr; }
+  .iris-source-grid,
+  .iris-source-grid--compact,
+  .iris-calc-grid { grid-template-columns: 1fr; }
+  .iris-pipeline li { grid-template-columns: 1fr; gap: 0.4rem; }
+  .iris-pipeline-step { margin-bottom: 0.25rem; }
 
   /* Stack all grids to 1-column */
   .iris-kpi-grid { grid-template-columns: 1fr 1fr; }
