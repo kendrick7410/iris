@@ -517,7 +517,7 @@
         "top_movers_up": [
           {
             "cn8": "29349990",
-            "label": "29349990 (CN8)",
+            "label": "29349990 (nucleic acids and their salts)",
             "value_current_eur_bn": 0.469,
             "value_previous_eur_bn": 0.292,
             "delta_eur_bn": 0.177,
@@ -525,7 +525,7 @@
           },
           {
             "cn8": "28442035",
-            "label": "28442035 (CN8)",
+            "label": "28442035 (uranium enriched in u 235 and its)",
             "value_current_eur_bn": 0.427,
             "value_previous_eur_bn": 0.253,
             "delta_eur_bn": 0.174,
@@ -543,7 +543,7 @@
         "top_movers_down": [
           {
             "cn8": "29371900",
-            "label": "29371900 (CN8)",
+            "label": "29371900 (polypeptide hormones)",
             "value_current_eur_bn": 0.021,
             "value_previous_eur_bn": 8.247,
             "delta_eur_bn": -8.226,
@@ -551,7 +551,7 @@
           },
           {
             "cn8": "29335995",
-            "label": "29335995 (CN8)",
+            "label": "29335995 (heterocyclic compounds with nitrogen)",
             "value_current_eur_bn": 0.073,
             "value_previous_eur_bn": 0.489,
             "delta_eur_bn": -0.416,
@@ -569,7 +569,7 @@
         "largest_products_current": [
           {
             "cn8": "29349990",
-            "label": "29349990 (CN8)",
+            "label": "29349990 (nucleic acids and their salts)",
             "value_current_eur_bn": 0.469,
             "value_previous_eur_bn": 0.292,
             "delta_eur_bn": 0.177,
@@ -577,7 +577,7 @@
           },
           {
             "cn8": "28442035",
-            "label": "28442035 (CN8)",
+            "label": "28442035 (uranium enriched in u 235 and its)",
             "value_current_eur_bn": 0.427,
             "value_previous_eur_bn": 0.253,
             "delta_eur_bn": 0.174,
@@ -599,7 +599,7 @@
           "products": [
             {
               "cn8": "29371900",
-              "label": "29371900 (CN8)",
+              "label": "29371900 (polypeptide hormones)",
               "delta_eur_bn": -8.226,
               "cumulative_share_pct": 87.5
             }
@@ -650,7 +650,7 @@
           },
           {
             "cn8": "38221900",
-            "label": "38221900 (CN8)",
+            "label": "38221900 (diagnostic or laboratory reagents on)",
             "value_current_eur_bn": 0.1,
             "value_previous_eur_bn": 0.119,
             "delta_eur_bn": -0.019,
@@ -658,7 +658,7 @@
           },
           {
             "cn8": "29339980",
-            "label": "29339980 (CN8)",
+            "label": "29339980 (heterocyclic compounds with nitrogen)",
             "value_current_eur_bn": 0.049,
             "value_previous_eur_bn": 0.063,
             "delta_eur_bn": -0.014,
@@ -676,7 +676,7 @@
           },
           {
             "cn8": "38221900",
-            "label": "38221900 (CN8)",
+            "label": "38221900 (diagnostic or laboratory reagents on)",
             "value_current_eur_bn": 0.1,
             "value_previous_eur_bn": 0.119,
             "delta_eur_bn": -0.019,
@@ -684,7 +684,7 @@
           },
           {
             "cn8": "29339980",
-            "label": "29339980 (CN8)",
+            "label": "29339980 (heterocyclic compounds with nitrogen)",
             "value_current_eur_bn": 0.049,
             "value_previous_eur_bn": 0.063,
             "delta_eur_bn": -0.014,
@@ -704,7 +704,7 @@
             },
             {
               "cn8": "38221900",
-              "label": "38221900 (CN8)",
+              "label": "38221900 (diagnostic or laboratory reagents on)",
               "delta_eur_bn": -0.019,
               "cumulative_share_pct": 49.2
             },
@@ -727,7 +727,7 @@
         "top_movers_up": [
           {
             "cn8": "28442035",
-            "label": "28442035 (CN8)",
+            "label": "28442035 (uranium enriched in u 235 and its)",
             "value_current_eur_bn": 0.272,
             "value_previous_eur_bn": 0.067,
             "delta_eur_bn": 0.206,
@@ -735,7 +735,7 @@
           },
           {
             "cn8": "29335995",
-            "label": "29335995 (CN8)",
+            "label": "29335995 (heterocyclic compounds with nitrogen)",
             "value_current_eur_bn": 0.037,
             "value_previous_eur_bn": 0.007,
             "delta_eur_bn": 0.031,
@@ -779,7 +779,7 @@
         "largest_products_current": [
           {
             "cn8": "28442035",
-            "label": "28442035 (CN8)",
+            "label": "28442035 (uranium enriched in u 235 and its)",
             "value_current_eur_bn": 0.272,
             "value_previous_eur_bn": 0.067,
             "delta_eur_bn": 0.206,
@@ -809,7 +809,7 @@
           "products": [
             {
               "cn8": "28442035",
-              "label": "28442035 (CN8)",
+              "label": "28442035 (uranium enriched in u 235 and its)",
               "delta_eur_bn": 0.206,
               "cumulative_share_pct": 207.0
             }

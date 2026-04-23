@@ -61,6 +61,50 @@ def _cn8_catalog(df: pd.DataFrame) -> Dict[str, str]:
     return {}
 
 
+def _load_cn8_labels_from_cache(month: str) -> Dict[str, str]:
+    """Harvest CN8 -> label_short from data/cache/{month}/trade.json.
+
+    The upstream fetcher populated the per-partner drill_down with pretty
+    labels from the Comext nomenclature. We reuse them here so the
+    enriched fiche carries readable labels, independent of the parquet.
+    """
+    fp = PROJECT_ROOT / "data" / "cache" / month / "trade.json"
+    if not fp.exists():
+        return {}
+    try:
+        d = json.loads(fp.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    labels: Dict[str, str] = {}
+    for flow_key in ("imports", "exports"):
+        flow = (d.get("flows") or {}).get(flow_key) or {}
+        for p in flow.get("by_partner", []) or []:
+            dd = p.get("drill_down") or {}
+            for c in dd.get("cn8_codes", []) or []:
+                code = str(c.get("code") or "").strip()
+                short = str(c.get("label_short") or "").strip()
+                if code and short and code not in labels:
+                    labels[code] = short
+    return labels
+
+
+def _apply_cn8_labels(drilldown: Dict, labels: Dict[str, str]) -> None:
+    """Rewrite CN8 label strings in-place from the lookup."""
+    def rewrite(items):
+        for item in items or []:
+            code = str(item.get("cn8") or "").strip()
+            if code in labels:
+                item["label"] = f"{code} ({labels[code].rstrip('.…').lower()})"
+    for partner, info in drilldown.items():
+        if not isinstance(info, dict) or info.get("skipped"):
+            continue
+        rewrite(info.get("top_movers_up"))
+        rewrite(info.get("top_movers_down"))
+        rewrite(info.get("largest_products_current"))
+        exp = info.get("explain_50pct_variation") or {}
+        rewrite(exp.get("products"))
+
+
 def _partner_cn8_drilldown(
     df: pd.DataFrame,
     partner: str,
@@ -241,6 +285,10 @@ def enrich(month: str) -> None:
         else:
             logger.warning(f"  {section_type}: no monthly_series available (cache missing)")
 
+    cn8_labels = _load_cn8_labels_from_cache(month)
+    if cn8_labels:
+        logger.info(f"  CN8 label lookup: {len(cn8_labels)} codes")
+
     for section_type, flow in (("trade_exports", FLOW_EXPORTS),
                                 ("trade_imports", FLOW_IMPORTS)):
         fp = fiches_dir / f"{section_type}.json"
@@ -253,6 +301,9 @@ def enrich(month: str) -> None:
         for partner in STRUCTURAL_PARTNERS:
             entry = _partner_cn8_drilldown(df, partner, flow, month, prev)
             drilldown[partner] = entry
+
+        if cn8_labels:
+            _apply_cn8_labels(drilldown, cn8_labels)
 
         fiche["data"]["partner_drilldown"] = drilldown
         fiche["data"]["historical_series"] = historical

@@ -1225,6 +1225,39 @@ body.ov-active .iris-footer { display: none; }
   max-height: 220px;
 }
 
+/* Waterfall row (imports drill-down per partner) */
+.iris-waterfall-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  flex-shrink: 0;
+}
+.iris-waterfall {
+  padding: 8px 4px 0;
+  background: var(--surface);
+}
+.iris-waterfall rect { transition: opacity 0.2s var(--ease); }
+.iris-waterfall-summary {
+  padding: 0.75rem 1.1rem 1rem;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--rule);
+  background: var(--surface-alt);
+}
+.iris-waterfall-summary strong {
+  font-family: var(--iris-serif);
+  font-weight: 500;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.iris-waterfall-summary strong.is-neg { color: var(--cefic-orange-700); }
+.iris-waterfall-summary strong.is-pos { color: var(--cefic-green-1); }
+.iris-waterfall-summary-pct {
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Partner drill-down grid */
 .iris-partner-grid {
   display: grid;
@@ -1426,6 +1459,7 @@ body.ov-active .iris-footer { display: none; }
   .iris-view-controls { justify-content: flex-end; }
   .iris-download-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
   .iris-download-btn span { display: inline; }
+  .iris-waterfall-row { grid-template-columns: 1fr; }
 
   /* Stack all grids to 1-column */
   .iris-kpi-grid { grid-template-columns: 1fr 1fr; }

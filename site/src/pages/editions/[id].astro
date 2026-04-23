@@ -240,6 +240,83 @@ const buildPartnersChart = (series_by: PartnerSeries | null | undefined, current
 
 const partners60m = buildPartnersChart(tradeExports?.data?.historical_series?.exports_by_partner_monthly, entry.id);
 
+// ---------- Inline waterfall (per-partner CN8 drill-down) ----------
+type Mover = { cn8: string; label: string; delta_eur_bn: number; delta_pct?: number | null };
+const buildWaterfall = (info: any) => {
+  if (!info || info.skipped) return null;
+  const start = Number(info.period_a_value_eur_bn || 0);
+  const end   = Number(info.period_b_value_eur_bn || 0);
+  const ups   = (info.top_movers_up   || []).slice(0, 3) as Mover[];
+  const downs = (info.top_movers_down || []).slice(0, 3) as Mover[];
+  const listedDelta = [...ups, ...downs].reduce((s, m) => s + Number(m.delta_eur_bn || 0), 0);
+  const totalDelta  = end - start;
+  const otherDelta  = totalDelta - listedDelta;
+
+  type Bar = { kind: 'start'|'up'|'down'|'other'|'end'; label: string; short?: string;
+               value?: number; delta?: number; cumulative: number; color: string };
+  const bars: Bar[] = [];
+  let running = start;
+  bars.push({ kind: 'start', label: 'Previous year', short: 'Prev. Feb 2025',
+              value: start, cumulative: start, color: '#007DC3' });
+  for (const m of ups) {
+    running += m.delta_eur_bn;
+    bars.push({ kind: 'up', label: m.label, short: m.label, delta: m.delta_eur_bn,
+                cumulative: running, color: '#00A99E' });
+  }
+  if (Math.abs(otherDelta) > 0.01) {
+    running += otherDelta;
+    bars.push({ kind: 'other', label: 'Other products', short: 'Other', delta: otherDelta,
+                cumulative: running, color: '#8a8a8a' });
+  }
+  for (const m of downs) {
+    running += m.delta_eur_bn;
+    bars.push({ kind: 'down', label: m.label, short: m.label, delta: m.delta_eur_bn,
+                cumulative: running, color: '#F47B20' });
+  }
+  bars.push({ kind: 'end', label: 'Current', short: 'Feb 2026',
+              value: end, cumulative: end, color: '#005CAB' });
+
+  // Layout
+  const W = 760, H = 380, padL = 56, padR = 24, padT = 28, padB = 110;
+  const w = W - padL - padR, h = H - padT - padB;
+  const cumulatives = bars.map(b => b.cumulative);
+  const values = bars.flatMap((b, i) => {
+    if (b.kind === 'start' || b.kind === 'end') return [0, b.value || 0];
+    const prev = i === 0 ? 0 : bars[i-1].cumulative;
+    return [prev, b.cumulative];
+  });
+  const ymax = Math.max(...values) * 1.08;
+  const ymin = Math.min(0, ...values);
+  const yScale = (v: number) => padT + (1 - (v - ymin) / (ymax - ymin)) * h;
+  const zeroY = yScale(0);
+
+  const gap = 0.2;
+  const slot = w / bars.length;
+  const bw = slot * (1 - gap);
+
+  const rects = bars.map((b, i) => {
+    const cx = padL + slot * (i + 0.5);
+    const x = cx - bw / 2;
+    let y: number, height: number, yTop: number, yBot: number;
+    if (b.kind === 'start' || b.kind === 'end') {
+      yTop = yScale(b.value || 0);
+      yBot = zeroY;
+    } else {
+      const prev = i === 0 ? 0 : bars[i-1].cumulative;
+      yTop = yScale(Math.max(prev, b.cumulative));
+      yBot = yScale(Math.min(prev, b.cumulative));
+    }
+    y = Math.min(yTop, yBot);
+    height = Math.abs(yBot - yTop);
+    return { ...b, i, cx, x, y, width: bw, height, yTop, yBot };
+  });
+
+  return { W, H, padL, padR, padT, padB, w, h, bars: rects, yScale, zeroY, totalDelta };
+};
+
+const waterfallUsImp = buildWaterfall(tradeImports?.data?.partner_drilldown?.US);
+const waterfallCnImp = buildWaterfall(tradeImports?.data?.partner_drilldown?.CN);
+
 // Chart helpers: confirm presence before referencing
 const chartsDir = path.resolve(`public/charts/${entry.id}`);
 const chartExists = (id: string): boolean => {
@@ -680,19 +757,69 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
         </div>
       )}
 
-      {hasImpWaterfall && (
-        <figure class="iris-chart iris-chart--wide iris-chart--tall">
-          <figcaption class="iris-chart-caption">
-            Imports drill-down, top CN 8-digit codes explain the month's movement. Bars show each
-            product's contribution to the net change; the tallest bars carry the causal weight.
-          </figcaption>
-          <button class="iris-chart-zoom" type="button" aria-label="Zoom"
-                  data-chart-src={chartUrl('trade_imports_waterfall_cn8')}
-                  data-chart-title="Imports drill-down, top CN 8-digit contributions (waterfall)">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
-          </button>
-          <img src={chartUrl('trade_imports_waterfall_cn8')} alt="Imports waterfall, CN 8-digit" />
-        </figure>
+      {(waterfallUsImp || waterfallCnImp) && (
+        <div class="iris-waterfall-row">
+          {[
+            { spec: waterfallUsImp, id: 'chart-waterfall-us', country: 'United States', code: 'US' },
+            { spec: waterfallCnImp, id: 'chart-waterfall-cn', country: 'China',         code: 'CN' },
+          ].map(({ spec, id, country, code }) => spec && (
+            <figure class="iris-chart iris-chart--tall" id={id}>
+              <figcaption class="iris-chart-caption">
+                <strong>Imports from {country}</strong>, CN 8-digit contributions to the
+                February 2026 year-on-year change. Green bars are net inflows, orange
+                bars are net outflows.
+              </figcaption>
+              <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                      data-chart-target={`#${id}`}
+                      data-chart-title={`Imports from ${country} (${code}), CN8 drill-down, Feb 2026 vs Feb 2025`}>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+              </button>
+              <svg class="iris-sparkchart iris-chart-hover iris-waterfall"
+                   viewBox={`0 0 ${spec.W} ${spec.H}`} xmlns="http://www.w3.org/2000/svg"
+                   preserveAspectRatio="xMidYMid meet">
+                <line class="gridline" x1={spec.padL} x2={spec.W - spec.padR}
+                      y1={spec.zeroY} y2={spec.zeroY} stroke="var(--ink)" stroke-width="0.8" />
+                {spec.bars.map((b: any, i: number) => (
+                  <g>
+                    <rect class="spark-hover-rect" x={b.x} y={b.y} width={b.width} height={Math.max(b.height, 1)}
+                          fill={b.color} opacity={b.kind === 'other' ? 0.6 : 0.92} rx="2"
+                          data-period={b.label}
+                          data-value={b.kind === 'start' || b.kind === 'end'
+                                        ? (b.value || 0).toFixed(2)
+                                        : ((b.delta ?? 0) >= 0 ? '+' : '') + (b.delta ?? 0).toFixed(2)}
+                          data-unit="€ bn"
+                          data-label={b.short}
+                          data-color={b.color} />
+                    <text x={b.cx} y={b.y - 4} text-anchor="middle"
+                          font-size="10" font-weight="600" fill={b.color}>
+                      {b.kind === 'start' || b.kind === 'end'
+                        ? `€${(b.value || 0).toFixed(2)}`
+                        : `${(b.delta ?? 0) >= 0 ? '+' : ''}${(b.delta ?? 0).toFixed(2)}`}
+                    </text>
+                    <text x={b.cx} y={spec.H - spec.padB + 14}
+                          text-anchor="end"
+                          font-size="9.5" fill="var(--ink-muted)"
+                          transform={`rotate(-30, ${b.cx}, ${spec.H - spec.padB + 14})`}>
+                      {(b.short || b.label).length > 34
+                        ? (b.short || b.label).slice(0, 32) + '…'
+                        : (b.short || b.label)}
+                    </text>
+                  </g>
+                ))}
+              </svg>
+              <div class="iris-chart-tooltip" aria-hidden="true"></div>
+              <div class="iris-waterfall-summary">
+                Net change:&nbsp;
+                <strong class={spec.totalDelta >= 0 ? 'is-pos' : 'is-neg'}>
+                  {spec.totalDelta >= 0 ? '+' : ''}€{spec.totalDelta.toFixed(2)} bn
+                </strong>
+                <span class="iris-waterfall-summary-pct">
+                  &nbsp;({((spec.totalDelta / spec.bars[0].value) * 100).toFixed(1)}% YoY)
+                </span>
+              </div>
+            </figure>
+          ))}
+        </div>
       )}
     </section>
   </main>
