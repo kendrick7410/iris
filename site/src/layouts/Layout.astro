@@ -133,6 +133,50 @@ const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
       window.addEventListener('scroll', onScroll, { passive: true });
     })();
 
+    // Chart hover tooltips (data labels on .iris-chart-hover SVGs)
+    (function () {
+      document.querySelectorAll('.iris-chart-hover').forEach((svg) => {
+        const figure  = svg.closest('.iris-chart');
+        const tooltip = figure?.querySelector('.iris-chart-tooltip');
+        if (!figure || !tooltip) return;
+
+        const rects = svg.querySelectorAll('.spark-hover-rect');
+        if (!rects.length) return;
+
+        const show = (r) => {
+          const period = r.dataset.period;
+          const value  = r.dataset.value;
+          const unit   = r.dataset.unit || '';
+          const label  = r.dataset.label || '';
+          const color  = r.dataset.color || '';
+          const swatch = color
+            ? `<span class="iris-chart-tooltip-swatch" style="background:${color}"></span>`
+            : '';
+          const labelHtml = label
+            ? `<span class="iris-chart-tooltip-label">${swatch}${label}</span>`
+            : '';
+          tooltip.innerHTML = `${labelHtml}<span class="iris-chart-tooltip-value">${value}${unit ? ' ' + unit : ''}</span><div style="font-size:.7rem;opacity:.6;margin-top:.15rem">${period}</div>`;
+
+          // Position tooltip relative to the figure, using the hover rect centre
+          const figRect  = figure.getBoundingClientRect();
+          const rRect    = r.getBoundingClientRect();
+          const left = (rRect.left + rRect.width / 2) - figRect.left;
+          const top  = rRect.top - figRect.top;
+          tooltip.style.left = left + 'px';
+          tooltip.style.top  = top + 'px';
+          tooltip.setAttribute('data-visible', 'true');
+        };
+        const hide = () => tooltip.removeAttribute('data-visible');
+
+        rects.forEach((r) => {
+          r.addEventListener('mouseenter', () => show(r));
+          r.addEventListener('mousemove',  () => show(r));
+          r.addEventListener('mouseleave', hide);
+        });
+        svg.addEventListener('mouseleave', hide);
+      });
+    })();
+
     // Chart lightbox (any figure with .iris-chart-zoom button)
     (function () {
       const dlg    = document.getElementById('iris-lightbox');

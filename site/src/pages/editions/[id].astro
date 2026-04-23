@@ -126,6 +126,120 @@ const outputSpark = buildSpark(outputFiche?.data?.monthly_series, 'var(--cefic-o
 const pricesSpark = buildSpark(pricesFiche?.data?.monthly_series, 'var(--cefic-blue-1)',  'Index (2021=100)');
 const salesSpark  = buildSpark(salesFiche?.data?.monthly_series,  'var(--cefic-green-1)', 'Index (2021=100)');
 
+// ---------- Long-arc balance chart (60 months) ----------
+type BalancePoint = { period: string; value_eur_bn: number };
+const buildBalanceChart = (series: BalancePoint[] | null | undefined) => {
+  if (!series || series.length < 2) return null;
+  const W = 960, H = 340;
+  const padL = 56, padR = 24, padT = 28, padB = 40;
+  const w = W - padL - padR;
+  const h = H - padT - padB;
+
+  const values = series.map(s => s.value_eur_bn);
+  const vmin = Math.min(...values, 0);
+  const vmax = Math.max(...values, 0);
+  const vpad = (vmax - vmin) * 0.10 || 1;
+  const ymin = vmin - vpad;
+  const ymax = vmax + vpad;
+
+  const yScale = (v: number) => padT + (1 - (v - ymin) / (ymax - ymin)) * h;
+  const xScale = (i: number) => padL + (i / (series.length - 1)) * w;
+  const zeroY = yScale(0);
+
+  const pts = series.map((s, i) => ({
+    x: xScale(i), y: yScale(s.value_eur_bn),
+    period: s.period, value: s.value_eur_bn,
+  }));
+
+  let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+  for (let i = 1; i < pts.length; i++) {
+    const p0 = pts[i-2] || pts[i-1];
+    const p1 = pts[i-1], p2 = pts[i], p3 = pts[i+1] || pts[i];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
+
+  // X ticks at every 12 months
+  const xTicks = series.map((s, i) => ({ i, period: s.period }))
+    .filter((_, i) => i === 0 || i === series.length - 1 || i % 12 === 0);
+  const yTicksVals = [ymin, (ymin + ymax) / 2, 0, ymax].filter(v => v >= ymin && v <= ymax);
+  const yTicks = Array.from(new Set(yTicksVals.map(v => Math.round(v * 10) / 10)))
+    .sort((a, b) => a - b)
+    .map(v => ({ v, y: yScale(v) }));
+
+  return { W, H, padL, padR, padT, padB, w, h, pts, d, zeroY, xTicks, yTicks, yScale, xScale };
+};
+
+const balance60m = buildBalanceChart(tradeExports?.data?.historical_series?.trade_balance_monthly);
+
+// ---------- Long-arc partners chart (60 months) ----------
+type PartnerSeries = Record<string, BalancePoint[]>;
+const buildPartnersChart = (series_by: PartnerSeries | null | undefined, currentMonth: string) => {
+  if (!series_by || !series_by.US) return null;
+  const partners = [
+    { code: 'US',    label: 'United States', color: '#F47B20', weight: 2.2 },
+    { code: 'GB',    label: 'United Kingdom', color: '#005CAB', weight: 1.3 },
+    { code: 'CN',    label: 'China',         color: '#00A99E', weight: 1.3 },
+    { code: 'CH',    label: 'Switzerland',   color: '#79B777', weight: 1.1 },
+    { code: 'OTHER', label: 'Other',         color: '#aaaaaa', weight: 1.0 },
+  ];
+  const first = series_by.US;
+  if (!first || first.length < 2) return null;
+
+  const W = 960, H = 380;
+  const padL = 56, padR = 24, padT = 40, padB = 44;
+  const w = W - padL - padR;
+  const h = H - padT - padB;
+
+  // Y domain from max across all partners
+  const allValues = partners.flatMap(p => (series_by[p.code] || []).map(s => s.value_eur_bn));
+  const vmin = 0;
+  const vmax = Math.max(...allValues);
+  const vpad = vmax * 0.08 || 1;
+  const ymax = vmax + vpad;
+
+  const yScale = (v: number) => padT + (1 - (v - vmin) / (ymax - vmin)) * h;
+  const xScale = (i: number) => padL + (i / (first.length - 1)) * w;
+
+  const seriesData = partners.map(p => {
+    const data = series_by[p.code] || [];
+    if (data.length < 2) return { ...p, pts: [], d: '' };
+    const pts = data.map((s, i) => ({
+      x: xScale(i), y: yScale(s.value_eur_bn),
+      period: s.period, value: s.value_eur_bn,
+    }));
+    let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i-2] || pts[i-1];
+      const p1 = pts[i-1], p2 = pts[i], p3 = pts[i+1] || pts[i];
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+    }
+    const current = pts.find(pt => pt.period === currentMonth);
+    return { ...p, pts, d, current };
+  });
+
+  const xTicks = first.map((s, i) => ({ i, period: s.period }))
+    .filter((_, i) => i === 0 || i === first.length - 1 || i % 12 === 0);
+  const yTicks = [0, ymax * 0.25, ymax * 0.5, ymax * 0.75, ymax]
+    .map(v => ({ v, y: yScale(v) }));
+
+  return {
+    W, H, padL, padR, padT, padB, w, h,
+    partners: seriesData,
+    xTicks, yTicks,
+    periods: first.length,
+  };
+};
+
+const partners60m = buildPartnersChart(tradeExports?.data?.historical_series?.exports_by_partner_monthly, entry.id);
+
 // Chart helpers: confirm presence before referencing
 const chartsDir = path.resolve(`public/charts/${entry.id}`);
 const chartExists = (id: string): boolean => {
@@ -278,23 +392,47 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
       </div>
 
       <div class="iris-cols iris-view-body">
-        {has60mBalance && (
-          <figure class="iris-chart">
+        {balance60m && (
+          <figure class="iris-chart" id="chart-balance-60m">
             <figcaption class="iris-chart-caption">
               EU27 chemical trade balance, 60-month context. The Q1 2025 spike reflects
               pre-tariff front-loading ahead of US trade measures; the February 2026
               reading sits at €0.21 bn, down €12.21 bn from 2025.
             </figcaption>
-            <button
-              class="iris-chart-zoom" type="button" aria-label="Zoom"
-              data-chart-src={chartUrl('trade_balance_monthly_60m')}
-              data-chart-title="EU27 chemical trade balance, 60 months"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />
-              </svg>
+            <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                    data-chart-target="#chart-balance-60m"
+                    data-chart-title="EU27 chemical trade balance, 60 months (Mar 2021 to Feb 2026)">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
             </button>
-            <img src={chartUrl('trade_balance_monthly_60m')} alt="EU27 chemical trade balance, 60 months" />
+            <svg class="iris-sparkchart iris-chart-hover"
+                 viewBox={`0 0 ${balance60m.W} ${balance60m.H}`}
+                 xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              {balance60m.yTicks.map((t: any) => (
+                <>
+                  <line class="gridline" x1={balance60m.padL} x2={balance60m.W - balance60m.padR} y1={t.y} y2={t.y} />
+                  <text class="axis-text" x={balance60m.padL - 6} y={t.y + 3} text-anchor="end">{t.v.toFixed(1)}</text>
+                </>
+              ))}
+              <line x1={balance60m.padL} x2={balance60m.W - balance60m.padR} y1={balance60m.zeroY} y2={balance60m.zeroY}
+                    stroke="var(--ink)" stroke-width="1.2" />
+              <path d={`${balance60m.d} L ${balance60m.pts[balance60m.pts.length-1].x} ${balance60m.zeroY} L ${balance60m.pts[0].x} ${balance60m.zeroY} Z`}
+                    fill="var(--cefic-green-1)" opacity="0.15" />
+              <path d={balance60m.d} fill="none" stroke="var(--cefic-orange)" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" />
+              {balance60m.pts.map((p: any, i: number) => (
+                <rect class="spark-hover-rect" x={p.x - 5} y={balance60m.padT} width={10} height={balance60m.h}
+                      fill="transparent"
+                      data-period={p.period} data-value={p.value.toFixed(2)} data-unit="€ bn"
+                      data-label="EU27 trade balance" />
+              ))}
+              {balance60m.xTicks.map((t: any) => (
+                <text class="axis-text" x={balance60m.padL + (t.i / (balance60m.pts.length - 1)) * balance60m.w}
+                      y={balance60m.H - 14} text-anchor="middle">{fmtMonth(t.period)}</text>
+              ))}
+              <circle cx={balance60m.pts[balance60m.pts.length - 1].x} cy={balance60m.pts[balance60m.pts.length - 1].y} r="4.5"
+                      fill="var(--cefic-orange)" stroke="var(--surface)" stroke-width="1.5" />
+            </svg>
+            <div class="iris-chart-tooltip" aria-hidden="true"></div>
           </figure>
         )}
 
@@ -344,7 +482,7 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
                 {spark.deltaPct >= 0 ? '+' : ''}{spark.deltaPct.toFixed(1)}% since {fmtMonth(spark.periodStart)}
               </span>
             </div>
-            <svg class="iris-sparkchart" viewBox={`0 0 ${spark.W} ${spark.H}`} xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            <svg class="iris-sparkchart iris-chart-hover" viewBox={`0 0 ${spark.W} ${spark.H}`} xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
               {spark.yTicks.map((t: any) => (
                 <>
                   <line class="gridline" x1={spark.padL} x2={spark.W - spark.padR} y1={t.y} y2={t.y} />
@@ -357,6 +495,12 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
                 <circle class="spark-point" cx={p.x} cy={p.y} r={i === spark.pts.length - 1 ? 4.5 : 2.5}
                         fill={spark.stroke} />
               ))}
+              {spark.pts.map((p: any) => (
+                <rect class="spark-hover-rect" x={p.x - 10} y={spark.padT} width={20} height={spark.h}
+                      fill="transparent"
+                      data-period={p.period} data-value={p.value.toFixed(1)} data-unit=""
+                      data-label={label} data-color={spark.stroke} />
+              ))}
               {spark.xTicks.map((t: any) => (
                 <text class="axis-text" x={spark.padL + (t.i / (spark.pts.length - 1)) * spark.w}
                       y={spark.H - 14} text-anchor="middle">{fmtMonth(t.period)}</text>
@@ -368,6 +512,7 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
                 {spark.last.toFixed(1)}
               </text>
             </svg>
+            <div class="iris-chart-tooltip" aria-hidden="true"></div>
           </figure>
         ))}
       </div>
@@ -418,19 +563,65 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
         <div class="iris-view-subtitle">US, China, United Kingdom</div>
       </header>
 
-      {has60mPartner && (
-        <figure class="iris-chart iris-chart--wide iris-chart--tall">
+      {partners60m && (
+        <figure class="iris-chart iris-chart--wide iris-chart--tall" id="chart-partners-60m">
           <figcaption class="iris-chart-caption">
             EU27 chemical exports by partner, 60-month context. The United States (orange) pulled
             away from the cluster through 2022-2024, peaked in February 2025 (pre-tariff
             front-loading), and retraced toward the China/UK band in early 2026.
           </figcaption>
           <button class="iris-chart-zoom" type="button" aria-label="Zoom"
-                  data-chart-src={chartUrl('exports_by_partner_60m')}
+                  data-chart-target="#chart-partners-60m"
                   data-chart-title="EU27 chemical exports by partner (US, GB, CN, CH, Other), 60 months">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
           </button>
-          <img src={chartUrl('exports_by_partner_60m')} alt="EU27 chemical exports by partner, 60 months" />
+          <svg class="iris-sparkchart iris-chart-hover"
+               viewBox={`0 0 ${partners60m.W} ${partners60m.H}`}
+               xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            {partners60m.yTicks.map((t: any) => (
+              <>
+                <line class="gridline" x1={partners60m.padL} x2={partners60m.W - partners60m.padR} y1={t.y} y2={t.y} />
+                <text class="axis-text" x={partners60m.padL - 6} y={t.y + 3} text-anchor="end">{t.v.toFixed(1)}</text>
+              </>
+            ))}
+            <g class="partner-legend">
+              {partners60m.partners.map((p: any, i: number) => (
+                <>
+                  <line x1={partners60m.padL + i * 140} x2={partners60m.padL + i * 140 + 16}
+                        y1={18} y2={18} stroke={p.color} stroke-width="2.5" />
+                  <text class="axis-text" x={partners60m.padL + i * 140 + 22} y={22} fill="var(--ink)">{p.label}</text>
+                </>
+              ))}
+            </g>
+            {partners60m.partners.map((p: any) => (
+              <path d={p.d} fill="none" stroke={p.color} stroke-width={p.weight}
+                    stroke-linecap="round" stroke-linejoin="round" />
+            ))}
+            {partners60m.partners.map((p: any) =>
+              p.current && (
+                <circle cx={p.current.x} cy={p.current.y} r="5" fill={p.color}
+                        stroke="var(--surface)" stroke-width="1.5" />
+              )
+            )}
+            {partners60m.partners.map((partner: any) =>
+              partner.pts.map((pt: any) => (
+                <rect class="spark-hover-rect"
+                      x={pt.x - 5} y={pt.y - 8} width={10} height={16}
+                      fill="transparent"
+                      data-period={pt.period}
+                      data-value={pt.value.toFixed(2)}
+                      data-unit="€ bn"
+                      data-label={partner.label}
+                      data-color={partner.color} />
+              ))
+            )}
+            {partners60m.xTicks.map((t: any) => (
+              <text class="axis-text"
+                    x={partners60m.padL + (t.i / (partners60m.periods - 1)) * partners60m.w}
+                    y={partners60m.H - 14} text-anchor="middle">{fmtMonth(t.period)}</text>
+            ))}
+          </svg>
+          <div class="iris-chart-tooltip" aria-hidden="true"></div>
         </figure>
       )}
 
