@@ -92,6 +92,17 @@ on 2026-04-21 via stricter §5.3 conditions + post-hoc once-per-edition enforcem
 **Edition 2026-02 should NOT be shown to external stakeholders** until regenerated
 with the base-effect guard (see `editorial/drafts/2026-02-v2/edition.md`).
 
+**Macro brief 2026-02 (regen 2026-04-23) — figure drift vs canonical section.** The
+regenerated macro brief (after §1.17 patch to disambiguate the trade triptych)
+claims *"the United States absorbed 95% of the export variation despite representing
+just one-tenth of total chemical trade"*. The canonical trade_exports section reports
+US contributing **€19 bn of the €25.1 bn decrease (76%)** and top-5 partners
+covering **50% of trade value**. The 95% and one-tenth claims in the macro brief
+need reconciling against the section — either adjust the macro brief prompt to draw
+these figures from the trade section, or add them as explicit fields in
+`macro_brief.json`. No action taken in this pass (scope was §1.17 + disambiguation
+only).
+
 ## 5. Ce qui reste à faire (roadmap)
 
 ### 5.0 — PRIORITÉ 1 : git init + premier commit structuré du repo Iris

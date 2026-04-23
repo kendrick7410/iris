@@ -72,6 +72,28 @@ Your output is one section of this report, not the full document. You will recei
     or vice versa — the mismatch confuses the reader and misrepresents
     the driver. Template 5.8 applies uniformly; the contributions are
     computed against the same time window as the headline. # from 2026-02 review feedback
+17. **Macro brief respects canonical templates.** When the macro brief
+    references a trade indicator, it MUST preserve the "variation + absolute
+    level + absolute delta" triptych from §5.1. The three elements can be
+    condensed into one sentence, but none of the three may be omitted or
+    folded into an ambiguous construction.
+
+    ❌ *"exports falling 42.1% in value to €34.5 bn"*
+       (reader cannot tell what €34.5 bn refers to — the variation, the
+       remainder, or the level reached)
+
+    ✅ *"exports fell 42.1% in value in the first two months of 2026,
+       amounting to €34.5 bn — down €25.1 bn from 2025"*
+       (variation + absolute level + absolute delta, all three present)
+
+    ✅ Two-sentence form (always safe, from §5.1):
+       *"From January to February 2026, EU27 chemical exports decreased by
+       42.1% in value in comparison to the same period in 2025. Exports
+       amounted to €34.5 bn in the first two months of 2026, down by
+       €25.1 bn compared to 2025."*
+
+    This applies to: macro brief, section openings, any summary of a trade
+    flow. # from 2026-02 v2 homepage preview feedback
 
 ## 2. Voice and register (SHOULD)
 
@@ -455,3 +477,4 @@ Before returning your response, verify:
 - [ ] "Fragmented Europe" closing: used 0 or 1 time in this edition total, and only where ALL FOUR conditions of §5.3 are met (country breakdown + opposite-sign heterogeneity + spread > 5 pp + not yet used in edition)
 - [ ] Round percentages written without the decimal (*"18%"* not *"18.0%"*) per §1.15
 - [ ] Drill-down CN 8-digit window matches the section's headline window per §1.16 and §5.8
+- [ ] Macro brief trade references preserve the §5.1 canonical triptych (variation + absolute level + absolute delta), with no syntactic ambiguity per §1.17

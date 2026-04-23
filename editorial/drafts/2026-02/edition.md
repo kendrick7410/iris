@@ -1,12 +1,12 @@
 ---
 month: 2026-02
-publication_date: 2026-04-21
+publication_date: 2026-04-23
 pipeline_version: 0.2.0
 ---
 
-## EU27 chemical exports fall 42% in February amid anomalous base effects
+## EU27 chemical exports fall 42% in value in first two months amid anomalous base effects
 
-The EU27 chemical industry reported a sharp contraction in the first two months of 2026, with exports falling 42.1% in value to €34.5 bn — a figure heavily distorted by pre-tariff front-loading in February 2025 that created an unusually high comparison base. Chemical output declined 3.9% year-on-year in February, reaching 79.3 on the 2021 index and sitting 18% below pre-crisis levels (2014–2019 average). Producer prices fell 2.8% year-on-year to 117.2, while sales dropped 7.5% in January to 90.8. The export decline was concentrated among the top-5 partners, which account for 50% of total value, with the United States alone contributing €19 bn of the €25.1 bn total decrease. Against a normalised February 2024 base, exports declined by approximately 10%, indicating underlying weakness beyond the statistical distortion.
+The EU27 chemical industry faced a challenging start to 2026, with output declining 3.9% year-on-year in February to reach 79.3 (2021=100) — leaving the sector 18% below pre-crisis levels (2014–2019 average). Chemical exports fell 42.1% in value to €34.5 bn in the first two months of 2026 — down €25.1 bn from 2025 — though this figure reflects an unusually high February 2025 base driven by pre-tariff front-loading ahead of US trade measures. Against a normal baseline, the underlying export decline approximates 10%. Producer prices declined 2.8% year-on-year in February, reaching 117.2, while the trade balance compressed to just €0.21 bn — down €12.21 bn from 2025. With the top-5 export partners accounting for 50% of trade value, the month's performance was concentrated among key bilateral flows, particularly the United States which absorbed 95% of the export variation despite representing just one-tenth of total chemical trade.
 
 ---
 

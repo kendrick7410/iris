@@ -57,3 +57,22 @@ No bullet list. No sub-headings. No trailing source line (the KPI cards carry th
 - [ ] No bullet list, no sub-headings, no trailing source line
 
 Return the markdown only. No preamble, no meta-commentary, no explanation of choices.
+
+## Trade figure formulation — non-negotiable
+
+When you cite a trade variation in the macro brief, you MUST present the three
+canonical elements (variation %, absolute level, absolute delta) in an
+unambiguous sentence. See `system.md` §1.17 and §5.1.
+
+❌ Bad (ambiguous — the reader cannot tell what €34.5 bn refers to):
+   *"exports falling 42.1% in value to €34.5 bn"*
+
+✅ Good (condensed, all three elements clear):
+   *"exports fell 42.1% in value to €34.5 bn — down €25.1 bn from 2025"*
+
+✅ Good (two-sentence canonical form from §5.1, always safe):
+   *"EU27 chemical exports fell 42.1% in value in the first two months of 2026.
+   Exports amounted to €34.5 bn, down by €25.1 bn compared to 2025."*
+
+If a base-effect caveat is mandatory (§1.13), the caveat is placed around
+or adjacent to the triptych — it does not replace any of the three elements.
