@@ -1,5 +1,5 @@
 """
-Macro brief generator for Iris — Livrable 5.
+Macro brief generator for Iris (Livrable 5).
 
 Contract:
   - draft_macro_brief(fiche_path, system_prompt_path, macro_prompt_path,
@@ -91,6 +91,7 @@ def _quality_check(text: str, anomaly_active: bool = False) -> dict:
     numbers = len(set(re.findall(r"\d+\.?\d*%?", body)))
     banned = [c for c in BANNED_CONNECTORS if c in body.lower()]
     has_heading = bool(heading)
+    em_dashes = text.count("—")  # §1.18 absolute ban
 
     word_floor = 80
     word_ceiling = 150 if anomaly_active else 120
@@ -106,10 +107,13 @@ def _quality_check(text: str, anomaly_active: bool = False) -> dict:
         "numbers_ok": numbers >= 3,
         "banned_found": banned,
         "banned_ok": len(banned) == 0,
+        "em_dashes": em_dashes,
+        "em_dashes_ok": em_dashes == 0,
         "anomaly_active": anomaly_active,
         "word_ceiling": word_ceiling,
         "pass": (has_heading and word_floor <= words <= word_ceiling
-                 and bullets == 0 and numbers >= 3 and len(banned) == 0),
+                 and bullets == 0 and numbers >= 3
+                 and len(banned) == 0 and em_dashes == 0),
     }
 
 
@@ -117,7 +121,7 @@ def _build_user_message(fiche_path: Path, section_paths: list) -> str:
     """Concatenate fiche JSON + drafted sections into one user message."""
     fiche_text = fiche_path.read_text(encoding="utf-8")
     parts = ["MACRO BRIEF FICHE (JSON):", fiche_text, ""]
-    parts.append("DRAFTED SECTIONS (context — do not re-edit):")
+    parts.append("DRAFTED SECTIONS (context, do not re-edit):")
     for sp in sorted(section_paths, key=lambda p: p.stem):
         content = sp.read_text(encoding="utf-8")
         if content.startswith("---"):
@@ -182,7 +186,7 @@ def draft_macro_brief(
 ) -> tuple:
     """Generate the macro brief (heading + 80-120 word paragraph).
 
-    Returns (path_to_macro_md, quality) — quality is "ok" | "degraded" | "failed".
+    Returns (path_to_macro_md, quality). Quality is "ok", "degraded", or "failed".
     """
     if not fiche_path.exists():
         logger.error(f"Macro brief fiche not found: {fiche_path}")
@@ -214,9 +218,9 @@ def draft_macro_brief(
 
     if opus_text and sonnet_text:
         opus_viol = sum(1 for k in ["has_heading", "words_ok", "bullets_ok",
-                                     "numbers_ok", "banned_ok"] if not opus_qc[k])
+                                     "numbers_ok", "banned_ok", "em_dashes_ok"] if not opus_qc[k])
         sonnet_viol = sum(1 for k in ["has_heading", "words_ok", "bullets_ok",
-                                       "numbers_ok", "banned_ok"] if not sonnet_qc[k])
+                                       "numbers_ok", "banned_ok", "em_dashes_ok"] if not sonnet_qc[k])
         best_text = opus_text if opus_viol <= sonnet_viol else sonnet_text
         best_model = OPUS if opus_viol <= sonnet_viol else SONNET
         logger.warning(f"Both models failed quality. Using {best_model} ({min(opus_viol, sonnet_viol)} violations).")

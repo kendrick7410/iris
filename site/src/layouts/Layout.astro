@@ -10,7 +10,7 @@ interface Props {
 
 const {
   title,
-  description = 'Monthly Chemical Trends — Cefic analysis based on Eurostat data',
+  description = 'Monthly Chemical Trends. Cefic analysis based on Eurostat data.',
   variant = 'page',
   heroOverlap = false,
 } = Astro.props;
@@ -76,7 +76,7 @@ const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
             <img src="/cefic-logo.png" alt="Cefic" />
             <span class="iris-footer-brand-name">Iris</span>
           </div>
-          <p>Monthly Chemical Trends — a Cefic publication monitoring the European chemical industry through Eurostat and Comext data.</p>
+          <p>Monthly Chemical Trends. A Cefic publication monitoring the European chemical industry through Eurostat and Comext data.</p>
         </div>
         <div>
           <div class="iris-footer-col-title">Publication</div>
@@ -92,7 +92,7 @@ const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
         </div>
       </div>
       <div class="iris-footer-bottom">
-        <div>© {new Date().getFullYear()} Cefic — European Chemical Industry Council</div>
+        <div>© {new Date().getFullYear()} Cefic. European Chemical Industry Council.</div>
         <div>Data: Eurostat · Comext</div>
       </div>
     </footer>

@@ -11,12 +11,12 @@ You will receive 2-4 editorial sections (output, prices, sales, trade) already d
 Return exactly this structure in markdown:
 
 ```
-## [One-sentence diagnostic headline — e.g. "The EU27 chemical industry is facing a tough reality"]
+## [One-sentence diagnostic headline, e.g. "The EU27 chemical industry is facing a tough reality"]
 
-- [Bullet 1: current situation — production, demand. 1-2 sentences with figures.]
-- [Bullet 2: competitive pressure — prices, imports, trade. 1-2 sentences with figures.]
-- [Bullet 3: structural driver — energy, regulation, China. 1-2 sentences with figures.]
-- [Bullet 4: forward indicator — investment outlook, closures, uncertainty. 1-2 sentences.]
+- [Bullet 1: current situation, production, demand. 1-2 sentences with figures.]
+- [Bullet 2: competitive pressure, prices, imports, trade. 1-2 sentences with figures.]
+- [Bullet 3: structural driver, energy, regulation, China. 1-2 sentences with figures.]
+- [Bullet 4: forward indicator, investment outlook, closures, uncertainty. 1-2 sentences.]
 ```
 
 ## Rules

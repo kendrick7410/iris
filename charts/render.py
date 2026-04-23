@@ -23,12 +23,12 @@ CHART_DISPATCHERS = {
     "prices_yoy_country": ("yoy_bars", "EU27 chemical producer prices by country (YoY %)"),
     "turnover_index": ("index_timeseries", "EU27 chemical turnover (index 2021=100)"),
     "turnover_yoy_country": ("yoy_bars", "EU27 chemical turnover by country (YoY %)"),
-    # L5 — trade drill-down waterfalls (one per flow, rendered for the first
+    # L5, trade drill-down waterfalls (one per flow, rendered for the first
     # key partner with a valid drill_down payload)
     "trade_exports_waterfall_cn8": ("waterfall_contribution",
-                                     "EU27 extra-EU export drivers — top CN 8-digit codes"),
+                                     "EU27 extra-EU export drivers, top CN 8-digit codes"),
     "trade_imports_waterfall_cn8": ("waterfall_contribution",
-                                     "EU27 extra-EU import drivers — top CN 8-digit codes"),
+                                     "EU27 extra-EU import drivers, top CN 8-digit codes"),
 }
 
 
@@ -88,7 +88,7 @@ def render_charts(fiches_dir: Path, output_dir: Path) -> list:
                         ts[data["current"]["period"]] = data["current"]["value"]
                     # Add YTD points if available
                     if data.get("ytd"):
-                        pass  # YTD is an average, not a point — skip for timeseries
+                        pass  # YTD is an average, not a point, skip for timeseries
 
                     if len(ts) >= 2:
                         index_timeseries.render(ts, title, svg_path, year)
@@ -123,7 +123,7 @@ def render_charts(fiches_dir: Path, output_dir: Path) -> list:
                             for c in dd.get("cn8_codes", [])
                         ]
                         other = dd["delta_total_eur_bn"] - sum(c["value"] for c in contribs)
-                        title_full = (f'{title} — {drill_partner["label"]} '
+                        title_full = (f'{title}, {drill_partner["label"]} '
                                        f'({dd.get("window", "")})')
                         waterfall_contribution.render(
                             contributions=contribs,

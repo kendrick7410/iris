@@ -1,5 +1,5 @@
 """
-Waterfall chart for CN 8-digit drill-down contributions — L5.
+Waterfall chart for CN 8-digit drill-down contributions, L5.
 
 Replaces the pie charts of slides 13/18/23/28 with a bridge chart that
 shows each CN8 code's contribution to the total change, followed by

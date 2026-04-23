@@ -6,7 +6,7 @@ pipeline_version: 0.2.0
 
 ## EU27 chemical exports fall 42% in value in first two months amid anomalous base effects
 
-The EU27 chemical industry faced a challenging start to 2026, with output declining 3.9% year-on-year in February to reach 79.3 (2021=100) — leaving the sector 18% below pre-crisis levels (2014–2019 average). Chemical exports fell 42.1% in value to €34.5 bn in the first two months of 2026 — down €25.1 bn from 2025 — though this figure reflects an unusually high February 2025 base driven by pre-tariff front-loading ahead of US trade measures. Against a normal baseline, the underlying export decline approximates 10%. Producer prices declined 2.8% year-on-year in February, reaching 117.2, while the trade balance compressed to just €0.21 bn — down €12.21 bn from 2025. With the top-5 export partners accounting for 50% of trade value, the month's performance was concentrated among key bilateral flows, particularly the United States which absorbed 95% of the export variation despite representing just one-tenth of total chemical trade.
+The EU27 chemical industry faced a challenging start to 2026, with output declining 3.9% year-on-year in February to reach 79.3 (2021=100), leaving the sector 18% below pre-crisis levels (2014–2019 average). Chemical exports fell 42.1% in value to €34.5 bn in the first two months of 2026, down €25.1 bn from 2025, though this figure reflects an unusually high February 2025 base driven by pre-tariff front-loading ahead of US trade measures. Against a normal baseline, the underlying export decline approximates 10%. Producer prices declined 2.8% year-on-year in February, reaching 117.2, while the trade balance compressed to just €0.21 bn, down €12.21 bn from 2025. With the top-5 export partners accounting for 50% of trade value, the month's performance was concentrated among key bilateral flows, particularly the United States which absorbed 95% of the export variation despite representing just one-tenth of total chemical trade.
 
 ---
 
@@ -58,11 +58,11 @@ Source: Cefic analysis based on Eurostat data (2026)
 
 ---
 
-## EU27 chemical exports fall 42% in value — a figure heavily influenced by an anomalous February 2025 base — with the US accounting for most of the decline
+## EU27 chemical exports fall 42% in value, a figure heavily influenced by an anomalous February 2025 base, with the US accounting for most of the decline
 
 EU27 chemical exports fell by 42.1% in value in the first two months of 2026 compared to the same period in 2025. The EU27 chemical exports amounted to €34.5 bn in the first two months of 2026, down by €25.1 bn compared to 2025. EU27 chemical exports fell by 17.4% in volume and 42.1% in value between January and February 2026, reflecting a shift toward lower-value categories and unit price effects.
 
-This figure reflects an unusually high base in February 2025, driven by pre-tariff front-loading ahead of US trade measures. EU27 exports averaged €22.3 bn per month in the 12 months preceding February 2025 but spiked to €31.6 bn in February 2025 — 4.8 standard deviations above the rolling mean. Against the February 2024 base (€20.2 bn), exports are down by approximately 10%, a more representative indication of the underlying trend.
+This figure reflects an unusually high base in February 2025, driven by pre-tariff front-loading ahead of US trade measures. EU27 exports averaged €22.3 bn per month in the 12 months preceding February 2025 but spiked to €31.6 bn in February 2025, 4.8 standard deviations above the rolling mean. Against the February 2024 base (€20.2 bn), exports are down by approximately 10%, a more representative indication of the underlying trend.
 
 With €3.6 bn, the United States is the primary export destination of the EU27 area for chemicals in February 2026, followed by the United Kingdom (€2.1 bn) and China (€1.4 bn). In February alone, exports to the US were down 73%, while the UK gained 5% and China declined 7%. Switzerland dropped 76% to €1.0 bn, while Brazil and South Korea posted gains of 5% and 11% respectively.
 

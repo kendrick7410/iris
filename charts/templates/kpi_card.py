@@ -1,5 +1,5 @@
 """
-KPI card for the macro brief — L5.
+KPI card for the macro brief, L5.
 
 Renders a standalone SVG: label (top), big primary value, delta
 coloured by direction, optional 12-month sparkline at the bottom.
@@ -52,7 +52,7 @@ def render(
     fig = plt.figure(figsize=(width_in, height_in), dpi=dpi)
     fig.patch.set_facecolor("white")
 
-    # Use a full-figure axes without visible elements — we paint text directly
+    # Use a full-figure axes without visible elements, we paint text directly
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
@@ -68,7 +68,7 @@ def render(
     ax.text(0.06, 0.86, label, fontsize=9, color="#555555",
             fontfamily=FONT_STACK[0], fontweight="normal", va="top")
 
-    # Primary value — format to string
+    # Primary value, format to string
     if isinstance(primary_value, (int, float)):
         value_str = f"{primary_value:.1f}" if isinstance(primary_value, float) else str(primary_value)
     else:
@@ -94,7 +94,7 @@ def render(
         ax.text(0.06, 0.18, delta_str, fontsize=11, color=delta_color,
                 fontfamily=FONT_STACK[0], fontweight="bold", va="center")
 
-    # Sparkline — thin line chart in bottom-right corner
+    # Sparkline, thin line chart in bottom-right corner
     if sparkline_data and len(sparkline_data) >= 2:
         vals = list(sparkline_data)
         lo, hi = min(vals), max(vals)

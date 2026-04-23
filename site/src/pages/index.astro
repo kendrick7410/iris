@@ -42,7 +42,7 @@ const featuredSummary = featured ? readSummary(featured.id) : null;
 const thumbVariants = ['', '--orange', '--green', '--blue'];
 ---
 <Layout
-  title="Iris — Monthly Chemical Trends | Cefic"
+  title="Iris: Monthly Chemical Trends | Cefic"
   variant="landing"
   heroOverlap
 >
@@ -64,7 +64,7 @@ const thumbVariants = ['', '--orange', '--green', '--blue'];
         </div>
         <div>
           <span class="iris-hero-meta-label">Latest</span>
-          <span class="iris-hero-meta-value">{featured ? monthShort(featured.id) : '—'}</span>
+          <span class="iris-hero-meta-value">{featured ? monthShort(featured.id) : '-'}</span>
         </div>
         <div>
           <span class="iris-hero-meta-label">Editions</span>
@@ -142,7 +142,7 @@ const thumbVariants = ['', '--orange', '--green', '--blue'];
     <div class="iris-pitch">
       <div class="iris-pitch-body">
         <p>
-          Iris turns the raw statistical pulse of European chemistry — <strong>production indices, producer prices, trade flows</strong> —
+          Iris turns the raw statistical pulse of European chemistry (<strong>production indices, producer prices, trade flows</strong>)
           into a monthly narrative. Each edition opens with a macro brief, drills into the products, partners and sectors
           that moved the needle, and closes with a retrospective check against prior reads.
         </p>

@@ -18,7 +18,7 @@ const monthName = (id: string) => {
   return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 };
 
-// Mock view data — will be wired to real MDX in next pass
+// Mock view data. Will be wired to real MDX in next pass.
 const kpis = [
   { label: 'EU27 chemical exports', value: '€34.5 bn', delta: '-42.1%', dir: 'neg', foot: 'Jan-Feb 2026, YoY' },
   { label: 'Production index',      value: '79.3',     delta: '-3.9%',  dir: 'neg', foot: 'Feb 2026, 2021=100' },
@@ -46,7 +46,7 @@ const partners = [
 ];
 ---
 <Layout
-  title={`Iris — ${monthName(entry.id)} edition`}
+  title={`Iris: ${monthName(entry.id)} edition`}
   variant="dashboard"
 >
   <!-- Drawer scrim -->
@@ -109,7 +109,7 @@ const partners = [
           <h3 class="iris-panel-title">Key takeaway</h3>
           <p>
             The EU27 chemical industry reported a sharp contraction in the first two months of 2026,
-            with exports falling <strong>42.1%</strong> in value to €34.5 bn — a figure heavily distorted by
+            with exports falling <strong>42.1%</strong> in value to €34.5 bn, a figure heavily distorted by
             pre-tariff front-loading in February 2025 that created an unusually high comparison base.
           </p>
           <p>
@@ -117,13 +117,13 @@ const partners = [
             index and sitting <strong>18% below pre-crisis levels</strong> (2014–2019 average).
           </p>
           <p>
-            Against a normalised February 2024 base, exports declined by approximately 10% —
+            Against a normalised February 2024 base, exports declined by approximately 10%,
             indicating underlying weakness beyond the statistical distortion.
           </p>
         </div>
 
         <div class="iris-panel">
-          <h3 class="iris-panel-title">Export decrease — top partners</h3>
+          <h3 class="iris-panel-title">Export decrease: top partners</h3>
           <ul class="iris-bar-list">
             {partners.map(p => (
               <li>
@@ -187,12 +187,12 @@ const partners = [
           <p>
             EU27 chemical output averaged <strong>79.1</strong> in the first two months of 2026, down
             1.7% compared to the same period in 2025. The sector remains structurally 18 points below
-            its 2014–2019 baseline — a gap that has not closed since the 2022 energy shock.
+            its 2014-2019 baseline, a gap that has not closed since the 2022 energy shock.
           </p>
         </div>
 
         <div class="iris-panel">
-          <h3 class="iris-panel-title">Country output — YoY</h3>
+          <h3 class="iris-panel-title">Country output: YoY</h3>
           <ul class="iris-bar-list">
             {countryPerf.map(c => {
               const pct = (Math.abs(c.value) / maxMag) * 100;
@@ -255,13 +255,13 @@ const partners = [
           <p>
             The <strong>€25.1 bn</strong> contraction in EU27 chemical exports was overwhelmingly driven
             by the top-5 trading partners, which together account for half of total export value.
-            The <strong>United States</strong> alone contributed €19 bn of the decrease —
+            The <strong>United States</strong> alone contributed €19 bn of the decrease,
             reflecting the <em>unwinding</em> of front-loaded February 2025 shipments ahead of anticipated
             tariff actions.
           </p>
           <p>
             Once the February 2025 distortion is stripped out, exports declined by roughly
-            <strong>10%</strong> against a normalised 2024 base — a smaller but still significant
+            <strong>10%</strong> against a normalised 2024 base, a smaller but still significant
             decrease, pointing to weaker underlying demand rather than purely a statistical artefact.
           </p>
         </div>
@@ -308,7 +308,7 @@ const partners = [
       scrim.addEventListener('click', close);
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
-      // View switching — shared by drawer items AND top tabs
+      // View switching: shared by drawer items AND top tabs
       const drawerItems = drawer.querySelectorAll('.iris-drawer-item[data-view]');
       const tabs        = document.querySelectorAll('.iris-view-tab[data-view]');
       const views       = document.querySelectorAll('.iris-view[data-view]');

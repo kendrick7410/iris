@@ -1,5 +1,5 @@
 """
-Stacked or clustered bars by NACE 4-digit category over multiple years — L5.
+Stacked or clustered bars by NACE 4-digit category over multiple years, L5.
 
 Reproduces slides 11/16/21/26 (stacked) and 12/17/22/27 (clustered with
 YoY annotations on last year) of the Cefic Trade Brief 2026-04 deck.
@@ -37,10 +37,10 @@ def render(
 
     by_year_by_nace : {"2021": {"20.14": 12.3, "20.15": 4.5, ...}, "2022": {...}, ...}
     nace_labels     : {"20.14": "Other organic basic chemicals", ...}
-    dimension       : "volume" or "value" — only used for axis label fallback
+    dimension       : "volume" or "value", only used for axis label fallback
     mode            : "stacked" (sum per year) or "clustered" (grouped side by side)
     annotate_yoy_last : if True, annotate each NACE bar of the last year with YoY %
-    year_range      : (2021, 2025) — optional filter; defaults to all years in data
+    year_range      : (2021, 2025), optional filter; defaults to all years in data
     unit            : y-axis unit label; defaults to "mln tonnes" (volume) or "€ bn" (value)
     """
     if not by_year_by_nace:

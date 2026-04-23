@@ -1,4 +1,4 @@
-/* Cefic brand tokens — Iris
+/* Cefic brand tokens for Iris.
    Aligned with Cefic Visual Identity Guidelines (April 2021).
    Digital typography: Noto Serif (titles) + Lato (UI/body).
 */
@@ -309,7 +309,7 @@ button { font-family: inherit; }
 .iris-drawer-item:hover { color: var(--cefic-orange); padding-left: 0.25rem; }
 .iris-drawer-item[data-active="true"] { color: var(--cefic-orange); font-weight: 700; }
 .iris-drawer-item[data-active="true"]::before {
-  content: "—"; margin-right: 0.4rem;
+  content: "›"; margin-right: 0.4rem;
 }
 
 .iris-drawer-scrim {
@@ -323,7 +323,7 @@ button { font-family: inherit; }
 .iris-drawer-scrim[data-open="true"] { opacity: 1; pointer-events: auto; }
 
 /* ============================================================
-   LANDING — HERO
+   LANDING: HERO
    ============================================================ */
 .iris-hero {
   min-height: 100vh;
@@ -339,7 +339,7 @@ button { font-family: inherit; }
   overflow: hidden;
 }
 .iris-hero::before {
-  /* Discrete hex pattern — reference to Cefic logo geometry */
+  /* Discrete hex pattern, reference to Cefic logo geometry */
   content: "";
   position: absolute; inset: 0;
   background-image:
@@ -424,7 +424,7 @@ button { font-family: inherit; }
 }
 
 /* ============================================================
-   LANDING — SECTIONS
+   LANDING: SECTIONS
    ============================================================ */
 .iris-section {
   padding: clamp(3rem, 7vw, 6rem) clamp(1.5rem, 6vw, 5rem);
@@ -465,7 +465,7 @@ button { font-family: inherit; }
   white-space: nowrap;
 }
 
-/* Featured edition card — hero-sized */
+/* Featured edition card, hero-sized */
 .iris-featured {
   position: relative;
   display: grid;
@@ -729,7 +729,7 @@ button { font-family: inherit; }
 }
 
 /* ============================================================
-   DASHBOARD (edition page) — full viewport, 1-screen views
+   DASHBOARD (edition page): full viewport, 1-screen views
    ============================================================ */
 body.ov-active {
   overflow: hidden;
@@ -749,7 +749,7 @@ body.ov-active .iris-footer { display: none; }
   gap: 1.25rem;
 }
 
-/* Tabs — visible view switcher (complements burger menu) */
+/* Tabs: visible view switcher (complements burger menu) */
 .iris-view-tabs {
   display: inline-flex;
   align-self: flex-start;
@@ -941,7 +941,7 @@ body.ov-active .iris-footer { display: none; }
 }
 
 /* ============================================================
-   LEGACY edition body (MDX fallback) — keep readable
+   LEGACY edition body (MDX fallback): keep readable
    ============================================================ */
 .cefic-edition-body h2 {
   font-family: var(--iris-serif);

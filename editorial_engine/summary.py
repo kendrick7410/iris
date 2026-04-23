@@ -179,7 +179,7 @@ def draft_summary(
         logger.info(f"Opus summary quality OK: {opus_qc['words']} words")
         return _save_summary(opus_text, output_dir, month, OPUS, "ok"), "ok"
 
-    # Both failed quality — pick best
+    # Both failed quality, pick best
     if opus_text and sonnet_text:
         opus_violations = sum(1 for k in ["words_ok", "bullets_ok", "numbers_ok", "banned_ok"]
                              if not opus_qc[k])
