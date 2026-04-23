@@ -903,6 +903,143 @@ body.ov-active .iris-footer { display: none; }
 }
 .iris-panel p:last-child { margin-bottom: 0; }
 
+/* Chart container (figure + caption) */
+.iris-chart {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.iris-chart img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  background: var(--surface);
+}
+.iris-chart--wide  { grid-column: 1 / -1; }
+.iris-chart--half  { }
+.iris-chart--third { }
+
+.iris-chart-caption {
+  order: -1;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-alt);
+}
+
+/* Row of 2-3 thumbnail charts */
+.iris-chart-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  flex-shrink: 0;
+  min-height: 0;
+}
+.iris-chart-row .iris-chart {
+  max-height: 280px;
+}
+.iris-chart-row .iris-chart img {
+  max-height: 220px;
+}
+
+/* Partner drill-down grid */
+.iris-partner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  flex-shrink: 0;
+}
+.iris-partner-card {
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.iris-partner-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+.iris-partner-name {
+  font-family: var(--iris-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.iris-partner-code {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  font-weight: 700;
+}
+.iris-partner-value {
+  font-family: var(--iris-serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.iris-partner-delta {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.iris-partner-delta.is-neg { color: var(--cefic-orange-700); }
+.iris-partner-delta.is-pos { color: var(--cefic-green-1); }
+.iris-partner-delta-abs {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+.iris-partner-share {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 0.1rem;
+}
+.iris-partner-chapters {
+  list-style: none;
+  padding: 0.5rem 0 0;
+  margin: 0.3rem 0 0;
+  border-top: 1px solid var(--rule);
+}
+.iris-partner-chapters li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+  padding: 0.25rem 0;
+  color: var(--ink-soft);
+}
+.iris-partner-chapter-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.iris-partner-chapter-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.iris-partner-chapter-value em {
+  font-style: normal;
+  color: var(--cefic-orange-700);
+}
+
 /* Mini bar list */
 .iris-bar-list { list-style: none; padding: 0; margin: 0; }
 .iris-bar-list li {

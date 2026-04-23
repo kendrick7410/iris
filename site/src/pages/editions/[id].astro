@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export async function getStaticPaths() {
   const editions = await getCollection('editions');
@@ -18,14 +20,101 @@ const monthName = (id: string) => {
   return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
 };
 
-// Mock view data. Will be wired to real MDX in next pass.
-const kpis = [
-  { label: 'EU27 chemical exports', value: '€34.5 bn', delta: '-42.1%', dir: 'neg', foot: 'Jan-Feb 2026, YoY' },
-  { label: 'Production index',      value: '79.3',     delta: '-3.9%',  dir: 'neg', foot: 'Feb 2026, 2021=100' },
-  { label: 'Producer prices',       value: '117.2',    delta: '-2.8%',  dir: 'neg', foot: 'Feb 2026, YoY' },
-  { label: 'Chemical sales',        value: '90.8',     delta: '-7.5%',  dir: 'neg', foot: 'Jan 2026, YoY' },
+// Resolve project root (Astro cwd = site/ during dev and build)
+const PROJECT_ROOT = path.resolve('..');
+
+// Load fiches at build time (graceful: some may be absent for older editions)
+const fichesDir = path.join(PROJECT_ROOT, 'data', 'processed', entry.id, 'fiches');
+const loadFiche = (name: string): any | null => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(fichesDir, `${name}.json`), 'utf8'));
+  } catch {
+    return null;
+  }
+};
+
+const tradeExports = loadFiche('trade_exports');
+const tradeImports = loadFiche('trade_imports');
+const macroFiche   = loadFiche('macro_brief');
+
+// Chart helpers: confirm presence before referencing
+const chartsDir = path.resolve(`public/charts/${entry.id}`);
+const chartExists = (id: string): boolean => {
+  try { return fs.statSync(path.join(chartsDir, `${id}.svg`)).isFile(); }
+  catch { return false; }
+};
+const chartUrl = (id: string) => `/charts/${entry.id}/${id}.svg`;
+
+// Build KPI cards from the macro fiche when available, else fall back to hardcoded
+const kpis = (() => {
+  if (macroFiche && macroFiche.kpi_cards) {
+    return macroFiche.kpi_cards.map((k: any) => ({
+      label: k.label,
+      value: k.value_formatted || k.value,
+      delta: k.yoy_formatted || k.yoy || '',
+      dir:   (k.yoy && Number(k.yoy) > 0) ? 'pos' : 'neg',
+      foot:  k.footnote || k.period || '',
+    }));
+  }
+  return [
+    { label: 'EU27 chemical exports', value: '€34.5 bn', delta: '-42.1%', dir: 'neg', foot: 'Jan-Feb 2026, YoY' },
+    { label: 'Production index',      value: '79.3',     delta: '-3.9%',  dir: 'neg', foot: 'Feb 2026, 2021=100' },
+    { label: 'Producer prices',       value: '117.2',    delta: '-2.8%',  dir: 'neg', foot: 'Feb 2026, YoY' },
+    { label: 'Chemical sales',        value: '90.8',     delta: '-7.5%',  dir: 'neg', foot: 'Jan 2026, YoY' },
+  ];
+})();
+
+// Partner drill-down data (US / CN / GB) from the trade_exports fiche when available
+type PartnerCard = {
+  code: string;
+  label: string;
+  value_now: string;
+  delta_value: string;
+  yoy_pct: string;
+  dir: 'pos' | 'neg';
+  share_pct: string;
+  top_chapters: Array<{ label: string; yoy_pct: string; value_now: string }>;
+};
+
+const STRUCTURAL_PARTNERS: Array<{ code: string; label: string }> = [
+  { code: 'US', label: 'United States' },
+  { code: 'CN', label: 'China' },
+  { code: 'GB', label: 'United Kingdom' },
 ];
 
+const partnerCards: PartnerCard[] = (() => {
+  if (!tradeExports?.data?.by_partner) return [];
+  const byCode: Record<string, any> = {};
+  for (const p of tradeExports.data.by_partner) {
+    if (p.partner) byCode[p.partner] = p;
+  }
+  const cards: PartnerCard[] = [];
+  for (const sp of STRUCTURAL_PARTNERS) {
+    const p = byCode[sp.code];
+    if (!p) continue;
+    const delta = Number((p.value_eur_bn - p.previous_year_value_eur_bn).toFixed(2));
+    cards.push({
+      code: sp.code,
+      label: sp.label,
+      value_now: `€${p.value_eur_bn.toFixed(2)} bn`,
+      delta_value: `${delta >= 0 ? '+' : ''}${delta.toFixed(2)} bn`,
+      yoy_pct: `${p.yoy_pct >= 0 ? '+' : ''}${p.yoy_pct.toFixed(1)}%`,
+      dir: p.yoy_pct >= 0 ? 'pos' : 'neg',
+      share_pct: `${p.share_pct.toFixed(1)}%`,
+      top_chapters: (p.top_nace || []).slice(0, 3).map((c: any) => {
+        const hasYoy = c.yoy_pct !== undefined && c.yoy_pct !== null && c.yoy_pct !== 0;
+        return {
+          label: (c.label || '').split(',')[0].slice(0, 40),
+          yoy_pct: hasYoy ? `${c.yoy_pct >= 0 ? '+' : ''}${c.yoy_pct.toFixed(1)}%` : '',
+          value_now: `€${(c.value_eur_bn ?? 0).toFixed(2)} bn`,
+        };
+      }),
+    });
+  }
+  return cards;
+})();
+
+// Country YoY for macro brief view (from output fiche eventually — hardcoded fallback)
 const countryPerf = [
   { label: 'Netherlands', value: -9.6 },
   { label: 'Italy',       value: -6.9 },
@@ -37,42 +126,37 @@ const countryPerf = [
 ];
 const maxMag = Math.max(...countryPerf.map(c => Math.abs(c.value)));
 
-const partners = [
-  { label: 'United States', value: '€19.0 bn', share: 76 },
-  { label: 'United Kingdom', value: '€1.8 bn',  share: 7 },
-  { label: 'Switzerland',    value: '€1.4 bn',  share: 6 },
-  { label: 'China',          value: '€1.2 bn',  share: 5 },
-  { label: 'Turkey',         value: '€0.9 bn',  share: 4 },
-];
+const has60mBalance  = chartExists('trade_balance_monthly_60m');
+const has60mPartner  = chartExists('exports_by_partner_60m');
+const hasOutputIdx   = chartExists('output_index');
+const hasPricesIdx   = chartExists('prices_index');
+const hasTurnoverIdx = chartExists('turnover_index');
+const hasOutputYoY   = chartExists('output_yoy_country');
+const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
 ---
 <Layout
   title={`Iris: ${monthName(entry.id)} edition`}
   variant="dashboard"
 >
-  <!-- Drawer scrim -->
   <div class="iris-drawer-scrim" id="iris-drawer-scrim"></div>
 
-  <!-- Drawer menu -->
   <aside class="iris-drawer" id="iris-drawer" data-open="false" aria-hidden="true">
     <div class="iris-drawer-header">
       <h2 class="iris-drawer-title">{monthName(entry.id)}</h2>
       <button class="iris-drawer-close" id="iris-drawer-close" type="button" aria-label="Close">×</button>
     </div>
-
     <div class="iris-drawer-section">
       <div class="iris-drawer-section-title">Start</div>
       <button class="iris-drawer-item" data-view="overview" data-active="true">Overview</button>
     </div>
-
     <div class="iris-drawer-section">
       <div class="iris-drawer-section-title">Main</div>
       <button class="iris-drawer-item" data-view="macro">Macro brief</button>
       <button class="iris-drawer-item" data-view="drilldown">Drill-down</button>
     </div>
-
     <div class="iris-drawer-section">
       <div class="iris-drawer-section-title">Archive</div>
-      <a class="iris-drawer-item" href="/">← Back to all editions</a>
+      <a class="iris-drawer-item" href="/">Back to all editions</a>
     </div>
   </aside>
 
@@ -83,18 +167,18 @@ const partners = [
       <button class="iris-view-tab" data-view="drilldown" role="tab">Drill-down</button>
     </div>
 
-    <!-- ===== VIEW 1 · OVERVIEW ===== -->
+    <!-- ===== OVERVIEW ===== -->
     <section class="iris-view" data-view="overview" data-active="true">
       <header class="iris-view-header">
         <div>
-          <div class="iris-view-eyebrow">Overview · {monthName(entry.id)}</div>
+          <div class="iris-view-eyebrow">Overview, {monthName(entry.id)}</div>
           <h1 class="iris-view-title">EU27 chemical exports fall 42% amid anomalous base effects</h1>
         </div>
         <div class="iris-view-subtitle">Published {entry.data.publication_date}</div>
       </header>
 
       <div class="iris-kpi-grid">
-        {kpis.map(k => (
+        {kpis.map((k: any) => (
           <div class="iris-kpi-card">
             <div class="iris-kpi-label">{k.label}</div>
             <div class="iris-kpi-value">{k.value}</div>
@@ -105,94 +189,93 @@ const partners = [
       </div>
 
       <div class="iris-cols iris-view-body">
+        {has60mBalance ? (
+          <figure class="iris-chart iris-chart--wide">
+            <figcaption class="iris-chart-caption">
+              EU27 chemical trade balance, 60-month context. The Q1 2025 spike reflects
+              pre-tariff front-loading ahead of US trade measures; the February 2026
+              reading sits at €0.21 bn, down €12.21 bn from 2025.
+            </figcaption>
+            <img src={chartUrl('trade_balance_monthly_60m')} alt="EU27 chemical trade balance, 60 months" />
+          </figure>
+        ) : (
+          <div class="iris-panel">
+            <h3 class="iris-panel-title">Key takeaway</h3>
+            <p>
+              The EU27 chemical industry reported a sharp contraction in the first two months of 2026,
+              with exports falling <strong>42.1%</strong> in value to €34.5 bn, a figure heavily
+              distorted by pre-tariff front-loading in February 2025 that created an unusually high
+              comparison base.
+            </p>
+          </div>
+        )}
+
         <div class="iris-panel">
           <h3 class="iris-panel-title">Key takeaway</h3>
           <p>
-            The EU27 chemical industry reported a sharp contraction in the first two months of 2026,
-            with exports falling <strong>42.1%</strong> in value to €34.5 bn, a figure heavily distorted by
-            pre-tariff front-loading in February 2025 that created an unusually high comparison base.
+            Exports fell <strong>42.1%</strong> in value to €34.5 bn, amid an anomalous February 2025
+            base driven by pre-tariff front-loading.
           </p>
           <p>
-            Chemical output declined <strong>3.9% year-on-year</strong> in February, reaching 79.3 on the 2021
-            index and sitting <strong>18% below pre-crisis levels</strong> (2014–2019 average).
+            Chemical output declined <strong>3.9% YoY</strong> in February, at 79.3 (2021 index),
+            sitting <strong>18% below pre-crisis levels</strong> (2014-2019 average).
           </p>
           <p>
-            Against a normalised February 2024 base, exports declined by approximately 10%,
-            indicating underlying weakness beyond the statistical distortion.
+            Against a normalised 2024 base, exports declined by approximately 10%, a more
+            representative indication of underlying weakness.
           </p>
-        </div>
-
-        <div class="iris-panel">
-          <h3 class="iris-panel-title">Export decrease: top partners</h3>
-          <ul class="iris-bar-list">
-            {partners.map(p => (
-              <li>
-                <span class="iris-bar-label">{p.label}</span>
-                <span class="iris-bar-track">
-                  <span class="iris-bar-fill is-neg" style={`width:${p.share}%`}></span>
-                </span>
-                <span class="iris-bar-value">{p.value}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </section>
 
-    <!-- ===== VIEW 2 · MACRO BRIEF ===== -->
+    <!-- ===== MACRO BRIEF ===== -->
     <section class="iris-view" data-view="macro">
       <header class="iris-view-header">
         <div>
-          <div class="iris-view-eyebrow">Macro brief · {monthName(entry.id)}</div>
+          <div class="iris-view-eyebrow">Macro brief, {monthName(entry.id)}</div>
           <h1 class="iris-view-title">Output down 3.9%, 18% below pre-crisis levels</h1>
         </div>
-        <div class="iris-view-subtitle">Production · Prices · Sales</div>
+        <div class="iris-view-subtitle">Production, prices, sales</div>
       </header>
 
-      <div class="iris-kpi-grid">
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Output vs Feb 2025</div>
-          <div class="iris-kpi-value">-3.9%</div>
-          <div class="iris-kpi-delta is-neg">Index 79.3</div>
-          <div class="iris-kpi-foot">2021 = 100</div>
-        </div>
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Output vs pre-crisis</div>
-          <div class="iris-kpi-value">-18%</div>
-          <div class="iris-kpi-delta is-neg">vs 2014-2019 avg</div>
-          <div class="iris-kpi-foot">Persistent gap</div>
-        </div>
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Producer prices YoY</div>
-          <div class="iris-kpi-value">-2.8%</div>
-          <div class="iris-kpi-delta is-neg">Index 117.2</div>
-          <div class="iris-kpi-foot">Feb 2026</div>
-        </div>
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Sales YoY</div>
-          <div class="iris-kpi-value">-7.5%</div>
-          <div class="iris-kpi-delta is-neg">Index 90.8</div>
-          <div class="iris-kpi-foot">Jan 2026</div>
-        </div>
+      <div class="iris-chart-row">
+        {hasOutputIdx && (
+          <figure class="iris-chart iris-chart--third">
+            <figcaption class="iris-chart-caption">Output index (2021=100)</figcaption>
+            <img src={chartUrl('output_index')} alt="EU27 chemical output index" />
+          </figure>
+        )}
+        {hasPricesIdx && (
+          <figure class="iris-chart iris-chart--third">
+            <figcaption class="iris-chart-caption">Producer prices (2021=100)</figcaption>
+            <img src={chartUrl('prices_index')} alt="EU27 chemical producer prices" />
+          </figure>
+        )}
+        {hasTurnoverIdx && (
+          <figure class="iris-chart iris-chart--third">
+            <figcaption class="iris-chart-caption">Chemical sales (2021=100)</figcaption>
+            <img src={chartUrl('turnover_index')} alt="EU27 chemical sales" />
+          </figure>
+        )}
       </div>
 
       <div class="iris-cols iris-view-body">
         <div class="iris-panel">
           <h3 class="iris-panel-title">Sector context</h3>
           <p>
-            Chemical production underperformed total manufacturing, which declined by just 0.4% in February.
-            Pharmaceuticals fell more sharply at 8.6%, while basic metals dropped 0.7% and motor vehicles
-            gained 2.0%.
+            Chemical production underperformed total manufacturing (,0.4% in February).
+            Pharmaceuticals fell more sharply at 8.6%, basic metals dropped 0.7%, motor
+            vehicles gained 2.0%.
           </p>
           <p>
-            EU27 chemical output averaged <strong>79.1</strong> in the first two months of 2026, down
-            1.7% compared to the same period in 2025. The sector remains structurally 18 points below
-            its 2014-2019 baseline, a gap that has not closed since the 2022 energy shock.
+            EU27 chemical output averaged <strong>79.1</strong> in the first two months of 2026,
+            down 1.7% versus the same period in 2025. The sector remains structurally 18 points
+            below its 2014-2019 baseline, a gap that has not closed since the 2022 energy shock.
           </p>
         </div>
 
         <div class="iris-panel">
-          <h3 class="iris-panel-title">Country output: YoY</h3>
+          <h3 class="iris-panel-title">Country output, YoY</h3>
           <ul class="iris-bar-list">
             {countryPerf.map(c => {
               const pct = (Math.abs(c.value) / maxMag) * 100;
@@ -212,75 +295,71 @@ const partners = [
       </div>
     </section>
 
-    <!-- ===== VIEW 3 · DRILL-DOWN ===== -->
+    <!-- ===== DRILL-DOWN ===== -->
     <section class="iris-view" data-view="drilldown">
       <header class="iris-view-header">
         <div>
-          <div class="iris-view-eyebrow">Drill-down · {monthName(entry.id)}</div>
-          <h1 class="iris-view-title">United States alone drove 76% of the export contraction</h1>
+          <div class="iris-view-eyebrow">Drill-down, {monthName(entry.id)}</div>
+          <h1 class="iris-view-title">Export contraction concentrated on the three structural partners</h1>
         </div>
-        <div class="iris-view-subtitle">Top partners · Base-effect adjusted</div>
+        <div class="iris-view-subtitle">US, China, United Kingdom</div>
       </header>
 
-      <div class="iris-kpi-grid">
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">US contribution</div>
-          <div class="iris-kpi-value">€19.0 bn</div>
-          <div class="iris-kpi-delta is-neg">of €25.1 bn total decrease</div>
-          <div class="iris-kpi-foot">76% of the gap</div>
-        </div>
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Top-5 share</div>
-          <div class="iris-kpi-value">50%</div>
-          <div class="iris-kpi-delta is-neg">of total export value</div>
-          <div class="iris-kpi-foot">Partner concentration</div>
-        </div>
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Base-effect adjusted</div>
-          <div class="iris-kpi-value">-10%</div>
-          <div class="iris-kpi-delta is-neg">vs normalised Feb 2024</div>
-          <div class="iris-kpi-foot">Underlying weakness</div>
-        </div>
-        <div class="iris-kpi-card">
-          <div class="iris-kpi-label">Imports ranking</div>
-          <div class="iris-kpi-value">3rd</div>
-          <div class="iris-kpi-delta is-neg">US as import partner</div>
-          <div class="iris-kpi-foot">Shift from 2024</div>
-        </div>
-      </div>
+      {has60mPartner && (
+        <figure class="iris-chart iris-chart--wide">
+          <figcaption class="iris-chart-caption">
+            EU27 chemical exports by partner, 60-month context. The United States (orange) pulled
+            away from the cluster through 2022-2024, peaked in February 2025 (pre-tariff
+            front-loading), and retraced toward the China/UK band in early 2026.
+          </figcaption>
+          <img src={chartUrl('exports_by_partner_60m')} alt="EU27 chemical exports by partner, 60 months" />
+        </figure>
+      )}
 
-      <div class="iris-cols iris-view-body">
-        <div class="iris-panel">
-          <h3 class="iris-panel-title">What moved the needle</h3>
-          <p>
-            The <strong>€25.1 bn</strong> contraction in EU27 chemical exports was overwhelmingly driven
-            by the top-5 trading partners, which together account for half of total export value.
-            The <strong>United States</strong> alone contributed €19 bn of the decrease,
-            reflecting the <em>unwinding</em> of front-loaded February 2025 shipments ahead of anticipated
-            tariff actions.
-          </p>
-          <p>
-            Once the February 2025 distortion is stripped out, exports declined by roughly
-            <strong>10%</strong> against a normalised 2024 base, a smaller but still significant
-            decrease, pointing to weaker underlying demand rather than purely a statistical artefact.
-          </p>
+      {partnerCards.length > 0 ? (
+        <div class="iris-partner-grid">
+          {partnerCards.map((p: PartnerCard) => (
+            <div class="iris-partner-card">
+              <div class="iris-partner-header">
+                <div class="iris-partner-name">{p.label}</div>
+                <div class="iris-partner-code">{p.code}</div>
+              </div>
+              <div class="iris-partner-value">{p.value_now}</div>
+              <div class={`iris-partner-delta is-${p.dir}`}>
+                {p.yoy_pct} <span class="iris-partner-delta-abs">({p.delta_value})</span>
+              </div>
+              <div class="iris-partner-share">{p.share_pct} of total EU27 extra-EU exports</div>
+              {p.top_chapters.length > 0 && (
+                <ul class="iris-partner-chapters">
+                  {p.top_chapters.map((c: any) => (
+                    <li>
+                      <span class="iris-partner-chapter-label">{c.label}</span>
+                      <span class="iris-partner-chapter-value">
+                        {c.value_now}
+                        {c.yoy_pct && <em> ({c.yoy_pct})</em>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
         </div>
+      ) : (
+        <div class="iris-panel">
+          <p>Partner drill-down data unavailable for this edition.</p>
+        </div>
+      )}
 
-        <div class="iris-panel">
-          <h3 class="iris-panel-title">Contribution to the export gap</h3>
-          <ul class="iris-bar-list">
-            {partners.map(p => (
-              <li>
-                <span class="iris-bar-label">{p.label}</span>
-                <span class="iris-bar-track">
-                  <span class="iris-bar-fill is-neg" style={`width:${p.share}%`}></span>
-                </span>
-                <span class="iris-bar-value">{p.share}%</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      {hasImpWaterfall && (
+        <figure class="iris-chart iris-chart--wide">
+          <figcaption class="iris-chart-caption">
+            Imports drill-down, top CN 8-digit codes explain the month's movement. Bars show each
+            product's contribution to the net change; the tallest bars carry the causal weight.
+          </figcaption>
+          <img src={chartUrl('trade_imports_waterfall_cn8')} alt="Imports waterfall, CN 8-digit" />
+        </figure>
+      )}
     </section>
   </main>
 
@@ -292,23 +371,14 @@ const partners = [
       const closeBtn = document.getElementById('iris-drawer-close');
       if (!drawer || !scrim) return;
 
-      const open  = () => {
-        drawer.setAttribute('data-open', 'true');
-        scrim.setAttribute('data-open', 'true');
-        drawer.setAttribute('aria-hidden', 'false');
-      };
-      const close = () => {
-        drawer.setAttribute('data-open', 'false');
-        scrim.setAttribute('data-open', 'false');
-        drawer.setAttribute('aria-hidden', 'true');
-      };
+      const open  = () => { drawer.setAttribute('data-open', 'true'); scrim.setAttribute('data-open', 'true'); drawer.setAttribute('aria-hidden', 'false'); };
+      const close = () => { drawer.setAttribute('data-open', 'false'); scrim.setAttribute('data-open', 'false'); drawer.setAttribute('aria-hidden', 'true'); };
 
       burger?.addEventListener('click', open);
       closeBtn?.addEventListener('click', close);
       scrim.addEventListener('click', close);
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
-      // View switching: shared by drawer items AND top tabs
       const drawerItems = drawer.querySelectorAll('.iris-drawer-item[data-view]');
       const tabs        = document.querySelectorAll('.iris-view-tab[data-view]');
       const views       = document.querySelectorAll('.iris-view[data-view]');
@@ -324,13 +394,8 @@ const partners = [
         });
       };
 
-      drawerItems.forEach(btn => btn.addEventListener('click', () => {
-        switchView(btn.getAttribute('data-view'));
-        close();
-      }));
-      tabs.forEach(btn => btn.addEventListener('click', () => {
-        switchView(btn.getAttribute('data-view'));
-      }));
+      drawerItems.forEach(btn => btn.addEventListener('click', () => { switchView(btn.getAttribute('data-view')); close(); }));
+      tabs.forEach(btn => btn.addEventListener('click', () => { switchView(btn.getAttribute('data-view')); }));
     })();
   </script>
 </Layout>
