@@ -77,6 +77,32 @@ unambiguous sentence. See `system.md` §1.17 and §5.1.
 If a base-effect caveat is mandatory (§1.13), the caveat is placed around
 or adjacent to the triptych, it does not replace any of the three elements.
 
+## Partner coverage — US / CN / GB (non-negotiable per §1.19)
+
+When the fiche carries a trade indicator with `partner_drilldown` data, the
+macro brief MUST cover the three structural partners US, CN (China), and GB
+(United Kingdom) when their `partner_drilldown.{PARTNER}.skipped` flag is
+absent.
+
+Use Template 5.11 form B (compact, one line per partner, three partners
+maximum). Order by absolute |delta|, largest mover first. Example:
+
+    "US: €3.6 bn (-72.5%), led by 29XXXXXX (organic basic chemicals)
+    (-€6.1 bn). CN: €1.4 bn (-7.3%), led by 38XXXXXX (other chemical
+    products) (-€0.1 bn). GB: €2.1 bn (+4.9%), led by 28XXXXXX (other
+    inorganic basic chemicals) (+€0.1 bn)."
+
+Skip a partner only when `skipped=true` appears in the fiche. A missing
+partner without the skip flag is a rule violation.
+
+## Long-arc context — trade balance chart (per Pattern 24)
+
+When the trade balance chart `trade_balance_monthly_60m` is available in the
+Overview tab, the macro brief opening paragraph should situate the current
+month within the 60-month arc. One explicit long-window reference is enough,
+e.g. *"over the past five years"* or *"between 2021 and 2026"*. Do not
+describe the chart line-by-line; the chart speaks for itself.
+
 ## No em dashes, absolute rule
 
 The em dash character (Unicode U+2014) is banned. See `system.md` §1.18. Use
