@@ -94,6 +94,18 @@ Your output is one section of this report, not the full document. You will recei
 
     This applies to: macro brief, section openings, any summary of a trade
     flow. # from 2026-02 v2 homepage preview feedback
+19. **Key-partner symmetry in trade sections.** Trade sections MUST cover the
+    three structural partners US, CN (China), GB (UK) symmetrically when
+    data is present. Each partner gets at least one dedicated sentence,
+    even if smaller than the month's headline figure. Absence is acceptable
+    ONLY when the `partner_drilldown.{PARTNER}.skipped` flag is set in the
+    data block (negligible volume). # from 2026-02-v3 feedback
+20. **Charts must be introduced by prose.** Every chart placeholder is
+    preceded by at least one sentence naming what the chart shows or
+    highlighting its key finding. Charts are never stacked without prose
+    between them. Two consecutive charts get a transition sentence
+    anchored on a figure from the second chart. # from Patterns 4, 13, 14
+
 18. **Never use em dashes. Absolute rule, no exceptions.**
     The em dash character (Unicode U+2014, long horizontal dash used as a
     parenthetical break) is banned across all Iris output: macro brief,
@@ -340,14 +352,57 @@ indication of the underlying trend.
 
 **Inline caveat when `severity = critical`** (§1.13 addendum):
 
-In addition to the paragraph, the opening finding itself carries an em-dash
-caveat between the figure and the explanation, e.g.:
+In addition to the paragraph, the opening finding itself carries an inline
+caveat between the figure and the explanation (no em dashes per §1.18 — use
+commas or parenthesis), e.g.:
 
 ```
 EU27 chemical exports fell by [X.X]% in value in the first [N] months of
 [year], a figure heavily influenced by an anomalous [prior-year window]
 base, reflecting [driver].
 ```
+
+### 5.11 Partner drill-down # from Pattern 23
+
+Template A (trade sections, full prose):
+
+```
+[Exports to / Imports from] [PARTNER] [decreased/increased] by €[X.X] bn
+([±Y.Y]%), driven by [top_movers_down[0].label] ([±€X.X] bn) and
+[top_movers_down[1].label] ([±€X.X] bn). [N] CN 8-digit products explain
+[Z]% of the net variation. The largest current flow remains
+[largest_products_current[0].label] (€[X.X] bn, [share]% of the total).
+```
+
+Template B (macro brief, compact one-liner per partner):
+
+```
+[PARTNER]: €[X.X] bn ([±Y.Y]%), led by [top_mover.label] ([±€X.X] bn).
+```
+
+**Rules of use:**
+- Template A in `trade_exports` and `trade_imports` sections.
+- Template B in the macro brief. Maximum three partners, one line each.
+- CN8 labels truncated per §5.12. Always cite the CN8 code before the label.
+- Partners ordered by absolute |delta|, largest mover first. US / CN / GB
+  covered symmetrically per §1.19, even if smaller than the headline.
+- Skipped partners (flag `partner_drilldown.{PARTNER}.skipped=true`):
+  omit entirely (no "N/A", no placeholder).
+- A rising partner and a falling partner in the same section: cite both with
+  their signs; never collapse them into a net figure that hides direction.
+
+### 5.12 CN8 product label truncation # from Pattern 23
+
+Keep the chemical head noun, drop parentheticals, truncate at 40-60
+characters with an ellipsis. Always cite the CN8 code (8 digits) before
+the short label.
+
+- Raw: *"29339980, Heterocyclic compounds with nitrogen hetero-atom[s] only
+  (excl. those containing an unfused pyrazole…)"*
+- Iris prose: *"29339980 (heterocyclic compounds with nitrogen)"*
+- Iris prose: *"29335995 (heterocyclic compounds, pyrimidine/piperazine ring)"*
+
+Do not paraphrase the chemical name. Truncate, do not rewrite.
 
 ## 6. Section structure
 
@@ -500,3 +555,7 @@ Before returning your response, verify:
 - [ ] Drill-down CN 8-digit window matches the section's headline window per §1.16 and §5.8
 - [ ] Macro brief trade references preserve the §5.1 canonical triptych (variation + absolute level + absolute delta), with no syntactic ambiguity per §1.17
 - [ ] Zero em dashes (U+2014) in the output per §1.18. Use commas, colons, parentheses, or sentence splits.
+- [ ] Trade sections cover US, CN, GB symmetrically per §1.19 (one dedicated sentence each, unless `skipped=true`).
+- [ ] Each chart placeholder is preceded by at least one prose sentence per §1.20.
+- [ ] Partner drill-down follows Template 5.11 (A in sections, B in macro brief).
+- [ ] CN8 labels truncated per §5.12 with the 8-digit code present.
