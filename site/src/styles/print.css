@@ -1,0 +1,333 @@
+/* Iris print layout, A4 optimised for Playwright headless Chromium PDF export. */
+
+@page {
+  size: A4;
+  margin: 20mm 18mm;
+}
+
+.iris-print-body {
+  font-family: "Lato", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a1a;
+  font-size: 10pt;
+  line-height: 1.45;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.iris-print-body h1,
+.iris-print-body h2,
+.iris-print-body h3 {
+  font-family: "Noto Serif", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.iris-print-body p {
+  margin: 0 0 0.7em;
+  color: #2a2a2a;
+}
+
+.iris-print-body strong { font-weight: 700; color: #1a1a1a; }
+
+/* Page & page breaks */
+.print-page {
+  padding: 0;
+  margin: 0 0 10mm 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.print-break { page-break-before: always; break-before: page; }
+
+/* ----- COVER ----- */
+.print-cover {
+  height: 257mm; /* A4 - top+bottom margins */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+  background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+  position: relative;
+}
+.print-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 104' fill='none' stroke='%23F47B20' stroke-width='1' opacity='0.05'><polygon points='60,4 110,32 110,92 60,120 10,92 10,32'/></svg>");
+  background-size: 120px 104px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+.print-cover > * { position: relative; z-index: 1; }
+
+.print-cover-head { padding-top: 0; }
+.print-cover-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.print-cover-brand img { height: 40px; width: auto; }
+.print-cover-brand-mark {
+  font-family: "Noto Serif", serif;
+  font-size: 28pt;
+  color: #1a1a1a;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.print-cover-tagline {
+  font-size: 11pt;
+  color: #666;
+  margin-top: 6pt;
+  letter-spacing: 0.04em;
+}
+
+.print-cover-body {
+  padding: 0;
+}
+.print-cover-edition {
+  font-size: 10pt;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #F47B20;
+  font-weight: 700;
+  margin-bottom: 14pt;
+}
+.print-cover-month {
+  font-family: "Noto Serif", serif;
+  font-size: 64pt;
+  line-height: 0.95;
+  font-weight: 300;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  margin-bottom: 36pt;
+}
+.print-cover-meta {
+  display: flex;
+  gap: 2rem;
+  font-size: 10pt;
+  color: #666;
+  padding-top: 12pt;
+  border-top: 1px solid #e0e0e0;
+}
+
+.print-cover-foot {
+  font-size: 9pt;
+  color: #888;
+  padding-top: 16pt;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ----- SECTION HEADERS ----- */
+.print-section-header {
+  margin-bottom: 16pt;
+  padding-bottom: 8pt;
+  border-bottom: 1px solid #e0e0e0;
+}
+.print-eyebrow {
+  font-size: 8pt;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #F47B20;
+  font-weight: 700;
+  margin-bottom: 4pt;
+}
+.print-section-title {
+  font-size: 20pt;
+  line-height: 1.1;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* ----- KPI GRID ----- */
+.print-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8pt;
+  margin-bottom: 16pt;
+}
+.print-kpi {
+  padding: 10pt 12pt;
+  border: 1px solid #e0e0e0;
+  border-radius: 4pt;
+  page-break-inside: avoid;
+}
+.print-kpi-label {
+  font-size: 7pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #666;
+  font-weight: 700;
+}
+.print-kpi-value {
+  font-family: "Noto Serif", serif;
+  font-size: 18pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  margin-top: 2pt;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.print-kpi-delta {
+  font-size: 10pt;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.print-kpi-delta.is-neg { color: #c65d18; }
+.print-kpi-delta.is-pos { color: #00A99E; }
+.print-kpi-foot {
+  font-size: 7pt;
+  color: #999;
+  margin-top: 2pt;
+}
+
+/* ----- CHARTS ----- */
+.print-chart {
+  margin: 12pt 0 14pt;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.print-chart-caption {
+  font-size: 9pt;
+  color: #666;
+  margin-bottom: 6pt;
+  font-weight: 500;
+}
+.print-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 150mm;
+  background: #fff;
+}
+.print-chart-source {
+  font-size: 8pt;
+  color: #999;
+  margin-top: 4pt;
+  font-style: italic;
+}
+
+.print-charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12pt;
+  margin-bottom: 14pt;
+}
+.print-chart--third { margin: 0; }
+
+.print-chart-deltapill {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8pt;
+  margin-top: 4pt;
+  color: #666;
+}
+.print-chart-value {
+  font-family: "Noto Serif", serif;
+  font-size: 12pt;
+  color: #1a1a1a;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.print-chart-delta {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.print-chart-delta.is-neg { color: #c65d18; }
+.print-chart-delta.is-pos { color: #00A99E; }
+
+/* ----- PARTNER CARDS ----- */
+.print-partner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10pt;
+  margin-bottom: 14pt;
+}
+.print-partner-card {
+  padding: 10pt 12pt;
+  border: 1px solid #e0e0e0;
+  border-radius: 4pt;
+  page-break-inside: avoid;
+}
+.print-partner-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4pt;
+  align-items: baseline;
+}
+.print-partner-label {
+  font-family: "Noto Serif", serif;
+  font-size: 11pt;
+  font-weight: 500;
+}
+.print-partner-code {
+  font-size: 7pt;
+  letter-spacing: 0.14em;
+  color: #999;
+  font-weight: 700;
+}
+.print-partner-value {
+  font-family: "Noto Serif", serif;
+  font-size: 16pt;
+  font-weight: 400;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.print-partner-delta {
+  font-size: 10pt;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2pt;
+}
+.print-partner-delta.is-neg { color: #c65d18; }
+.print-partner-delta.is-pos { color: #00A99E; }
+.print-partner-abs { font-weight: 500; color: #999; font-size: 8pt; }
+.print-partner-share {
+  font-size: 8pt;
+  color: #666;
+  margin-top: 2pt;
+}
+
+/* ----- NARRATIVE / TAKEAWAY ----- */
+.print-takeaway,
+.print-narrative {
+  font-size: 10pt;
+  line-height: 1.5;
+  color: #2a2a2a;
+}
+.print-takeaway p,
+.print-narrative p { margin: 0 0 8pt; }
+
+/* ----- APPENDIX (full MDX body) ----- */
+.print-edition-body {
+  font-size: 9.5pt;
+  line-height: 1.5;
+  color: #333;
+}
+.print-edition-body h2 {
+  font-family: "Noto Serif", serif;
+  font-size: 13pt;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 14pt 0 6pt;
+  padding-bottom: 3pt;
+  border-bottom: 1px solid #e8e8e8;
+}
+.print-edition-body img {
+  max-width: 100%;
+  height: auto;
+  max-height: 100mm;
+  margin: 6pt 0;
+}
+.print-edition-body hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 12pt 0;
+}
+.print-edition-body p { margin: 0 0 6pt; }
