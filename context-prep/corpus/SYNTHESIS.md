@@ -383,3 +383,48 @@ Formulation Iris v2 (générée par le pipeline sur l'édition 2026-02-v2, valid
 **Implication :** Template ajouté au system prompt (§5.9), règle MUST §1.13 pour le déclenchement, règle MUST §1.14 pour la cohérence temporelle dans une même phrase (ne pas juxtaposer une tête YTD et des chiffres single-month sans préfixe explicite). Pipeline amont (`analysis/anomaly_detector.py`) calcule un `anomaly_report` attaché à la fiche ; severity ∈ {none, watch, warn, critical} est dérivée du nombre et de la combinaison de flags. La règle est **purement rédactionnelle** : pas d'altération du chiffre, pas d'adoucissement — le contexte de lecture passe avec le chiffre.
 
 ---
+
+## 23. La symétrie des trois partenaires structurels (US / CN / GB)
+
+Cefic analyses systematically cover the three structural trade partners of EU27
+chemistry (United States, China, United Kingdom) rather than focusing on the
+largest mover of the month. Ensemble these three account for around 60 % of
+EU27 chemical trade value and represent three distinct economic dynamics:
+transatlantic commodity flows and tariff-sensitive ingredients (US), large
+specialty and polymer exports into a volatile demand base (CN), and a
+post-Brexit near-neighbour trade with residual regulatory friction (GB).
+
+A month où la Chine bouge de −5 % et les États-Unis de −40 % est narrativement
+US-dominant ; la secousse chinoise est néanmoins structurellement plus
+signifiante (volatilité inférieure, base moins distordue par des mesures de
+politique commerciale ponctuelles) et doit être rapportée.
+
+**Implication :** le pipeline extrait le drill-down pour US / CN / GB
+inconditionnellement (`data/processed/.../fiches/trade_exports.json`,
+`partner_drilldown.{US,CN,GB}`), le LLM écrit sur chacun dès que la donnée est
+présente. Des partenaires additionnels (CH, TR, JP…) peuvent venir **après** les
+trois structurels, jamais à leur place. Règle codifiée en `system.md` §1.19.
+
+## 24. Les charts de contexte long-arc (60 mois)
+
+Les publications Cefic ancrent toute lecture mensuelle dans un contexte
+pluri-annuel. *Facts & Figures* et *Chemical Trends Reports* affichent des
+séries sur cinq ans minimum pour les agrégats majeurs (balance commerciale,
+production, prix à la production).
+
+Deux fonctions : (a) montrer si la lecture courante s'inscrit en **continuité**
+ou en **rupture** avec un arc temporel long, (b) permettre au lecteur de **voir
+visuellement** les anomalies que l'analyse narrative peut manquer ou atténuer.
+
+Le chart 60 mois de la balance commerciale rend le pic février 2025 (front-
+loading pré-tarifs) immédiatement lisible — un caveat prose sur la page seule
+ne le ferait pas aussi bien. Le chart 60 mois des exports par partenaire rend
+visible le décrochage US de mars-avril 2025 et sa convergence récente vers la
+bande CN/GB.
+
+**Implication :** chaque édition Iris intègre au minimum deux charts 60 mois
+(`trade_balance_monthly_60m` dans Overview, `exports_by_partner_60m` dans
+Drill-down). Les fiches Iris portent `historical_series.trade_balance_monthly`
+(60 points) et `historical_series.exports_by_partner_monthly` (5 partenaires).
+Rendu via `charts/templates/line_chart.py`.
+
