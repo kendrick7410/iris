@@ -638,7 +638,51 @@ button { font-family: inherit; }
   margin-top: 0.25rem;
 }
 
-/* Methodology section (homepage long-form documentation) */
+/* Methodology teaser on homepage */
+.iris-methodology-teaser {
+  padding-top: clamp(2rem, 4vw, 4rem);
+}
+.iris-teaser-body {
+  max-width: 880px;
+}
+.iris-teaser-body > p {
+  font-family: var(--iris-serif);
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-weight: 300;
+  margin: 0 0 1.5rem;
+}
+.iris-teaser-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+}
+.iris-teaser-bullets li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.iris-teaser-bullets li:last-child { border-bottom: none; }
+.iris-teaser-bullets li strong {
+  color: var(--ink);
+  margin-right: 0.3rem;
+}
+.iris-teaser-bullets li code {
+  font-family: var(--iris-mono);
+  font-size: 0.85em;
+  background: var(--surface-alt);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+
+/* Dedicated methodology page */
+.iris-methodology--page { padding-top: clamp(6rem, 10vw, 8rem); }
+
+/* Methodology section (long-form documentation) */
 .iris-methodology { padding-top: clamp(2rem, 4vw, 4rem); }
 .iris-methodology-intro {
   font-family: var(--iris-serif);

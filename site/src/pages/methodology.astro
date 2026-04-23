@@ -1,0 +1,336 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout
+  title="Iris: methodology"
+  description="How Iris is built — data sources, classifications, calculations, pipeline, editorial rules."
+  variant="page"
+>
+  <section class="iris-section iris-methodology iris-methodology--page">
+    <div class="iris-section-header">
+      <div>
+        <div class="iris-section-eyebrow">Data and methodology</div>
+        <h1 class="iris-section-title">How Iris is built</h1>
+      </div>
+      <a class="iris-section-link" href="/">← Back to editions</a>
+    </div>
+
+    <div class="iris-methodology-intro">
+      <p>
+        Iris is reproducible from public Eurostat data end-to-end. The sections below list
+        every input series, the calculations that turn them into indicators, the pipeline
+        that drafts and publishes the edition, and the editorial rules that govern the prose.
+      </p>
+    </div>
+
+    <h2 class="iris-methodology-h3">1. Data sources</h2>
+    <div class="iris-source-grid">
+      <div class="iris-source-card">
+        <div class="iris-source-head">
+          <h4>Production index</h4>
+          <span class="iris-source-code">sts_inpr_m</span>
+        </div>
+        <div class="iris-source-filters">
+          <span><strong>NACE</strong> <code>C20</code> (Chemicals, 2-digit)</span>
+          <span><strong>Benchmarks</strong> <code>C</code>, <code>C21</code>, <code>C24</code>, <code>C29</code></span>
+          <span><strong>Geo</strong> <code>EU27_2020</code> + 27 states</span>
+          <span><strong>Unit</strong> <code>I21</code> (2021 = 100)</span>
+          <span><strong>s_adj</strong> <code>SCA</code> (seasonally + working-day adjusted)</span>
+        </div>
+        <p>
+          Monthly index of industrial production. Chemicals only (NACE <code>C20</code>);
+          pharmaceuticals (<code>C21</code>), basic metals (<code>C24</code>), motor vehicles
+          (<code>C29</code>) pulled as peer-sector benchmarks. Feeds the Output sparkline
+          and the per-country YoY bar list in the Macro brief tab.
+        </p>
+        <a class="iris-source-link"
+           href="https://ec.europa.eu/eurostat/databrowser/view/sts_inpr_m__custom_12061884/default/table"
+           target="_blank" rel="noopener">
+          Eurostat databrowser, sts_inpr_m
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h7v7M13 3L4 12"/></svg>
+        </a>
+      </div>
+
+      <div class="iris-source-card">
+        <div class="iris-source-head">
+          <h4>Producer prices</h4>
+          <span class="iris-source-code">sts_inppd_m</span>
+        </div>
+        <div class="iris-source-filters">
+          <span><strong>NACE</strong> <code>C20</code></span>
+          <span><strong>Market</strong> domestic</span>
+          <span><strong>Geo</strong> <code>EU27_2020</code> + 27 states</span>
+          <span><strong>Unit</strong> <code>I21</code> (2021 = 100)</span>
+        </div>
+        <p>
+          Monthly index of producer prices in industry (domestic market), NACE
+          <code>C20</code>, EU27 aggregate and member states. Feeds the Prices sparkline
+          and the country price-decline ranking in trade commentary.
+        </p>
+        <a class="iris-source-link"
+           href="https://ec.europa.eu/eurostat/databrowser/view/sts_inppd_m__custom_12061992/default/table"
+           target="_blank" rel="noopener">
+          Eurostat databrowser, sts_inppd_m
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h7v7M13 3L4 12"/></svg>
+        </a>
+      </div>
+
+      <div class="iris-source-card">
+        <div class="iris-source-head">
+          <h4>Chemical sales (turnover)</h4>
+          <span class="iris-source-code">sts_intv_m</span>
+        </div>
+        <div class="iris-source-filters">
+          <span><strong>NACE</strong> <code>C20</code></span>
+          <span><strong>Geo</strong> <code>EU27_2020</code> + 27 states</span>
+          <span><strong>Unit</strong> <code>I21</code> (2021 = 100)</span>
+        </div>
+        <p>
+          Monthly turnover index in industry, NACE <code>C20</code>. Published with a slightly
+          longer lag than production and prices (typically T+7 to T+8 weeks); the macro brief
+          flags the lag window when the turnover reference month trails the production reference
+          month.
+        </p>
+        <a class="iris-source-link"
+           href="https://ec.europa.eu/eurostat/databrowser/view/sts_intv_m__custom_12062104/default/table"
+           target="_blank" rel="noopener">
+          Eurostat databrowser, sts_intv_m
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h7v7M13 3L4 12"/></svg>
+        </a>
+      </div>
+
+      <div class="iris-source-card">
+        <div class="iris-source-head">
+          <h4>Trade flows (exports/imports)</h4>
+          <span class="iris-source-code">Comext</span>
+        </div>
+        <div class="iris-source-filters">
+          <span><strong>Declarant</strong> <code>EU</code> (EU27 as reporter)</span>
+          <span><strong>Partner</strong> ≠ <code>EU27</code> (extra-EU only)</span>
+          <span><strong>Products</strong> 1,372 CN 8-digit codes</span>
+          <span><strong>Flows</strong> 1 = imports, 2 = exports</span>
+        </div>
+        <p>
+          Chemistry filter maps <strong>CPA 2015 → CN 2025</strong> via the Cefic
+          <code>SubstanceId.csv</code> lookup. Coverage by NACE 4-digit class:
+        </p>
+        <ul class="iris-source-nace-list">
+          <li><strong>NACE 20.11-20.17</strong> basic chemicals (industrial gases, dyes, inorganic and organic chemicals, fertilisers, primary plastics, synthetic rubber)</li>
+          <li><strong>NACE 20.20</strong> pesticides and other agrochemical products</li>
+          <li><strong>NACE 20.30</strong> paints, varnishes, printing inks</li>
+          <li><strong>NACE 20.41-20.42</strong> soaps, detergents, cleaning and polishing preparations, perfumes</li>
+          <li><strong>NACE 20.51-20.59</strong> other chemical products (explosives, glues, essential oils, photographic chemicals)</li>
+          <li><strong>NACE 20.60</strong> man-made fibres</li>
+          <li><strong>NACE 21.10</strong> basic pharmaceutical products (active pharmaceutical ingredients). <em>NACE 21.20 finished drugs is excluded.</em></li>
+        </ul>
+        <p>
+          Source of the 60-month balance chart, the exports-by-partner chart, the US/CN/GB
+          partner cards, and the CN 8-digit waterfall charts.
+        </p>
+        <a class="iris-source-link"
+           href="https://ec.europa.eu/eurostat/web/international-trade-in-goods/data/database"
+           target="_blank" rel="noopener">
+          Eurostat, Comext database
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h7v7M13 3L4 12"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <p class="iris-methodology-note-inline">
+      <strong>Key scope difference.</strong> The industrial-indicator path (production, prices,
+      sales) is strict <code>C20</code> and never picks up pharmaceuticals. The trade path reaches
+      into <code>21.10</code> because the Cefic chemistry map explicitly includes active pharmaceutical
+      ingredients. Expect imports from the United States and China to skew high on polypeptide
+      hormones and heterocyclic compounds for that reason.
+    </p>
+
+    <h2 class="iris-methodology-h3">2. Classifications</h2>
+    <ul class="iris-docs-list">
+      <li>
+        <strong>NACE Rev. 2</strong> (statistical classification of economic activities).
+        Industrial indicators use the 2-digit <strong><code>C20</code> Chemicals</strong>
+        division, strict (no pharmaceuticals). Peer-sector benchmarks quoted in prose:
+        <code>C</code> (total manufacturing), <code>C21</code> (pharmaceuticals), <code>C24</code>
+        (basic metals), <code>C29</code> (motor vehicles).
+        <a href="https://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_CLS_DTL&amp;StrNom=NACE_REV2"
+           target="_blank" rel="noopener">NACE Rev. 2 reference ↗</a>
+      </li>
+      <li>
+        <strong>CPA 2015</strong> (statistical classification of products by activity).
+        The chemistry product map is defined in CPA 2015 terms at the 4-digit level
+        (<code>2011</code> to <code>2060</code>, plus <code>2110</code> for active
+        pharmaceutical ingredients) and mapped to 2025 CN 8-digit codes.
+        <a href="https://ec.europa.eu/eurostat/ramon/nomenclatures/index.cfm?TargetUrl=LST_NOM_DTL&amp;StrNom=CPA_2015"
+           target="_blank" rel="noopener">CPA 2015 reference ↗</a>
+      </li>
+      <li>
+        <strong>Combined Nomenclature (CN 8-digit)</strong>. Used for the Comext trade
+        drill-down. Scope spans 1,372 distinct codes across chapters 27-40 (mineral fuels,
+        organic and inorganic chemicals, pharmaceutical APIs, fertilisers, essential oils,
+        soaps, explosives, plastics, rubber). Labels (for example <em>polypeptide hormones</em>,
+        <em>heterocyclic compounds with nitrogen</em>) are pulled from the Comext nomenclature.
+        <a href="https://taxation-customs.ec.europa.eu/customs-4/combined-nomenclature-cn_en"
+           target="_blank" rel="noopener">Combined Nomenclature ↗</a>
+      </li>
+      <li>
+        <strong>EU27 membership</strong>. Aggregates follow the current EU27 definition
+        (<code>geo=EU27_2020</code>, post-Brexit); the UK is treated as a third country across
+        the whole history for consistency.
+      </li>
+    </ul>
+
+    <h2 class="iris-methodology-h3">3. Calculations</h2>
+    <div class="iris-calc-grid">
+      <div class="iris-calc-card">
+        <div class="iris-calc-name">Year-on-year (YoY)</div>
+        <code class="iris-calc-formula">(current − previous) ÷ previous × 100</code>
+        <p>Current period value against the same period one year earlier. Default window for monthly indicators.</p>
+      </div>
+      <div class="iris-calc-card">
+        <div class="iris-calc-name">Year-to-date (YTD)</div>
+        <code class="iris-calc-formula">Σ(first N months of Y) ÷ Σ(first N months of Y-1) − 1</code>
+        <p>Used for trade flows where a single-month reading is too noisy. Never mixed with
+          single-month figures in the same sentence without an explicit scope prefix.</p>
+      </div>
+      <div class="iris-calc-card">
+        <div class="iris-calc-name">Pre-crisis baseline</div>
+        <code class="iris-calc-formula">avg(2014 … 2019)</code>
+        <p>Six-year average (2014-2019) used to measure the structural gap opened by the 2022
+          energy shock. Quoted as "X below pre-crisis levels (2014-2019 average)".</p>
+      </div>
+      <div class="iris-calc-card">
+        <div class="iris-calc-name">Partner drill-down</div>
+        <code class="iris-calc-formula">Σ(value_current − value_prev) by CN8</code>
+        <p>For US, CN, GB: top 3 positive movers, top 3 negative movers, residual "Other"
+          bar so the totals reconcile. Labels from the Comext nomenclature.</p>
+      </div>
+      <div class="iris-calc-card">
+        <div class="iris-calc-name">Pareto concentration</div>
+        <code class="iris-calc-formula">top-N cumulative share ≥ 50% of Σ|Δ|</code>
+        <p>Triggers the Pareto framing in prose only when concentrated. Flat distributions get
+          a chapter-level breakdown instead.</p>
+      </div>
+      <div class="iris-calc-card">
+        <div class="iris-calc-name">Base-effect guards</div>
+        <code class="iris-calc-formula">5 signals → severity ∈ &#123;none, watch, warn, critical&#125;</code>
+        <p>Trade shock without industrial co-movement, ≤ 2 partners carrying > 75% of the
+          variation, comparison base > 2 sigma above its 12-month rolling mean, Δ vs N-2 less
+          than half Δ vs N-1, value/volume divergence > 2×.</p>
+      </div>
+    </div>
+
+    <h2 class="iris-methodology-h3">4. Pipeline</h2>
+    <ol class="iris-pipeline">
+      <li>
+        <span class="iris-pipeline-step">Fetch</span>
+        <p>
+          Pulls monthly STS series from the Eurostat JSON API for C20 production, prices, and
+          turnover, across the EU27 and the 27 member states. Trade data reads from a sibling
+          Comext ETL parquet, already filtered to chemistry (14M+ rows, 2002-present, monthly).
+          Raw cache written to a local folder keyed by reference month.
+        </p>
+      </li>
+      <li>
+        <span class="iris-pipeline-step">Process</span>
+        <p>
+          Computes YoY, YTD, pre-crisis deltas, per-country and per-sector breakdowns, partner
+          drill-downs, 60-month historical series, and the anomaly report. Outputs are one
+          self-contained fiche per section (output, prices, sales, trade_exports, trade_imports,
+          macro_brief) that drives both the prose drafting and the site rendering.
+        </p>
+      </li>
+      <li>
+        <span class="iris-pipeline-step">Draft</span>
+        <p>
+          Five sections drafted by Claude Sonnet with a canonical system prompt and the fiche
+          JSON as user message. Each draft is quality-gated (word count, banned connectors, zero
+          em dashes, zero bullets in the macro brief); on gate failure the request re-runs on
+          Opus and the best of the two is kept.
+        </p>
+      </li>
+      <li>
+        <span class="iris-pipeline-step">Macro brief</span>
+        <p>
+          The opening headline and 80-120 word paragraph are drafted from the already-reconciled
+          sections, under a dedicated prompt overlay. Anomaly-active mode expands the word
+          ceiling to 150 when a base-effect caveat is mandatory.
+        </p>
+      </li>
+      <li>
+        <span class="iris-pipeline-step">Visualise</span>
+        <p>
+          Index series and country bars are rendered as static SVG via matplotlib; long-arc
+          line charts, partner breakdowns, and waterfalls are rendered inline at site build
+          time from the fiches, so they scale cleanly in the zoom lightbox and accept hover
+          tooltips.
+        </p>
+      </li>
+      <li>
+        <span class="iris-pipeline-step">Build</span>
+        <p>
+          The pipeline emits a consolidated edition Markdown file into the Astro content
+          collection. Astro's static build wires charts, fiches, and the MDX body into the
+          dashboard template and the print-layout page.
+        </p>
+      </li>
+      <li>
+        <span class="iris-pipeline-step">Publish</span>
+        <p>
+          The static site is deployed to Azure Static Web Apps, redeploying
+          <code>iris.cefic.org</code> within 1-2 minutes of the publish trigger. The PDF is
+          generated by a headless Chromium pass over the print-layout page and committed
+          alongside the edition.
+        </p>
+      </li>
+    </ol>
+
+    <h2 class="iris-methodology-h3">5. Scheduled jobs</h2>
+    <ul class="iris-docs-list">
+      <li>
+        <strong>Monthly edition run.</strong> The full pipeline fires once the Eurostat STS
+        release for month M is available (typically around the 15th of month M+2). No fixed
+        cron yet; triggered manually until the release-watcher is wired.
+      </li>
+      <li>
+        <strong>Comext ETL refresh.</strong> Weekly on Monday 06:00. The ETL regenerates the
+        chemistry-filtered trade parquet, so Iris picks up revised trade figures on the next
+        pipeline run.
+      </li>
+      <li>
+        <strong>Selective regeneration.</strong> Three one-shot jobs cover the common
+        mid-edition adjustments without replaying the whole pipeline: macro brief only,
+        macro brief + trade sections, or a fiche-enrichment pass that adds partner_drilldown
+        and 60-month historical series to existing fiches.
+      </li>
+      <li>
+        <strong>PDF refresh.</strong> A standalone job regenerates the edition PDF when
+        the print-layout changes without the content having moved.
+      </li>
+    </ul>
+
+    <h2 class="iris-methodology-h3">6. Editorial engine</h2>
+    <p class="iris-methodology-p">
+      All prose is written by an LLM under a 500-line style guide derived from Cefic's
+      Facts &amp; Figures and Chemical Trends Reports corpus, synthesised into 24 editorial
+      patterns. Twenty MUST rules and a dozen SHOULD rules shape the Iris voice.
+    </p>
+    <ul class="iris-docs-list">
+      <li><strong>§1.13</strong> Anomaly disclosure mandatory when severity ≥ <code>warn</code>. Base-effect caveat placed immediately after the opening finding.</li>
+      <li><strong>§1.14</strong> Temporal scope consistency. YTD and single-month figures never juxtaposed in the same sentence without explicit prefix.</li>
+      <li><strong>§1.17</strong> Canonical trade triptych. Variation % + absolute level + absolute delta, never condensed into an ambiguous construction.</li>
+      <li><strong>§1.18</strong> No em dashes (U+2014). Absolute rule, enforced by the quality gate.</li>
+      <li><strong>§1.19</strong> Key-partner symmetry. US / CN / GB covered with at least one dedicated sentence each.</li>
+      <li><strong>§1.20</strong> Every chart placeholder is preceded by at least one prose sentence.</li>
+      <li><strong>§5.11</strong> Partner drill-down templates (Template A in sections, Template B in macro brief).</li>
+      <li><strong>§5.12</strong> CN8 labels truncated at 40-60 chars with the 8-digit code always cited first.</li>
+    </ul>
+
+    <div class="iris-methodology-note">
+      <p>
+        Iris is published under the Cefic economics team byline. For questions, corrections,
+        or data revisions, reach the team via
+        <a href="https://cefic.org/media-corner/" target="_blank" rel="noopener">cefic.org/media-corner</a>.
+      </p>
+    </div>
+  </section>
+</Layout>
