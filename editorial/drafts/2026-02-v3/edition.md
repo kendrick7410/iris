@@ -1,7 +1,7 @@
 ---
 month: 2026-02
 publication_date: 2026-04-23
-pipeline_version: 0.3.0
+pipeline_version: 0.2.0
 ---
 
 ## EU27 chemical exports fall 42% in February, distorted by anomalous 2025 base
@@ -18,10 +18,10 @@ Chemical production underperformed total manufacturing, which declined by just 0
 
 Country trends show significant variation across the EU27. The Netherlands experienced the steepest decline at 9.6%, followed by Italy (6.9%) and Germany (3.5%). Spain fell 3.3%, Poland declined 2.1%, and Belgium dropped 1.2%. Only France gained, at 1.1%.
 
-<img src="/charts/2026-02/output_index.svg" alt="output_index" />
+{{chart:output_index}}
 Source: Cefic analysis based on Eurostat data (2026)
 
-<img src="/charts/2026-02/output_yoy_country.svg" alt="output_yoy_country" />
+{{chart:output_yoy_country}}
 Source: Cefic analysis based on Eurostat data (2026)
 
 ---
@@ -34,10 +34,10 @@ Chemical prices fell more sharply than total manufacturing, which remained broad
 
 The Netherlands experienced the steepest price decline at 9.2%, followed by Belgium (5.5%) and France (3.0%). Germany reported a 1.7% decrease, while Spain matched the EU27 average at 2.8%. Italy posted the smallest decline at 0.3%. Poland decreased by 1.9%.
 
-<img src="/charts/2026-02/prices_index.svg" alt="prices_index" />
+{{chart:prices_index}}
 Source: Cefic analysis based on Eurostat data (2026)
 
-<img src="/charts/2026-02/prices_yoy_country.svg" alt="prices_yoy_country" />
+{{chart:prices_yoy_country}}
 Source: Cefic analysis based on Eurostat data (2026)
 
 ---
@@ -50,10 +50,10 @@ Germany experienced the steepest decline at 8.0%, followed by the Netherlands (1
 
 Among manufacturing sectors, pharmaceuticals recorded the largest drop at 24.4%, while motor vehicles and basic metals gained 4.9% and 4.7% respectively. These chemical sales trends by country show a fragmented Europe.
 
-<img src="/charts/2026-02/turnover_index.svg" alt="turnover_index" />
+{{chart:turnover_index}}
 Source: Cefic analysis based on Eurostat data (2026)
 
-<img src="/charts/2026-02/turnover_yoy_country.svg" alt="turnover_yoy_country" />
+{{chart:turnover_yoy_country}}
 Source: Cefic analysis based on Eurostat data (2026)
 
 ---
@@ -90,5 +90,5 @@ Imports from the United Kingdom declined by 13.3% to €1.5 bn in February 2026,
 
 With 5 CN chapters accounting for 73% of imports, the product base shows moderate concentration. Organic chemicals remained the largest import category at €9.2 bn, virtually unchanged from 2025 (down 0.3%). Miscellaneous chemical products fell by 9.1% to €1.8 bn, while plastics and articles thereof dropped by 18.4% to €1.6 bn.
 
-<img src="/charts/2026-02/trade_imports_waterfall_cn8.svg" alt="trade_imports_waterfall_cn8" />
+{{chart:trade_imports_waterfall_cn8}}
 Source: Cefic analysis based on Eurostat data (2026)
