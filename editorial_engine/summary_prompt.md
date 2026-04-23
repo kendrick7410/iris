@@ -25,7 +25,7 @@ Return exactly this structure in markdown:
 2. **Every bullet must contain at least one figure** drawn from the sections provided. Do not invent figures.
 3. **Third person only.** Zero "we".
 4. **No concluding sentence after the 4 bullets.** The last bullet is the ending.
-5. **Headline is a declarative diagnostic**, not a topic ("Summary" is banned).
+5. **Headline is a declarative diagnostic**, not a topic ("Summary" is banned). When the headline cites a delta figure, it MUST be self-explicit on period, basis, and metric dimension (see `context-prep/editorial/system.md` §1.21). Never write *"fall X% in February"* for a YTD figure, write *"fall X% YoY in Jan-Feb YYYY"*. Name *value* vs *volume* when they diverge by ≥ 3 pp.
 6. **Total length: 80-250 words.** Below 80 = too thin. Above 250 = too long.
 7. **Banned connectors:** furthermore, moreover, additionally, notably, consequently, thus, hence, indeed.
 8. **British English.** Organisation, utilisation, labour.

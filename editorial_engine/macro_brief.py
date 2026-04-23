@@ -79,6 +79,32 @@ def _strip_heading(text: str) -> tuple:
     return heading, body
 
 
+_MONTH_TOKEN = (
+    r"(?:January|February|March|April|May|June|July|August|September|"
+    r"October|November|December|"
+    r"Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)"
+)
+
+
+def _heading_scope_ok(heading: str) -> bool:
+    # Enforces system.md §1.21: a heading with a % delta must be self-explicit
+    # on period. Specifically, any "in <Month>" citation must be followed by a
+    # 4-digit year OR by a compound window like "Jan-Feb 2026". A bare
+    # "in February" next to a % is the forbidden pattern (reader cannot tell
+    # single-month vs YTD).
+    if not heading:
+        return False
+    if not re.search(r"\d+(?:\.\d+)?\s*%", heading):
+        return True
+    bare_month = re.compile(
+        rf"\bin\s+{_MONTH_TOKEN}\b"
+        rf"(?!\s+\d{{4}})"
+        rf"(?!\s*[-–]\s*{_MONTH_TOKEN}\s+\d{{4}})",
+        re.IGNORECASE,
+    )
+    return not bool(bare_month.search(heading))
+
+
 def _quality_check(text: str, anomaly_active: bool = False) -> dict:
     """Gate the macro brief against Cefic register rules.
 
@@ -92,6 +118,7 @@ def _quality_check(text: str, anomaly_active: bool = False) -> dict:
     banned = [c for c in BANNED_CONNECTORS if c in body.lower()]
     has_heading = bool(heading)
     em_dashes = text.count("—")  # §1.18 absolute ban
+    heading_scope_ok = _heading_scope_ok(heading)  # §1.21
 
     word_floor = 80
     word_ceiling = 150 if anomaly_active else 120
@@ -109,11 +136,13 @@ def _quality_check(text: str, anomaly_active: bool = False) -> dict:
         "banned_ok": len(banned) == 0,
         "em_dashes": em_dashes,
         "em_dashes_ok": em_dashes == 0,
+        "heading_scope_ok": heading_scope_ok,
         "anomaly_active": anomaly_active,
         "word_ceiling": word_ceiling,
         "pass": (has_heading and word_floor <= words <= word_ceiling
                  and bullets == 0 and numbers >= 3
-                 and len(banned) == 0 and em_dashes == 0),
+                 and len(banned) == 0 and em_dashes == 0
+                 and heading_scope_ok),
     }
 
 
@@ -218,7 +247,8 @@ def draft_macro_brief(
 
     if opus_text and sonnet_text:
         opus_viol = sum(1 for k in ["has_heading", "words_ok", "bullets_ok",
-                                     "numbers_ok", "banned_ok", "em_dashes_ok"] if not opus_qc[k])
+                                     "numbers_ok", "banned_ok", "em_dashes_ok",
+                                     "heading_scope_ok"] if not opus_qc[k])
         sonnet_viol = sum(1 for k in ["has_heading", "words_ok", "bullets_ok",
                                        "numbers_ok", "banned_ok", "em_dashes_ok"] if not sonnet_qc[k])
         best_text = opus_text if opus_viol <= sonnet_viol else sonnet_text

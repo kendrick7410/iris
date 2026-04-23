@@ -32,6 +32,16 @@ No bullet list. No sub-headings. No trailing source line (the KPI cards carry th
 ## Rules specific to the macro brief
 
 1. **Heading is a declarative finding with a figure**, not a topic label. *"EU27 chemical output sits 18% below pre-crisis levels in February 2026"* ✓, *"February 2026 report"* ✗. Follow Pattern 4 and `system.md` §2 rules 6 and 7.
+
+   **Heading self-explicitness (non-negotiable, `system.md` §1.21).** The heading MUST be self-contained on three axes: period, basis, metric dimension. A reader seeing only the heading, with no paragraph underneath, MUST be able to answer *X% of what, compared to what, over what window?*
+
+   - **Period.** If the figure is YTD, write the explicit window (*"in Jan-Feb 2026"*, *"in the first two months of 2026"*). Never write *"in February"* for a YTD figure. Single-month figures include the year: *"in February 2026"*.
+   - **Basis.** Name *"YoY"*, *"vs 2024"*, *"vs pre-crisis"* when the comparison is not already carried by the wording.
+   - **Metric dimension.** When value and volume diverge by ≥ 3 pp, name the dimension: *"export value"*, *"export volume"*. Never cite a value figure under a generic *"exports fall X%"* framing when volume tells a different story.
+
+   ❌ *"EU27 chemical exports fall 42% in February, distorted by anomalous 2025 base"* (period / basis / dimension all ambiguous)
+
+   ✅ *"EU27 chemical export value falls 42% YoY in Jan-Feb 2026, distorted by anomalous 2025 base"*
 2. **Paragraph length: 80–120 words**, extended to **80–150 words** when any fiche (trade or other) carries `anomaly_report.severity` ≥ `"warn"`, to accommodate the mandatory base-effect caveat (§1.13 of system.md). Below the floor = too thin, above the ceiling = too long. Count words, not characters.
 3. **Minimum 3 distinct figures** in the paragraph. The KPI cards already carry their own numbers, the paragraph must add further numbers (country breakdown, sub-sector context, pre-crisis gap, trade partner rank, etc.), not paraphrase the cards.
 4. **Triple temporality is encouraged**, up to 3 windows (per `system.md` §2 rule 8). Long windows must be named in words: *"between 2020 and 2025"*, *"over the past five years"*, *"since March 2022"*. Never abbreviate to *"5Y"* or *"YoY"* in prose.
@@ -46,6 +56,9 @@ No bullet list. No sub-headings. No trailing source line (the KPI cards carry th
 ## Self-check before output
 
 - [ ] Heading is declarative with a figure, not a label
+- [ ] Heading names the period explicitly (no bare *"in February"* for a YTD figure)
+- [ ] Heading names the comparison basis (YoY / vs 2024 / vs pre-crisis) unless it is a pure level statement
+- [ ] Heading names the metric dimension (value / volume / turnover / output) when value and volume diverge
 - [ ] Paragraph is 80–120 words (count them)
 - [ ] At least 3 figures in the paragraph beyond what the KPI cards carry
 - [ ] Up to 3 time windows, each explicit in words

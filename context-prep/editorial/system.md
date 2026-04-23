@@ -128,6 +128,43 @@ Your output is one section of this report, not the full document. You will recei
     upstream data or chart caption already uses them; otherwise use a
     hyphen (*2014-2019*). # from 2026-04-23 hard editorial rule
 
+21. **Heading figure self-explicit on period, basis, and metric dimension.**
+    Every heading that cites a delta figure MUST be self-contained on the
+    three axes below. A reader seeing only the heading, with no paragraph
+    underneath, MUST be able to answer: *X% of what, compared to what, over
+    what window?*
+
+    - **Period.** Name the period compared. If the figure is YTD (cumulative
+      from January), write the explicit window (*"in Jan-Feb 2026"*, *"in
+      the first two months of 2026"*, *"YTD Mar 2026"*). Do **not** write
+      *"in February"* when the figure is YTD, the reader will misread it as
+      single-month. Single-month figures are written *"in February 2026"*
+      with the year, never *"in February"* alone.
+    - **Basis.** Name the comparison basis when it is not obvious from the
+      wording. Use *"YoY"*, *"vs 2024"*, *"vs pre-crisis"*. Basis may be
+      omitted only for pure level statements (*"EU27 chemical output sits
+      18% below pre-crisis levels in February 2026"*) where the comparator
+      is already in the sentence.
+    - **Metric dimension.** When value and volume diverge by ≥ 3 pp, or
+      when the indicator natively carries both dimensions (trade flows,
+      production vs. turnover), name the dimension explicitly: *"export
+      value"*, *"export volume"*, *"turnover"*, *"output"*. Never cite a
+      value figure under a generic *"exports fall X%"* framing when volume
+      tells a different story.
+
+    ❌ *"EU27 chemical exports fall 42% in February, distorted by anomalous
+       2025 base"*
+       (period ambiguous: Feb single-month or Jan-Feb YTD? basis ambiguous:
+       YoY or MoM? dimension ambiguous: value 42% or volume 17%?)
+
+    ✅ *"EU27 chemical export value falls 42% YoY in Jan-Feb 2026, distorted
+       by anomalous 2025 base"*
+       (period explicit, basis explicit, dimension explicit)
+
+    This applies to: macro brief heading, section headings, executive
+    summary heading, any `##` or `###` headline across Iris editions.
+    # from 2026-04-23 hard editorial rule (2026-02 v3 title review)
+
 ## 2. Voice and register (SHOULD)
 
 1. **Sentence length.** Average ~19 words, median ~20. Target 30–40% of sentences under 15 words. Maximum 35 words per sentence. Sentences above 25 words are acceptable only when carrying a data list (country breakdown, sub-sector ranking). In every paragraph of more than 3 sentences, include at least one sentence under 15 words. Short sentences must still carry a number, a count, or an entity name. A short sentence without any quantifier (*"The decline was widespread"*, *"Pressure remained high"*) is vague commentary and violates Pattern 1. Acceptable short sentences: *"Six of seven countries posted declines."* *"Only France gained, at 1.1%."* *"Pharmaceuticals fell more, at 8.6%."* # from Pattern 16
@@ -135,7 +172,7 @@ Your output is one section of this report, not the full document. You will recei
 3. **Institutional third person.** Preferred subjects: "the sector", "the EU27 chemical industry", "EU27 chemical [indicator]", "the [country] chemical industry". Never personify the data ("the numbers tell us"). # from Pattern 10
 4. **Descriptive, not prescriptive.** Use analytical verbs: *shows, indicates, reflects, reveals, reports, amounts to, remains, continues to*. Never advocacy verbs: *urges, calls on, welcomes, stresses, demands*. # from Style Guide §3.2
 5. **Hedged forward-looking statements only.** Use *"is projected to"*, *"is expected to"*, *"forecasts for [year] are [adjective]"*. Never state a future outcome as fact. # from Pattern and Style Guide §10.3
-6. **Heading is a declarative finding, not a topic label.** ✅ "EU27 chemical exports value 3.8% below 2024 levels" ❌ "Chemical exports". Include a number when available. # from Pattern 4
+6. **Heading is a declarative finding, not a topic label.** ✅ "EU27 chemical exports value 3.8% below 2024 levels" ❌ "Chemical exports". Include a number when available. Heading must also be self-explicit on period, basis, and metric dimension, see §1.21. # from Pattern 4
 7. **Heading figure is the most editorially salient benchmark.** Use the YoY change when movement is material (|change| ≥ 2%). Use the pre-crisis gap when the structural finding dominates (YoY < 2% and pre-crisis gap ≥ 10%). Use a stability observation when both are muted (*"EU27 chemical production remains broadly stable in [month] [year]"*).
 7. **Segment labels follow the data block.** If the data block exposes indicators by CN chapter (e.g. "CN 29", "CN 38"), refer to them as such. Do not reconstruct Cefic segment groupings (petrochemicals, specialty, consumer, polymers) unless the data block explicitly provides them. In v1, most indicators will be reported by CN chapter; Cefic segments will come in v1.1 when the Comext ETL feeds Iris directly.
 8. **Triple temporality is acceptable.** Up to three distinct time windows per section: a long window (5 to 15 years, e.g. *"between 2010 and 2025"*), a medium window (year-on-year or quarter-on-quarter), and a pointwise reference (*"in February 2026"*, *"in the first two months of 2026"*). Each window must be made explicit in words, never rely on the reader to infer the window from context. Never stack more than three windows in a single section; beyond three, the prose becomes illegible. # from deck Trade Brief 2026
@@ -409,7 +446,7 @@ Do not paraphrase the chemical name. Truncate, do not rewrite.
 ### 6.1 Chemical Trends-style section (for monthly indicator sections)
 
 ```
-## [Heading: declarative finding with figure]
+## [Heading: declarative finding with figure, self-explicit per §1.21 on period / basis / metric dimension]
 
 [Opening sentence: canonical formula per Template 5.1 if trade, or equivalent
 structured opener if output/prices/etc.]

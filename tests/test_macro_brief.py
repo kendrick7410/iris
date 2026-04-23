@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from editorial_engine.macro_brief import _quality_check, _strip_heading
+from editorial_engine.macro_brief import _quality_check, _strip_heading, _heading_scope_ok
 from analysis.indicators import build_macro_brief_fiche
 
 
@@ -92,6 +92,34 @@ def test_quality_check_catches_bullets():
     qc = _quality_check(text)
     assert not qc["bullets_ok"]
     print(f"  bullets caught: {qc['bullets']}")
+
+
+def test_heading_scope_catches_bare_month_with_pct():
+    # 2026-02 v3 regression: "42% in February" is ambiguous (single-month or YTD?).
+    # system.md §1.21: headings with a % delta MUST name the period explicitly.
+    bad = "## EU27 chemical exports fall 42% in February, distorted by anomalous 2025 base"
+    good_ytd = "## EU27 chemical export value falls 42% YoY in Jan-Feb 2026, distorted by anomalous 2025 base"
+    good_single = "## EU27 chemical output sits 18% below pre-crisis levels in February 2026"
+    good_year_only = "## EU27 chemical sales decline by 5.7% in 2025"
+    good_no_pct = "## Chemical exports fall in February"
+
+    assert not _heading_scope_ok(bad), bad
+    assert _heading_scope_ok(good_ytd), good_ytd
+    assert _heading_scope_ok(good_single), good_single
+    assert _heading_scope_ok(good_year_only), good_year_only
+    assert _heading_scope_ok(good_no_pct), good_no_pct
+
+    # Quality check propagates the flag into pass.
+    body = (
+        "\n\nEU27 chemical production stood at 79.3 in February 2026, down by "
+        "3.9% compared to February 2025. The sector remains 18.0% below "
+        "pre-crisis levels (2014-2019 average). Poland posted the strongest "
+        "growth at 3.1% while Belgium declined by 4.5%."
+    )
+    qc = _quality_check(bad + body)
+    assert not qc["heading_scope_ok"], qc
+    assert not qc["pass"], qc
+    print("  heading_scope_ok catches bare-month + % ambiguity")
 
 
 def test_strip_heading():
@@ -179,6 +207,7 @@ if __name__ == "__main__":
     test_quality_check_pass()
     test_quality_check_catches_banned()
     test_quality_check_catches_bullets()
+    test_heading_scope_catches_bare_month_with_pct()
     test_strip_heading()
     test_build_macro_brief_fiche_three_kpis()
     test_build_macro_brief_fiche_four_kpis_with_capacity()
