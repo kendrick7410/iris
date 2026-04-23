@@ -36,6 +36,95 @@ const loadFiche = (name: string): any | null => {
 const tradeExports = loadFiche('trade_exports');
 const tradeImports = loadFiche('trade_imports');
 const macroFiche   = loadFiche('macro_brief');
+const outputFiche  = loadFiche('output');
+const pricesFiche  = loadFiche('prices');
+const salesFiche   = loadFiche('sales');
+
+// ---------- Smooth inline SVG line chart helper ----------
+type SeriesPoint = { period: string; value: number };
+type SparkSpec = {
+  id: string;
+  points: SeriesPoint[];
+  stroke: string;
+  unit: string;
+  // yoy is computed inside buildSpark to render a small delta badge
+};
+
+const buildSpark = (series: SeriesPoint[] | null | undefined, stroke: string, unit: string) => {
+  if (!series || series.length < 2) return null;
+  const W = 600, H = 240;
+  const padL = 48, padR = 24, padT = 20, padB = 36;
+  const w = W - padL - padR;
+  const h = H - padT - padB;
+
+  const values = series.map(s => s.value);
+  const vmin = Math.min(...values);
+  const vmax = Math.max(...values);
+  const vpad = (vmax - vmin) * 0.12 || 1;
+  const ymin = vmin - vpad;
+  const ymax = vmax + vpad;
+
+  const pts = series.map((s, i) => {
+    const x = padL + (i / (series.length - 1)) * w;
+    const y = padT + (1 - (s.value - ymin) / (ymax - ymin)) * h;
+    return { x, y, period: s.period, value: s.value };
+  });
+
+  // Catmull-Rom -> cubic Bezier
+  const P = pts;
+  let d = `M ${P[0].x.toFixed(2)} ${P[0].y.toFixed(2)}`;
+  for (let i = 1; i < P.length; i++) {
+    const p0 = P[i-2] || P[i-1];
+    const p1 = P[i-1];
+    const p2 = P[i];
+    const p3 = P[i+1] || P[i];
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+  }
+
+  // Area fill path (line + down + left + up)
+  const areaD = d
+    + ` L ${P[P.length-1].x.toFixed(2)} ${(padT + h).toFixed(2)}`
+    + ` L ${P[0].x.toFixed(2)} ${(padT + h).toFixed(2)} Z`;
+
+  // Axis ticks: X = every 2 months, Y = 3 gridlines
+  const xTicks = series.map((s, i) => ({ i, period: s.period }))
+    .filter((_, i) => i % Math.max(1, Math.floor(series.length / 6)) === 0 || i === series.length - 1);
+  const yTicks = [0, 0.5, 1].map(f => {
+    const v = ymin + (ymax - ymin) * (1 - f);
+    const y = padT + f * h;
+    return { y, v };
+  });
+
+  // YoY delta: first vs last
+  const first = series[0].value;
+  const last  = series[series.length - 1].value;
+  const deltaPct = ((last - first) / first) * 100;
+
+  return {
+    W, H, padL, padR, padT, padB, w, h,
+    pts, d, areaD, xTicks, yTicks,
+    stroke, unit,
+    current: last,
+    deltaPct,
+    first, last,
+    periodStart: series[0].period,
+    periodEnd: series[series.length - 1].period,
+  };
+};
+
+const fmtMonth = (ym: string) => {
+  const [y, m] = ym.split('-');
+  const d = new Date(Number(y), Number(m) - 1, 1);
+  return d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+};
+
+const outputSpark = buildSpark(outputFiche?.data?.monthly_series, 'var(--cefic-orange)', 'Index (2021=100)');
+const pricesSpark = buildSpark(pricesFiche?.data?.monthly_series, 'var(--cefic-blue-1)',  'Index (2021=100)');
+const salesSpark  = buildSpark(salesFiche?.data?.monthly_series,  'var(--cefic-green-1)', 'Index (2021=100)');
 
 // Chart helpers: confirm presence before referencing
 const chartsDir = path.resolve(`public/charts/${entry.id}`);
@@ -189,25 +278,24 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
       </div>
 
       <div class="iris-cols iris-view-body">
-        {has60mBalance ? (
-          <figure class="iris-chart iris-chart--wide">
+        {has60mBalance && (
+          <figure class="iris-chart">
             <figcaption class="iris-chart-caption">
               EU27 chemical trade balance, 60-month context. The Q1 2025 spike reflects
               pre-tariff front-loading ahead of US trade measures; the February 2026
               reading sits at €0.21 bn, down €12.21 bn from 2025.
             </figcaption>
+            <button
+              class="iris-chart-zoom" type="button" aria-label="Zoom"
+              data-chart-src={chartUrl('trade_balance_monthly_60m')}
+              data-chart-title="EU27 chemical trade balance, 60 months"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />
+              </svg>
+            </button>
             <img src={chartUrl('trade_balance_monthly_60m')} alt="EU27 chemical trade balance, 60 months" />
           </figure>
-        ) : (
-          <div class="iris-panel">
-            <h3 class="iris-panel-title">Key takeaway</h3>
-            <p>
-              The EU27 chemical industry reported a sharp contraction in the first two months of 2026,
-              with exports falling <strong>42.1%</strong> in value to €34.5 bn, a figure heavily
-              distorted by pre-tariff front-loading in February 2025 that created an unusually high
-              comparison base.
-            </p>
-          </div>
         )}
 
         <div class="iris-panel">
@@ -239,24 +327,49 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
       </header>
 
       <div class="iris-chart-row">
-        {hasOutputIdx && (
-          <figure class="iris-chart iris-chart--third">
-            <figcaption class="iris-chart-caption">Output index (2021=100)</figcaption>
-            <img src={chartUrl('output_index')} alt="EU27 chemical output index" />
+        {[
+          { spark: outputSpark, id: 'chart-output-spark',  label: 'Output index',     title: 'EU27 chemical output, index (2021=100), monthly' },
+          { spark: pricesSpark, id: 'chart-prices-spark',  label: 'Producer prices',  title: 'EU27 chemical producer prices, index (2021=100), monthly' },
+          { spark: salesSpark,  id: 'chart-sales-spark',   label: 'Chemical sales',   title: 'EU27 chemical sales, index (2021=100), monthly' },
+        ].map(({ spark, id, label, title }) => spark && (
+          <figure class="iris-chart iris-chart--third" id={id}>
+            <figcaption class="iris-chart-caption">{label} (2021=100)</figcaption>
+            <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                    data-chart-target={`#${id}`} data-chart-title={title}>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+            </button>
+            <div class="iris-sparkheader">
+              <span class="iris-sparkheader-value">{spark.current.toFixed(1)}</span>
+              <span class={`iris-sparkheader-delta is-${spark.deltaPct >= 0 ? 'pos' : 'neg'}`}>
+                {spark.deltaPct >= 0 ? '+' : ''}{spark.deltaPct.toFixed(1)}% since {fmtMonth(spark.periodStart)}
+              </span>
+            </div>
+            <svg class="iris-sparkchart" viewBox={`0 0 ${spark.W} ${spark.H}`} xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              {spark.yTicks.map((t: any) => (
+                <>
+                  <line class="gridline" x1={spark.padL} x2={spark.W - spark.padR} y1={t.y} y2={t.y} />
+                  <text class="axis-text" x={spark.padL - 6} y={t.y + 3} text-anchor="end">{t.v.toFixed(0)}</text>
+                </>
+              ))}
+              <path class="spark-area" d={spark.areaD} fill={spark.stroke} />
+              <path class="spark-line" d={spark.d} stroke={spark.stroke} />
+              {spark.pts.map((p: any, i: number) => (
+                <circle class="spark-point" cx={p.x} cy={p.y} r={i === spark.pts.length - 1 ? 4.5 : 2.5}
+                        fill={spark.stroke} />
+              ))}
+              {spark.xTicks.map((t: any) => (
+                <text class="axis-text" x={spark.padL + (t.i / (spark.pts.length - 1)) * spark.w}
+                      y={spark.H - 14} text-anchor="middle">{fmtMonth(t.period)}</text>
+              ))}
+              <text class="spark-value"
+                    x={spark.pts[spark.pts.length - 1].x - 4}
+                    y={spark.pts[spark.pts.length - 1].y - 10}
+                    text-anchor="end" fill={spark.stroke}>
+                {spark.last.toFixed(1)}
+              </text>
+            </svg>
           </figure>
-        )}
-        {hasPricesIdx && (
-          <figure class="iris-chart iris-chart--third">
-            <figcaption class="iris-chart-caption">Producer prices (2021=100)</figcaption>
-            <img src={chartUrl('prices_index')} alt="EU27 chemical producer prices" />
-          </figure>
-        )}
-        {hasTurnoverIdx && (
-          <figure class="iris-chart iris-chart--third">
-            <figcaption class="iris-chart-caption">Chemical sales (2021=100)</figcaption>
-            <img src={chartUrl('turnover_index')} alt="EU27 chemical sales" />
-          </figure>
-        )}
+        ))}
       </div>
 
       <div class="iris-cols iris-view-body">
@@ -306,12 +419,17 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
       </header>
 
       {has60mPartner && (
-        <figure class="iris-chart iris-chart--wide">
+        <figure class="iris-chart iris-chart--wide iris-chart--tall">
           <figcaption class="iris-chart-caption">
             EU27 chemical exports by partner, 60-month context. The United States (orange) pulled
             away from the cluster through 2022-2024, peaked in February 2025 (pre-tariff
             front-loading), and retraced toward the China/UK band in early 2026.
           </figcaption>
+          <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                  data-chart-src={chartUrl('exports_by_partner_60m')}
+                  data-chart-title="EU27 chemical exports by partner (US, GB, CN, CH, Other), 60 months">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+          </button>
           <img src={chartUrl('exports_by_partner_60m')} alt="EU27 chemical exports by partner, 60 months" />
         </figure>
       )}
@@ -352,11 +470,16 @@ const hasImpWaterfall = chartExists('trade_imports_waterfall_cn8');
       )}
 
       {hasImpWaterfall && (
-        <figure class="iris-chart iris-chart--wide">
+        <figure class="iris-chart iris-chart--wide iris-chart--tall">
           <figcaption class="iris-chart-caption">
             Imports drill-down, top CN 8-digit codes explain the month's movement. Bars show each
             product's contribution to the net change; the tallest bars carry the causal weight.
           </figcaption>
+          <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                  data-chart-src={chartUrl('trade_imports_waterfall_cn8')}
+                  data-chart-title="Imports drill-down, top CN 8-digit contributions (waterfall)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+          </button>
           <img src={chartUrl('trade_imports_waterfall_cn8')} alt="Imports waterfall, CN 8-digit" />
         </figure>
       )}

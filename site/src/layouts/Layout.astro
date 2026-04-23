@@ -68,6 +68,14 @@ const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
 
   <slot />
 
+  <!-- Chart lightbox (global: available on every page) -->
+  <dialog class="iris-lightbox" id="iris-lightbox" aria-label="Chart zoom">
+    <button class="iris-lightbox-close" id="iris-lightbox-close" type="button" aria-label="Close">×</button>
+    <div class="iris-lightbox-caption" id="iris-lightbox-caption"></div>
+    <img class="iris-lightbox-img" id="iris-lightbox-img" alt="" />
+    <div class="iris-lightbox-inline" id="iris-lightbox-inline"></div>
+  </dialog>
+
   {variant !== 'dashboard' && (
     <footer class="iris-footer">
       <div class="iris-footer-inner">
@@ -123,6 +131,61 @@ const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
       };
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+    // Chart lightbox (any figure with .iris-chart-zoom button)
+    (function () {
+      const dlg    = document.getElementById('iris-lightbox');
+      const img    = document.getElementById('iris-lightbox-img');
+      const cap    = document.getElementById('iris-lightbox-caption');
+      const inline = document.getElementById('iris-lightbox-inline');
+      const close  = document.getElementById('iris-lightbox-close');
+      if (!dlg || !img || !inline) return;
+
+      const showImg = (src, title) => {
+        img.src = src;
+        img.alt = title || '';
+        img.style.display = 'block';
+        inline.innerHTML = '';
+      };
+      const showInline = (targetSel, title) => {
+        const src = document.querySelector(targetSel);
+        if (!src) return;
+        img.style.display = 'none';
+        img.src = '';
+        // Clone the SVG so IDs don't collide; strip the zoom button copy
+        const clone = src.cloneNode(true);
+        clone.querySelectorAll('.iris-chart-zoom').forEach(el => el.remove());
+        inline.innerHTML = '';
+        inline.appendChild(clone);
+      };
+
+      const open = (btn) => {
+        const title = btn.dataset.chartTitle || '';
+        cap.textContent = title;
+        if (btn.dataset.chartTarget) showInline(btn.dataset.chartTarget, title);
+        else if (btn.dataset.chartSrc) showImg(btn.dataset.chartSrc, title);
+        if (typeof dlg.showModal === 'function') dlg.showModal();
+        else dlg.setAttribute('open', '');
+      };
+      const closeLightbox = () => {
+        if (typeof dlg.close === 'function') dlg.close();
+        else dlg.removeAttribute('open');
+        img.src = '';
+        inline.innerHTML = '';
+      };
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.iris-chart-zoom');
+        if (btn) {
+          e.preventDefault();
+          open(btn);
+          return;
+        }
+        if (e.target === dlg) closeLightbox();
+      });
+      close?.addEventListener('click', closeLightbox);
+      dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeLightbox(); });
     })();
   </script>
 </body>

@@ -186,6 +186,33 @@ def _prev_month(ym: str) -> str:
     return f"{y - 1:04d}-{m:02d}"
 
 
+def _cache_monthly_series(month: str, cache_file: str) -> Optional[List[Dict]]:
+    """Read the EU27 monthly series from data/cache/{month}/{cache_file}.json.
+
+    Returns a chronological list of {period, value} or None if unavailable.
+    """
+    fp = PROJECT_ROOT / "data" / "cache" / month / f"{cache_file}.json"
+    if not fp.exists():
+        return None
+    try:
+        d = json.loads(fp.read_text(encoding="utf-8"))
+        eu = d.get("eu27") or {}
+        if not isinstance(eu, dict) or not eu:
+            return None
+        return [{"period": p, "value": round(float(v), 2)}
+                for p, v in sorted(eu.items()) if v is not None]
+    except Exception:
+        return None
+
+
+# Cache file -> fiche section mapping for the monthly index series
+_INDEX_SECTIONS = [
+    ("output",  "production"),   # fiche section_type / cache filename
+    ("prices",  "prices"),
+    ("sales",   "turnover"),
+]
+
+
 def enrich(month: str) -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
                         datefmt="%Y-%m-%dT%H:%M:%S", stream=sys.stderr)
@@ -199,6 +226,21 @@ def enrich(month: str) -> None:
     }
 
     fiches_dir = PROJECT_ROOT / "data" / "processed" / month / "fiches"
+
+    # Index fiches (output / prices / sales): add monthly_series from cache
+    for section_type, cache_file in _INDEX_SECTIONS:
+        fp = fiches_dir / f"{section_type}.json"
+        if not fp.exists():
+            continue
+        series = _cache_monthly_series(month, cache_file)
+        fiche = json.loads(fp.read_text(encoding="utf-8"))
+        if series:
+            fiche["data"]["monthly_series"] = series
+            fp.write_text(json.dumps(fiche, indent=2, ensure_ascii=False), encoding="utf-8")
+            logger.info(f"  {section_type}: monthly_series ({len(series)} points)")
+        else:
+            logger.warning(f"  {section_type}: no monthly_series available (cache missing)")
+
     for section_type, flow in (("trade_exports", FLOW_EXPORTS),
                                 ("trade_imports", FLOW_IMPORTS)):
         fp = fiches_dir / f"{section_type}.json"

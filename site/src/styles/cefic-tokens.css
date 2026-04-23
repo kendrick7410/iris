@@ -789,6 +789,15 @@ body.ov-active .iris-footer { display: none; }
 }
 .iris-view[data-active="true"] { display: flex; }
 
+/* Drill-down can overflow a single viewport (chart + cards + chart); let it
+   scroll vertically inside the locked dashboard frame. */
+.iris-view[data-view="drilldown"] {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding-right: 0.5rem;
+}
+
 .iris-view-header {
   display: flex;
   align-items: baseline;
@@ -913,7 +922,169 @@ body.ov-active .iris-footer { display: none; }
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
 }
+
+/* Zoom button: top-right corner of every chart figure */
+.iris-chart-zoom {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.iris-chart:hover .iris-chart-zoom,
+.iris-chart-zoom:focus-visible { opacity: 1; }
+.iris-chart-zoom:hover { border-color: var(--cefic-orange); color: var(--cefic-orange); }
+.iris-chart-zoom svg { width: 16px; height: 16px; }
+
+/* Lightbox dialog */
+.iris-lightbox {
+  max-width: 95vw;
+  max-height: 95vh;
+  width: 1200px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.iris-lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+.iris-lightbox[open] {
+  display: flex;
+  flex-direction: column;
+}
+.iris-lightbox-caption {
+  padding: 1rem 3rem 1rem 1.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-alt);
+  font-family: var(--iris-sans);
+}
+.iris-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(95vh - 80px);
+  object-fit: contain;
+  padding: 1.5rem;
+  background: var(--surface);
+  margin: 0 auto;
+}
+.iris-lightbox-inline {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: calc(95vh - 80px);
+  overflow: auto;
+}
+.iris-lightbox-inline:empty { display: none; }
+.iris-lightbox-inline > * {
+  width: 100%;
+  max-width: 100%;
+}
+.iris-lightbox-inline svg {
+  width: 100%;
+  height: auto;
+  max-height: calc(95vh - 120px);
+}
+
+/* Inline spark charts (macro brief) */
+.iris-sparkchart {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: var(--iris-sans);
+}
+.iris-sparkchart .axis-text {
+  font-size: 10px;
+  fill: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.iris-sparkchart .gridline {
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.iris-sparkchart .spark-area {
+  opacity: 0.08;
+}
+.iris-sparkchart .spark-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.iris-sparkchart .spark-point {
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+.iris-sparkchart .spark-value {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--ink);
+}
+
+.iris-sparkheader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem 0.3rem;
+  gap: 1rem;
+}
+.iris-sparkheader-value {
+  font-family: var(--iris-serif);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.iris-sparkheader-delta {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.iris-sparkheader-delta.is-neg { color: var(--cefic-orange-700); }
+.iris-sparkheader-delta.is-pos { color: var(--cefic-green-1); }
+.iris-lightbox-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-size: 1.6rem;
+  line-height: 1;
+  z-index: 2;
+}
+.iris-lightbox-close:hover { color: var(--cefic-orange); background: var(--surface-alt); }
 .iris-chart img {
   display: block;
   width: 100%;
@@ -925,6 +1096,8 @@ body.ov-active .iris-footer { display: none; }
 .iris-chart--wide  { grid-column: 1 / -1; }
 .iris-chart--half  { }
 .iris-chart--third { }
+.iris-chart--tall  { min-height: 360px; }
+.iris-chart--tall img { min-height: 300px; object-fit: contain; }
 
 .iris-chart-caption {
   order: -1;

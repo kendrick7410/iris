@@ -94,7 +94,65 @@
         "yoy_pct": 0.9
       }
     },
-    "source": "Cefic analysis based on Eurostat data (sts_inppd_m, 2026)"
+    "source": "Cefic analysis based on Eurostat data (sts_inppd_m, 2026)",
+    "monthly_series": [
+      {
+        "period": "2025-01",
+        "value": 119.4
+      },
+      {
+        "period": "2025-02",
+        "value": 120.6
+      },
+      {
+        "period": "2025-03",
+        "value": 120.5
+      },
+      {
+        "period": "2025-04",
+        "value": 119.1
+      },
+      {
+        "period": "2025-05",
+        "value": 117.7
+      },
+      {
+        "period": "2025-06",
+        "value": 117.4
+      },
+      {
+        "period": "2025-07",
+        "value": 117.2
+      },
+      {
+        "period": "2025-08",
+        "value": 117.1
+      },
+      {
+        "period": "2025-09",
+        "value": 116.9
+      },
+      {
+        "period": "2025-10",
+        "value": 116.5
+      },
+      {
+        "period": "2025-11",
+        "value": 116.7
+      },
+      {
+        "period": "2025-12",
+        "value": 116.6
+      },
+      {
+        "period": "2026-01",
+        "value": 116.8
+      },
+      {
+        "period": "2026-02",
+        "value": 117.2
+      }
+    ]
   },
   "charts": [
     "prices_index",
