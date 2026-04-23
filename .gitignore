@@ -3,7 +3,11 @@
 
 # Data (cached, not reproducible without API)
 data/cache/
-data/processed/
+data/processed/*
+# Keep fiches versioned: Astro site reads them at build time
+!data/processed/*/
+!data/processed/*/fiches/
+!data/processed/*/fiches/*.json
 
 # LLM logs (may contain system prompt excerpts)
 editorial/drafts/**/llm_log.jsonl

@@ -1,0 +1,112 @@
+{
+  "section_type": "output",
+  "period": {
+    "month": "2025-12",
+    "publication_date": "2026-04-21",
+    "window": "January-December 2025",
+    "window_months": 12,
+    "window_ordinal": null
+  },
+  "data": {
+    "current": {
+      "value": 80.5,
+      "unit": "index 2021=100",
+      "period": "2025-12",
+      "s_adj": "SCA"
+    },
+    "previous_year": {
+      "value": 79.8,
+      "period": "2024-12",
+      "delta_pct": 0.9
+    },
+    "pre_crisis_avg": {
+      "value": 96.7,
+      "base": "2014-2019 average, I15 converted to I21",
+      "delta_pct": -16.8
+    },
+    "ytd": {
+      "current_avg": 80.5,
+      "previous_year_avg": 81.4,
+      "delta_pct": -1.1
+    },
+    "by_country": {
+      "DE": {
+        "current": 74.5,
+        "previous_year": 77.8,
+        "yoy_pct": -4.2
+      },
+      "FR": {
+        "current": 90.4,
+        "previous_year": 90.8,
+        "yoy_pct": -0.4
+      },
+      "IT": {
+        "current": 82.6,
+        "previous_year": 85.7,
+        "yoy_pct": -3.6
+      },
+      "NL": {
+        "current": 77.4,
+        "previous_year": 78.9,
+        "yoy_pct": -1.9
+      },
+      "ES": {
+        "current": 94.5,
+        "previous_year": 94.5,
+        "yoy_pct": 0.0
+      },
+      "BE": {
+        "current": 86.4,
+        "previous_year": 90.5,
+        "yoy_pct": -4.5
+      },
+      "PL": {
+        "current": 101.1,
+        "previous_year": 98.1,
+        "yoy_pct": 3.1
+      }
+    },
+    "by_sector": {
+      "C": {
+        "label": "Total manufacturing",
+        "current": 101.1,
+        "previous_year": 98.7,
+        "yoy_pct": 2.4
+      },
+      "C20": {
+        "label": "Chemicals",
+        "current": 80.5,
+        "previous_year": 79.8,
+        "yoy_pct": 0.9
+      },
+      "C21": {
+        "label": "Pharmaceuticals",
+        "current": 154.3,
+        "previous_year": 154.4,
+        "yoy_pct": -0.1
+      },
+      "C24": {
+        "label": "Basic metals",
+        "current": 88.5,
+        "previous_year": 87.8,
+        "yoy_pct": 0.8
+      },
+      "C29": {
+        "label": "Motor vehicles",
+        "current": 103.1,
+        "previous_year": 97.6,
+        "yoy_pct": 5.6
+      }
+    },
+    "source": "Cefic analysis based on Eurostat data (sts_inpr_m, 2025)"
+  },
+  "charts": [
+    "output_index",
+    "output_yoy_country"
+  ],
+  "editorial_context": {
+    "latest_structural_break": "March 2022",
+    "notable_events": [],
+    "pre_crisis_reference": "2014-2019 average"
+  }
+}

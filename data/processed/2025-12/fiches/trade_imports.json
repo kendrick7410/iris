@@ -1,0 +1,562 @@
+{
+  "section_type": "trade_imports",
+  "period": {
+    "month": "2025-12",
+    "publication_date": "2026-04-21",
+    "window": "January-December 2025",
+    "window_months": 12,
+    "window_ordinal": null
+  },
+  "data": {
+    "current": {
+      "value_eur_bn": 16.7,
+      "volume_kt": 9648.1,
+      "period": "2025-12",
+      "unit_value": "\u20ac bn",
+      "unit_volume": "kt",
+      "scope": "Extra-EU27 trade (declarant=EU, partner \u2260 EU27), Comext CN 15/22/24/25\u201339 subset"
+    },
+    "previous_year": {
+      "value_eur_bn": 16.06,
+      "volume_kt": 6980.3,
+      "period": "2024-12",
+      "delta_pct_value": 4.0,
+      "delta_pct_volume": 38.2
+    },
+    "ytd": {
+      "current_value_eur_bn": 230.65,
+      "previous_year_value_eur_bn": 216.29,
+      "delta_pct_value": 6.6,
+      "current_volume_kt": 102817.0,
+      "previous_year_volume_kt": 91392.9,
+      "delta_pct_volume": 12.5,
+      "window_months": 12
+    },
+    "five_year_window": {
+      "start": "2020-12",
+      "end": "2025-12",
+      "value_eur_bn_start": 10.52,
+      "value_eur_bn_end": 16.7,
+      "delta_pct_value": 58.8,
+      "volume_kt_start": 7442.6,
+      "volume_kt_end": 9648.1,
+      "delta_pct_volume": 29.6
+    },
+    "by_partner": [
+      {
+        "rank": 1,
+        "partner": "CN",
+        "label": "China",
+        "value_eur_bn": 3.14,
+        "previous_year_value_eur_bn": 3.37,
+        "yoy_pct": -6.8,
+        "share_pct": 18.8,
+        "five_year_delta_pct_value": 139.7,
+        "five_year_delta_pct_volume": 194.4,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 1.1,
+            "share_of_partner_pct": 34.9
+          },
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.78,
+            "share_of_partner_pct": 24.9
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.4,
+            "share_of_partner_pct": 12.6
+          }
+        ]
+      },
+      {
+        "rank": 2,
+        "partner": "US",
+        "label": "United States",
+        "value_eur_bn": 3.08,
+        "previous_year_value_eur_bn": 2.75,
+        "yoy_pct": 12.1,
+        "share_pct": 18.5,
+        "five_year_delta_pct_value": 94.9,
+        "five_year_delta_pct_volume": 55.3,
+        "top_nace": [
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 1.12,
+            "share_of_partner_pct": 36.3
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.57,
+            "share_of_partner_pct": 18.4
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.54,
+            "share_of_partner_pct": 17.4
+          }
+        ],
+        "drill_down": {
+          "window": "2020-12..2025-12",
+          "delta_total_eur_bn": 1.5,
+          "covers_pct_of_delta": 54.7,
+          "cn8_codes": [
+            {
+              "code": "29371900",
+              "label_short": "Polypeptide hormones",
+              "contribution_eur_bn": 0.914,
+              "pct_of_delta": 36.6
+            },
+            {
+              "code": "38221900",
+              "label_short": "Diagnostic or laboratory reagents on\u2026",
+              "contribution_eur_bn": 0.264,
+              "pct_of_delta": 10.6
+            },
+            {
+              "code": "29371200",
+              "label_short": "Insulin and its salts",
+              "contribution_eur_bn": -0.083,
+              "pct_of_delta": 3.3
+            },
+            {
+              "code": "30024900",
+              "label_short": "Toxins, cultures of micro-organisms\u2026",
+              "contribution_eur_bn": 0.065,
+              "pct_of_delta": 2.6
+            },
+            {
+              "code": "30019091",
+              "label_short": "Heparin and its salts",
+              "contribution_eur_bn": -0.039,
+              "pct_of_delta": 1.6
+            }
+          ]
+        }
+      },
+      {
+        "rank": 3,
+        "partner": "CH",
+        "label": "Switzerland",
+        "value_eur_bn": 1.69,
+        "previous_year_value_eur_bn": 2.09,
+        "yoy_pct": -19.4,
+        "share_pct": 10.1,
+        "five_year_delta_pct_value": 44.2,
+        "five_year_delta_pct_volume": -21.0,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.69,
+            "share_of_partner_pct": 41.2
+          },
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.58,
+            "share_of_partner_pct": 34.5
+          },
+          {
+            "nace4": "2053",
+            "label": "Essential oils",
+            "value_eur_bn": 0.09,
+            "share_of_partner_pct": 5.6
+          }
+        ]
+      },
+      {
+        "rank": 4,
+        "partner": "GB",
+        "label": "United Kingdom (ISO alpha-2)",
+        "value_eur_bn": 1.31,
+        "previous_year_value_eur_bn": 1.46,
+        "yoy_pct": -10.4,
+        "share_pct": 7.8,
+        "five_year_delta_pct_value": -33.1,
+        "five_year_delta_pct_volume": -34.4,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.26,
+            "share_of_partner_pct": 19.9
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.22,
+            "share_of_partner_pct": 17.0
+          },
+          {
+            "nace4": "2042",
+            "label": "Perfumes and toilet preparations",
+            "value_eur_bn": 0.19,
+            "share_of_partner_pct": 14.6
+          }
+        ]
+      },
+      {
+        "rank": 5,
+        "partner": "IN",
+        "label": "India",
+        "value_eur_bn": 1.19,
+        "previous_year_value_eur_bn": 1.11,
+        "yoy_pct": 7.3,
+        "share_pct": 7.1,
+        "five_year_delta_pct_value": 191.2,
+        "five_year_delta_pct_volume": -2.8,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.91,
+            "share_of_partner_pct": 76.8
+          },
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.11,
+            "share_of_partner_pct": 9.0
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.04,
+            "share_of_partner_pct": 3.0
+          }
+        ]
+      },
+      {
+        "rank": 6,
+        "partner": "KR",
+        "label": "South Korea",
+        "value_eur_bn": 0.72,
+        "previous_year_value_eur_bn": 0.67,
+        "yoy_pct": 7.3,
+        "share_pct": 4.3,
+        "five_year_delta_pct_value": 58.7,
+        "five_year_delta_pct_volume": 38.2,
+        "top_nace": [
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.22,
+            "share_of_partner_pct": 30.9
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.2,
+            "share_of_partner_pct": 27.9
+          },
+          {
+            "nace4": "2042",
+            "label": "Perfumes and toilet preparations",
+            "value_eur_bn": 0.13,
+            "share_of_partner_pct": 17.6
+          }
+        ]
+      },
+      {
+        "rank": 7,
+        "partner": "JP",
+        "label": "Japan",
+        "value_eur_bn": 0.49,
+        "previous_year_value_eur_bn": 0.55,
+        "yoy_pct": -10.7,
+        "share_pct": 2.9,
+        "five_year_delta_pct_value": -5.4,
+        "five_year_delta_pct_volume": -2.5,
+        "top_nace": [
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.17,
+            "share_of_partner_pct": 34.9
+          },
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.07,
+            "share_of_partner_pct": 15.2
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.07,
+            "share_of_partner_pct": 14.5
+          }
+        ]
+      },
+      {
+        "rank": 8,
+        "partner": "TR",
+        "label": "T\u00fcrkiye",
+        "value_eur_bn": 0.43,
+        "previous_year_value_eur_bn": 0.37,
+        "yoy_pct": 16.9,
+        "share_pct": 2.6,
+        "five_year_delta_pct_value": 138.2,
+        "five_year_delta_pct_volume": 87.5,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.1,
+            "share_of_partner_pct": 23.7
+          },
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.08,
+            "share_of_partner_pct": 17.5
+          },
+          {
+            "nace4": "2013",
+            "label": "Other inorganic basic chemicals",
+            "value_eur_bn": 0.07,
+            "share_of_partner_pct": 15.7
+          }
+        ]
+      },
+      {
+        "rank": 9,
+        "partner": "RU",
+        "label": "Russia",
+        "value_eur_bn": 0.43,
+        "previous_year_value_eur_bn": 0.23,
+        "yoy_pct": 91.8,
+        "share_pct": 2.6,
+        "five_year_delta_pct_value": 7.9,
+        "five_year_delta_pct_volume": -44.7,
+        "top_nace": [
+          {
+            "nace4": "2015",
+            "label": "Fertilisers and nitrogen compounds",
+            "value_eur_bn": 0.25,
+            "share_of_partner_pct": 58.6
+          },
+          {
+            "nace4": "2013",
+            "label": "Other inorganic basic chemicals",
+            "value_eur_bn": 0.15,
+            "share_of_partner_pct": 35.7
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.02,
+            "share_of_partner_pct": 3.6
+          }
+        ]
+      },
+      {
+        "rank": 10,
+        "partner": "SG",
+        "label": "Singapore",
+        "value_eur_bn": 0.43,
+        "previous_year_value_eur_bn": 0.29,
+        "yoy_pct": 46.9,
+        "share_pct": 2.6,
+        "five_year_delta_pct_value": 182.0,
+        "five_year_delta_pct_volume": -14.6,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.28,
+            "share_of_partner_pct": 65.8
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.06,
+            "share_of_partner_pct": 13.5
+          },
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.05,
+            "share_of_partner_pct": 12.0
+          }
+        ]
+      }
+    ],
+    "by_chapter": {
+      "29": {
+        "label": "Organic chemicals",
+        "value_eur_bn": 6.94,
+        "previous_year_value_eur_bn": 7.26,
+        "yoy_pct": -4.5
+      },
+      "38": {
+        "label": "Miscellaneous chemical products",
+        "value_eur_bn": 1.93,
+        "previous_year_value_eur_bn": 1.94,
+        "yoy_pct": -0.7
+      },
+      "39": {
+        "label": "Plastics and articles thereof",
+        "value_eur_bn": 1.45,
+        "previous_year_value_eur_bn": 1.63,
+        "yoy_pct": -10.7
+      },
+      "28": {
+        "label": "Inorganic chemicals",
+        "value_eur_bn": 1.26,
+        "previous_year_value_eur_bn": 1.18,
+        "yoy_pct": 6.5
+      },
+      "31": {
+        "label": "Fertilisers",
+        "value_eur_bn": 1.25,
+        "previous_year_value_eur_bn": 0.34,
+        "yoy_pct": 271.1
+      },
+      "33": {
+        "label": "Essential oils and resinoids",
+        "value_eur_bn": 1.12,
+        "previous_year_value_eur_bn": 1.0,
+        "yoy_pct": 12.0
+      },
+      "32": {
+        "label": "Tanning or dyeing extracts",
+        "value_eur_bn": 0.49,
+        "previous_year_value_eur_bn": 0.54,
+        "yoy_pct": -8.0
+      },
+      "27": {
+        "label": "Mineral fuels, mineral oils and products of their distillation",
+        "value_eur_bn": 0.38,
+        "previous_year_value_eur_bn": 0.44,
+        "yoy_pct": -14.1
+      },
+      "34": {
+        "label": "Soap, organic surface-active agents, washing preparations, lubricating preparations, artificial waxes, prepared waxes, polishing or scouring preparations, candles and similar articles, modelling pastes, \u2018dental waxes\u2019 and dental preparations with a basis of plaster",
+        "value_eur_bn": 0.36,
+        "previous_year_value_eur_bn": 0.33,
+        "yoy_pct": 9.1
+      },
+      "15": {
+        "label": "Animal or vegetable fats and oils and their cleavage products",
+        "value_eur_bn": 0.24,
+        "previous_year_value_eur_bn": 0.15,
+        "yoy_pct": 61.8
+      },
+      "30": {
+        "label": "Pharmaceutical products",
+        "value_eur_bn": 0.24,
+        "previous_year_value_eur_bn": 0.18,
+        "yoy_pct": 29.1
+      },
+      "35": {
+        "label": "Albuminoidal substances",
+        "value_eur_bn": 0.2,
+        "previous_year_value_eur_bn": 0.17,
+        "yoy_pct": 16.0
+      },
+      "24": {
+        "label": "Tobacco and manufactured tobacco substitutes",
+        "value_eur_bn": 0.15,
+        "previous_year_value_eur_bn": 0.16,
+        "yoy_pct": -3.5
+      },
+      "40": {
+        "label": "Rubber and articles thereof",
+        "value_eur_bn": 0.14,
+        "previous_year_value_eur_bn": 0.17,
+        "yoy_pct": -17.5
+      },
+      "54": {
+        "label": "Man-made filaments",
+        "value_eur_bn": 0.11,
+        "previous_year_value_eur_bn": 0.13,
+        "yoy_pct": -15.4
+      },
+      "22": {
+        "label": "Beverages, spirits and vinegar",
+        "value_eur_bn": 0.11,
+        "previous_year_value_eur_bn": 0.12,
+        "yoy_pct": -9.7
+      },
+      "55": {
+        "label": "Man-made staple fibres",
+        "value_eur_bn": 0.1,
+        "previous_year_value_eur_bn": 0.12,
+        "yoy_pct": -18.5
+      },
+      "36": {
+        "label": "Explosives",
+        "value_eur_bn": 0.09,
+        "previous_year_value_eur_bn": 0.08,
+        "yoy_pct": 14.5
+      },
+      "37": {
+        "label": "Photographic or cinematographic goods",
+        "value_eur_bn": 0.06,
+        "previous_year_value_eur_bn": 0.07,
+        "yoy_pct": -13.3
+      },
+      "84": {
+        "label": "Nuclear reactors, boilers, machinery and mechanical appliances",
+        "value_eur_bn": 0.06,
+        "previous_year_value_eur_bn": 0.02,
+        "yoy_pct": 278.5
+      },
+      "44": {
+        "label": "Wood and articles of wood",
+        "value_eur_bn": 0.02,
+        "previous_year_value_eur_bn": 0.02,
+        "yoy_pct": 20.3
+      },
+      "71": {
+        "label": "Natural or cultured pearls, precious or semi-precious stones, precious metals, metals clad with precious metal, and articles thereof",
+        "value_eur_bn": 0.0,
+        "previous_year_value_eur_bn": 0.0,
+        "yoy_pct": -41.5
+      },
+      "25": {
+        "label": "Salt",
+        "value_eur_bn": 0.0,
+        "previous_year_value_eur_bn": 0.01,
+        "yoy_pct": -88.0
+      },
+      "26": {
+        "label": "Ores, slag and ash",
+        "value_eur_bn": 0.0,
+        "previous_year_value_eur_bn": 0.0,
+        "yoy_pct": -98.7
+      }
+    },
+    "key_partners": [
+      "US",
+      "CN",
+      "GB"
+    ],
+    "source": "Cefic analysis based on Comext data (Eurostat, 2026)"
+  },
+  "charts": [
+    "trade_imports_waterfall_cn8"
+  ],
+  "editorial_context": {
+    "latest_structural_break": "March 2022",
+    "notable_events": [
+      "US tariff measures since March 2025"
+    ],
+    "scope_note": "Extra-EU27 trade (declarant=EU, partner \u2260 EU27), Comext CN 15/22/24/25\u201339 subset",
+    "narrative_hints": {
+      "apply_volume_value_duality": true,
+      "apply_pareto_if_concentrated": true,
+      "apply_drilldown_for_key_partners": true
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "section_type": "macro_brief",
+  "period": {
+    "month": "2026-02",
+    "publication_date": "2026-04-21",
+    "window": "January-February 2026",
+    "window_months": 2,
+    "window_ordinal": "first two"
+  },
+  "kpis": [
+    {
+      "key": "output_yoy",
+      "label": "Chemical output",
+      "primary_value": 79.3,
+      "primary_unit": "index 2021=100",
+      "delta_value": -3.9,
+      "delta_unit": "% YoY",
+      "direction": "down",
+      "source_fiche": "output"
+    },
+    {
+      "key": "trade_balance_yoy",
+      "label": "Trade balance",
+      "primary_value": 0.21,
+      "primary_unit": "\u20ac bn",
+      "delta_value": -12.21,
+      "delta_unit": "\u20ac bn YoY",
+      "direction": "down",
+      "source_fiche": "trade_exports|trade_imports"
+    },
+    {
+      "key": "prices_yoy",
+      "label": "Producer prices",
+      "primary_value": 117.2,
+      "primary_unit": "index 2021=100",
+      "delta_value": -2.8,
+      "delta_unit": "% YoY",
+      "direction": "down",
+      "source_fiche": "prices"
+    }
+  ],
+  "headline_data": {
+    "concentration_pareto": {
+      "top_n": 5,
+      "share_pct": 50.0,
+      "entities": [
+        "United States",
+        "United Kingdom (ISO alpha-2)",
+        "China",
+        "T\u00fcrkiye",
+        "Switzerland"
+      ],
+      "scope": "top-5 export partners cover 50.0% of value"
+    },
+    "volume_value_divergence": {
+      "volume_pct": -19.0,
+      "value_pct": -42.5,
+      "gap_pp": -23.5,
+      "scope": "exports, year-on-year"
+    }
+  },
+  "source": "Cefic analysis based on Eurostat data and Comext (2026)"
+}

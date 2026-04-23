@@ -1,0 +1,51 @@
+{
+  "section_type": "macro_brief",
+  "period": {
+    "month": "2025-12",
+    "publication_date": "2026-04-21",
+    "window": "January-December 2025",
+    "window_months": 12,
+    "window_ordinal": null
+  },
+  "kpis": [
+    {
+      "key": "output_yoy",
+      "label": "Chemical output",
+      "primary_value": 80.5,
+      "primary_unit": "index 2021=100",
+      "delta_value": 0.9,
+      "delta_unit": "% YoY",
+      "direction": "up",
+      "source_fiche": "output"
+    },
+    {
+      "key": "trade_balance_yoy",
+      "label": "Trade balance",
+      "primary_value": 1.09,
+      "primary_unit": "\u20ac bn",
+      "delta_value": -3.3,
+      "delta_unit": "\u20ac bn YoY",
+      "direction": "down",
+      "source_fiche": "trade_exports|trade_imports"
+    },
+    {
+      "key": "prices_yoy",
+      "label": "Producer prices",
+      "primary_value": 116.6,
+      "primary_unit": "index 2021=100",
+      "delta_value": -1.3,
+      "delta_unit": "% YoY",
+      "direction": "down",
+      "source_fiche": "prices"
+    }
+  ],
+  "headline_data": {
+    "volume_value_divergence": {
+      "volume_pct": -6.0,
+      "value_pct": -13.0,
+      "gap_pp": -7.0,
+      "scope": "exports, year-on-year"
+    }
+  },
+  "source": "Cefic analysis based on Eurostat data and Comext (2026)"
+}

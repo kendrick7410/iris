@@ -1,0 +1,2366 @@
+{
+  "section_type": "trade_imports",
+  "period": {
+    "month": "2026-02",
+    "publication_date": "2026-04-21",
+    "window": "January-February 2026",
+    "window_months": 2,
+    "window_ordinal": "first two"
+  },
+  "data": {
+    "current": {
+      "value_eur_bn": 17.97,
+      "volume_kt": 7133.4,
+      "period": "2026-02",
+      "unit_value": "€ bn",
+      "unit_volume": "kt",
+      "scope": "Extra-EU27 trade (declarant=EU, partner ≠ EU27), Comext CN 15/22/24/25–39 subset"
+    },
+    "previous_year": {
+      "value_eur_bn": 19.22,
+      "volume_kt": 8041.5,
+      "period": "2025-02",
+      "delta_pct_value": -6.5,
+      "delta_pct_volume": -11.3
+    },
+    "ytd": {
+      "current_value_eur_bn": 33.47,
+      "previous_year_value_eur_bn": 38.04,
+      "delta_pct_value": -12.0,
+      "current_volume_kt": 13756.7,
+      "previous_year_volume_kt": 16884.6,
+      "delta_pct_volume": -18.5,
+      "window_months": 2
+    },
+    "five_year_window": {
+      "start": "2021-02",
+      "end": "2026-02",
+      "value_eur_bn_start": 11.56,
+      "value_eur_bn_end": 17.97,
+      "delta_pct_value": 55.5,
+      "volume_kt_start": 7648.3,
+      "volume_kt_end": 7133.4,
+      "delta_pct_volume": -6.7
+    },
+    "by_partner": [
+      {
+        "rank": 1,
+        "partner": "CN",
+        "label": "China",
+        "value_eur_bn": 4.37,
+        "previous_year_value_eur_bn": 4.17,
+        "yoy_pct": 4.8,
+        "share_pct": 24.3,
+        "five_year_delta_pct_value": 202.9,
+        "five_year_delta_pct_volume": 103.9,
+        "top_nace": [
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 1.8,
+            "share_of_partner_pct": 41.1
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 1.51,
+            "share_of_partner_pct": 34.6
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.36,
+            "share_of_partner_pct": 8.3
+          }
+        ],
+        "drill_down": {
+          "window": "2021-02..2026-02",
+          "delta_total_eur_bn": 2.93,
+          "covers_pct_of_delta": 64.0,
+          "cn8_codes": [
+            {
+              "code": "29371900",
+              "label_short": "Polypeptide hormones",
+              "contribution_eur_bn": 0.876,
+              "pct_of_delta": 25.4
+            },
+            {
+              "code": "29339980",
+              "label_short": "Heterocyclic compounds with nitrogen…",
+              "contribution_eur_bn": 0.612,
+              "pct_of_delta": 17.7
+            },
+            {
+              "code": "29335995",
+              "label_short": "Heterocyclic compounds with nitrogen…",
+              "contribution_eur_bn": 0.529,
+              "pct_of_delta": 15.3
+            },
+            {
+              "code": "29349990",
+              "label_short": "Nucleic acids and their salts",
+              "contribution_eur_bn": 0.108,
+              "pct_of_delta": 3.1
+            },
+            {
+              "code": "24041200",
+              "label_short": "Products containing nicotine,…",
+              "contribution_eur_bn": 0.085,
+              "pct_of_delta": 2.5
+            }
+          ]
+        }
+      },
+      {
+        "rank": 2,
+        "partner": "US",
+        "label": "United States",
+        "value_eur_bn": 3.67,
+        "previous_year_value_eur_bn": 3.51,
+        "yoy_pct": 4.7,
+        "share_pct": 20.4,
+        "five_year_delta_pct_value": 97.0,
+        "five_year_delta_pct_volume": 80.2,
+        "top_nace": [
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 1.7,
+            "share_of_partner_pct": 46.2
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.65,
+            "share_of_partner_pct": 17.7
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.5,
+            "share_of_partner_pct": 13.7
+          }
+        ],
+        "drill_down": {
+          "window": "2021-02..2026-02",
+          "delta_total_eur_bn": 1.81,
+          "covers_pct_of_delta": 58.1,
+          "cn8_codes": [
+            {
+              "code": "29371900",
+              "label_short": "Polypeptide hormones",
+              "contribution_eur_bn": 1.407,
+              "pct_of_delta": 44.6
+            },
+            {
+              "code": "38221900",
+              "label_short": "Diagnostic or laboratory reagents on…",
+              "contribution_eur_bn": 0.255,
+              "pct_of_delta": 8.1
+            },
+            {
+              "code": "30025100",
+              "label_short": "Cell therapy products",
+              "contribution_eur_bn": 0.063,
+              "pct_of_delta": 2.0
+            },
+            {
+              "code": "28442035",
+              "label_short": "Uranium enriched in U 235 and its…",
+              "contribution_eur_bn": -0.054,
+              "pct_of_delta": 1.7
+            },
+            {
+              "code": "29333999",
+              "label_short": "Heterocyclic compounds with nitrogen…",
+              "contribution_eur_bn": -0.053,
+              "pct_of_delta": 1.7
+            }
+          ]
+        }
+      },
+      {
+        "rank": 3,
+        "partner": "CH",
+        "label": "Switzerland",
+        "value_eur_bn": 1.9,
+        "previous_year_value_eur_bn": 2.37,
+        "yoy_pct": -19.9,
+        "share_pct": 10.6,
+        "five_year_delta_pct_value": -4.1,
+        "five_year_delta_pct_volume": -5.1,
+        "top_nace": [
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.75,
+            "share_of_partner_pct": 39.7
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.59,
+            "share_of_partner_pct": 31.2
+          },
+          {
+            "nace4": "2053",
+            "label": "Essential oils",
+            "value_eur_bn": 0.12,
+            "share_of_partner_pct": 6.1
+          }
+        ]
+      },
+      {
+        "rank": 4,
+        "partner": "GB",
+        "label": "United Kingdom (ISO alpha-2)",
+        "value_eur_bn": 1.5,
+        "previous_year_value_eur_bn": 1.73,
+        "yoy_pct": -13.3,
+        "share_pct": 8.4,
+        "five_year_delta_pct_value": 24.3,
+        "five_year_delta_pct_volume": -4.5,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.24,
+            "share_of_partner_pct": 16.2
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.24,
+            "share_of_partner_pct": 16.2
+          },
+          {
+            "nace4": "2013",
+            "label": "Other inorganic basic chemicals",
+            "value_eur_bn": 0.24,
+            "share_of_partner_pct": 16.1
+          }
+        ]
+      },
+      {
+        "rank": 5,
+        "partner": "IN",
+        "label": "India",
+        "value_eur_bn": 1.38,
+        "previous_year_value_eur_bn": 1.36,
+        "yoy_pct": 1.2,
+        "share_pct": 7.7,
+        "five_year_delta_pct_value": 174.2,
+        "five_year_delta_pct_volume": -10.2,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 1.09,
+            "share_of_partner_pct": 79.3
+          },
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.09,
+            "share_of_partner_pct": 6.7
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.04,
+            "share_of_partner_pct": 3.0
+          }
+        ]
+      },
+      {
+        "rank": 6,
+        "partner": "KR",
+        "label": "South Korea",
+        "value_eur_bn": 0.6,
+        "previous_year_value_eur_bn": 0.85,
+        "yoy_pct": -29.1,
+        "share_pct": 3.4,
+        "five_year_delta_pct_value": 30.2,
+        "five_year_delta_pct_volume": 38.1,
+        "top_nace": [
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.2,
+            "share_of_partner_pct": 32.5
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.11,
+            "share_of_partner_pct": 18.6
+          },
+          {
+            "nace4": "2042",
+            "label": "Perfumes and toilet preparations",
+            "value_eur_bn": 0.11,
+            "share_of_partner_pct": 17.9
+          }
+        ]
+      },
+      {
+        "rank": 7,
+        "partner": "JP",
+        "label": "Japan",
+        "value_eur_bn": 0.43,
+        "previous_year_value_eur_bn": 0.63,
+        "yoy_pct": -30.6,
+        "share_pct": 2.4,
+        "five_year_delta_pct_value": -19.3,
+        "five_year_delta_pct_volume": -9.0,
+        "top_nace": [
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.11,
+            "share_of_partner_pct": 24.6
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.08,
+            "share_of_partner_pct": 19.1
+          },
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.07,
+            "share_of_partner_pct": 16.7
+          }
+        ]
+      },
+      {
+        "rank": 8,
+        "partner": "SG",
+        "label": "Singapore",
+        "value_eur_bn": 0.39,
+        "previous_year_value_eur_bn": 0.27,
+        "yoy_pct": 44.0,
+        "share_pct": 2.2,
+        "five_year_delta_pct_value": 39.6,
+        "five_year_delta_pct_volume": -28.8,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.28,
+            "share_of_partner_pct": 71.2
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.04,
+            "share_of_partner_pct": 10.1
+          },
+          {
+            "nace4": "2110",
+            "label": "Basic pharmaceutical products",
+            "value_eur_bn": 0.04,
+            "share_of_partner_pct": 9.6
+          }
+        ]
+      },
+      {
+        "rank": 9,
+        "partner": "TR",
+        "label": "Türkiye",
+        "value_eur_bn": 0.38,
+        "previous_year_value_eur_bn": 0.45,
+        "yoy_pct": -17.3,
+        "share_pct": 2.1,
+        "five_year_delta_pct_value": 69.4,
+        "five_year_delta_pct_volume": 27.5,
+        "top_nace": [
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.1,
+            "share_of_partner_pct": 26.6
+          },
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.07,
+            "share_of_partner_pct": 19.4
+          },
+          {
+            "nace4": "2013",
+            "label": "Other inorganic basic chemicals",
+            "value_eur_bn": 0.06,
+            "share_of_partner_pct": 16.0
+          }
+        ]
+      },
+      {
+        "rank": 10,
+        "partner": "SA",
+        "label": "Saudi Arabia",
+        "value_eur_bn": 0.26,
+        "previous_year_value_eur_bn": 0.33,
+        "yoy_pct": -20.0,
+        "share_pct": 1.5,
+        "five_year_delta_pct_value": 6.2,
+        "five_year_delta_pct_volume": 8.2,
+        "top_nace": [
+          {
+            "nace4": "2014",
+            "label": "Other organic basic chemicals",
+            "value_eur_bn": 0.16,
+            "share_of_partner_pct": 60.0
+          },
+          {
+            "nace4": "2016",
+            "label": "Plastics in primary forms",
+            "value_eur_bn": 0.07,
+            "share_of_partner_pct": 28.3
+          },
+          {
+            "nace4": "2059",
+            "label": "Other chemical products",
+            "value_eur_bn": 0.01,
+            "share_of_partner_pct": 4.4
+          }
+        ]
+      }
+    ],
+    "by_chapter": {
+      "29": {
+        "label": "Organic chemicals",
+        "value_eur_bn": 9.2,
+        "previous_year_value_eur_bn": 9.23,
+        "yoy_pct": -0.3
+      },
+      "38": {
+        "label": "Miscellaneous chemical products",
+        "value_eur_bn": 1.79,
+        "previous_year_value_eur_bn": 1.97,
+        "yoy_pct": -9.1
+      },
+      "39": {
+        "label": "Plastics and articles thereof",
+        "value_eur_bn": 1.55,
+        "previous_year_value_eur_bn": 1.9,
+        "yoy_pct": -18.4
+      },
+      "28": {
+        "label": "Inorganic chemicals",
+        "value_eur_bn": 1.21,
+        "previous_year_value_eur_bn": 1.41,
+        "yoy_pct": -14.4
+      },
+      "33": {
+        "label": "Essential oils and resinoids",
+        "value_eur_bn": 1.06,
+        "previous_year_value_eur_bn": 1.05,
+        "yoy_pct": 0.5
+      },
+      "32": {
+        "label": "Tanning or dyeing extracts",
+        "value_eur_bn": 0.6,
+        "previous_year_value_eur_bn": 0.65,
+        "yoy_pct": -6.8
+      },
+      "31": {
+        "label": "Fertilisers",
+        "value_eur_bn": 0.36,
+        "previous_year_value_eur_bn": 0.68,
+        "yoy_pct": -47.2
+      },
+      "34": {
+        "label": "Soap, organic surface-active agents, washing preparations, lubricating preparations, artificial waxes, prepared waxes, polishing or scouring preparations, candles and similar articles, modelling pastes, ‘dental waxes’ and dental preparations with a basis of plaster",
+        "value_eur_bn": 0.35,
+        "previous_year_value_eur_bn": 0.38,
+        "yoy_pct": -9.3
+      },
+      "27": {
+        "label": "Mineral fuels, mineral oils and products of their distillation",
+        "value_eur_bn": 0.33,
+        "previous_year_value_eur_bn": 0.35,
+        "yoy_pct": -8.2
+      },
+      "15": {
+        "label": "Animal or vegetable fats and oils and their cleavage products",
+        "value_eur_bn": 0.29,
+        "previous_year_value_eur_bn": 0.23,
+        "yoy_pct": 26.1
+      },
+      "30": {
+        "label": "Pharmaceutical products",
+        "value_eur_bn": 0.26,
+        "previous_year_value_eur_bn": 0.22,
+        "yoy_pct": 18.3
+      },
+      "35": {
+        "label": "Albuminoidal substances",
+        "value_eur_bn": 0.2,
+        "previous_year_value_eur_bn": 0.21,
+        "yoy_pct": -0.8
+      },
+      "40": {
+        "label": "Rubber and articles thereof",
+        "value_eur_bn": 0.16,
+        "previous_year_value_eur_bn": 0.21,
+        "yoy_pct": -22.6
+      },
+      "54": {
+        "label": "Man-made filaments",
+        "value_eur_bn": 0.13,
+        "previous_year_value_eur_bn": 0.17,
+        "yoy_pct": -22.5
+      },
+      "55": {
+        "label": "Man-made staple fibres",
+        "value_eur_bn": 0.11,
+        "previous_year_value_eur_bn": 0.14,
+        "yoy_pct": -25.8
+      },
+      "24": {
+        "label": "Tobacco and manufactured tobacco substitutes",
+        "value_eur_bn": 0.09,
+        "previous_year_value_eur_bn": 0.09,
+        "yoy_pct": 10.3
+      },
+      "22": {
+        "label": "Beverages, spirits and vinegar",
+        "value_eur_bn": 0.07,
+        "previous_year_value_eur_bn": 0.12,
+        "yoy_pct": -43.6
+      },
+      "37": {
+        "label": "Photographic or cinematographic goods",
+        "value_eur_bn": 0.07,
+        "previous_year_value_eur_bn": 0.07,
+        "yoy_pct": -4.9
+      },
+      "36": {
+        "label": "Explosives",
+        "value_eur_bn": 0.07,
+        "previous_year_value_eur_bn": 0.05,
+        "yoy_pct": 42.5
+      },
+      "84": {
+        "label": "Nuclear reactors, boilers, machinery and mechanical appliances",
+        "value_eur_bn": 0.04,
+        "previous_year_value_eur_bn": 0.06,
+        "yoy_pct": -40.3
+      },
+      "25": {
+        "label": "Salt",
+        "value_eur_bn": 0.02,
+        "previous_year_value_eur_bn": 0.01,
+        "yoy_pct": 165.4
+      },
+      "44": {
+        "label": "Wood and articles of wood",
+        "value_eur_bn": 0.01,
+        "previous_year_value_eur_bn": 0.02,
+        "yoy_pct": -29.2
+      },
+      "71": {
+        "label": "Natural or cultured pearls, precious or semi-precious stones, precious metals, metals clad with precious metal, and articles thereof",
+        "value_eur_bn": 0.0,
+        "previous_year_value_eur_bn": 0.0,
+        "yoy_pct": -24.5
+      },
+      "26": {
+        "label": "Ores, slag and ash",
+        "value_eur_bn": 0.0,
+        "previous_year_value_eur_bn": 0.0,
+        "yoy_pct": 301.0
+      }
+    },
+    "key_partners": [
+      "US",
+      "CN",
+      "GB"
+    ],
+    "source": "Cefic analysis based on Comext data (Eurostat, 2026)",
+    "partner_drilldown": {
+      "US": {
+        "partner": "US",
+        "period_b_value_eur_bn": 3.671,
+        "period_a_value_eur_bn": 3.506,
+        "delta_eur_bn": 0.166,
+        "delta_pct": 4.7,
+        "window": "2026-02 vs 2025-02",
+        "top_movers_up": [
+          {
+            "cn8": "29371900",
+            "label": "29371900 (CN8)",
+            "value_current_eur_bn": 1.484,
+            "value_previous_eur_bn": 0.757,
+            "delta_eur_bn": 0.727,
+            "delta_pct": 96.0
+          },
+          {
+            "cn8": "30025100",
+            "label": "30025100 (CN8)",
+            "value_current_eur_bn": 0.063,
+            "value_previous_eur_bn": 0.027,
+            "delta_eur_bn": 0.036,
+            "delta_pct": 130.5
+          },
+          {
+            "cn8": "29012100",
+            "label": "29012100 (CN8)",
+            "value_current_eur_bn": 0.074,
+            "value_previous_eur_bn": 0.041,
+            "delta_eur_bn": 0.034,
+            "delta_pct": 83.5
+          }
+        ],
+        "top_movers_down": [
+          {
+            "cn8": "29349990",
+            "label": "29349990 (CN8)",
+            "value_current_eur_bn": 0.04,
+            "value_previous_eur_bn": 0.158,
+            "delta_eur_bn": -0.118,
+            "delta_pct": -74.7
+          },
+          {
+            "cn8": "29419000",
+            "label": "29419000 (CN8)",
+            "value_current_eur_bn": 0.002,
+            "value_previous_eur_bn": 0.073,
+            "delta_eur_bn": -0.072,
+            "delta_pct": -97.7
+          },
+          {
+            "cn8": "29372900",
+            "label": "29372900 (CN8)",
+            "value_current_eur_bn": 0.008,
+            "value_previous_eur_bn": 0.052,
+            "delta_eur_bn": -0.044,
+            "delta_pct": -85.0
+          }
+        ],
+        "largest_products_current": [
+          {
+            "cn8": "29371900",
+            "label": "29371900 (CN8)",
+            "value_current_eur_bn": 1.484,
+            "value_previous_eur_bn": 0.757,
+            "delta_eur_bn": 0.727,
+            "delta_pct": 96.0
+          },
+          {
+            "cn8": "38221900",
+            "label": "38221900 (CN8)",
+            "value_current_eur_bn": 0.255,
+            "value_previous_eur_bn": 0.277,
+            "delta_eur_bn": -0.022,
+            "delta_pct": -8.0
+          },
+          {
+            "cn8": "29012100",
+            "label": "29012100 (CN8)",
+            "value_current_eur_bn": 0.074,
+            "value_previous_eur_bn": 0.041,
+            "delta_eur_bn": 0.034,
+            "delta_pct": 83.5
+          }
+        ],
+        "explain_50pct_variation": {
+          "product_count": 1,
+          "cumulative_share": 4.386,
+          "base": "net_variation",
+          "products": [
+            {
+              "cn8": "29371900",
+              "label": "29371900 (CN8)",
+              "delta_eur_bn": 0.727,
+              "cumulative_share_pct": 438.6
+            }
+          ]
+        }
+      },
+      "CN": {
+        "partner": "CN",
+        "period_b_value_eur_bn": 4.374,
+        "period_a_value_eur_bn": 4.172,
+        "delta_eur_bn": 0.202,
+        "delta_pct": 4.8,
+        "window": "2026-02 vs 2025-02",
+        "top_movers_up": [
+          {
+            "cn8": "29371900",
+            "label": "29371900 (CN8)",
+            "value_current_eur_bn": 0.876,
+            "value_previous_eur_bn": 0.563,
+            "delta_eur_bn": 0.313,
+            "delta_pct": 55.6
+          },
+          {
+            "cn8": "29335995",
+            "label": "29335995 (CN8)",
+            "value_current_eur_bn": 0.55,
+            "value_previous_eur_bn": 0.383,
+            "delta_eur_bn": 0.168,
+            "delta_pct": 43.8
+          },
+          {
+            "cn8": "29091990",
+            "label": "29091990 (CN8)",
+            "value_current_eur_bn": 0.056,
+            "value_previous_eur_bn": 0.001,
+            "delta_eur_bn": 0.055,
+            "delta_pct": 6362.3
+          }
+        ],
+        "top_movers_down": [
+          {
+            "cn8": "29339980",
+            "label": "29339980 (CN8)",
+            "value_current_eur_bn": 0.724,
+            "value_previous_eur_bn": 0.953,
+            "delta_eur_bn": -0.229,
+            "delta_pct": -24.0
+          },
+          {
+            "cn8": "28419085",
+            "label": "28419085 (CN8)",
+            "value_current_eur_bn": 0.0,
+            "value_previous_eur_bn": 0.021,
+            "delta_eur_bn": -0.021,
+            "delta_pct": -100.0
+          },
+          {
+            "cn8": "31022100",
+            "label": "31022100 (CN8)",
+            "value_current_eur_bn": 0.008,
+            "value_previous_eur_bn": 0.026,
+            "delta_eur_bn": -0.019,
+            "delta_pct": -71.3
+          }
+        ],
+        "largest_products_current": [
+          {
+            "cn8": "29371900",
+            "label": "29371900 (CN8)",
+            "value_current_eur_bn": 0.876,
+            "value_previous_eur_bn": 0.563,
+            "delta_eur_bn": 0.313,
+            "delta_pct": 55.6
+          },
+          {
+            "cn8": "29339980",
+            "label": "29339980 (CN8)",
+            "value_current_eur_bn": 0.724,
+            "value_previous_eur_bn": 0.953,
+            "delta_eur_bn": -0.229,
+            "delta_pct": -24.0
+          },
+          {
+            "cn8": "29335995",
+            "label": "29335995 (CN8)",
+            "value_current_eur_bn": 0.55,
+            "value_previous_eur_bn": 0.383,
+            "delta_eur_bn": 0.168,
+            "delta_pct": 43.8
+          }
+        ],
+        "explain_50pct_variation": {
+          "product_count": 1,
+          "cumulative_share": 1.55,
+          "base": "net_variation",
+          "products": [
+            {
+              "cn8": "29371900",
+              "label": "29371900 (CN8)",
+              "delta_eur_bn": 0.313,
+              "cumulative_share_pct": 155.0
+            }
+          ]
+        }
+      },
+      "GB": {
+        "partner": "GB",
+        "period_b_value_eur_bn": 1.502,
+        "period_a_value_eur_bn": 1.732,
+        "delta_eur_bn": -0.23,
+        "delta_pct": -13.3,
+        "window": "2026-02 vs 2025-02",
+        "top_movers_up": [
+          {
+            "cn8": "29225000",
+            "label": "29225000 (CN8)",
+            "value_current_eur_bn": 0.03,
+            "value_previous_eur_bn": 0.004,
+            "delta_eur_bn": 0.026,
+            "delta_pct": 674.8
+          },
+          {
+            "cn8": "84013000",
+            "label": "84013000 (CN8)",
+            "value_current_eur_bn": 0.037,
+            "value_previous_eur_bn": 0.017,
+            "delta_eur_bn": 0.02,
+            "delta_pct": 114.8
+          },
+          {
+            "cn8": "30024900",
+            "label": "30024900 (CN8)",
+            "value_current_eur_bn": 0.043,
+            "value_previous_eur_bn": 0.024,
+            "delta_eur_bn": 0.019,
+            "delta_pct": 78.8
+          }
+        ],
+        "top_movers_down": [
+          {
+            "cn8": "27079999",
+            "label": "27079999 (CN8)",
+            "value_current_eur_bn": 0.039,
+            "value_previous_eur_bn": 0.124,
+            "delta_eur_bn": -0.085,
+            "delta_pct": -68.3
+          },
+          {
+            "cn8": "39011090",
+            "label": "39011090 (CN8)",
+            "value_current_eur_bn": 0.003,
+            "value_previous_eur_bn": 0.027,
+            "delta_eur_bn": -0.024,
+            "delta_pct": -89.9
+          },
+          {
+            "cn8": "39100000",
+            "label": "39100000 (CN8)",
+            "value_current_eur_bn": 0.015,
+            "value_previous_eur_bn": 0.03,
+            "delta_eur_bn": -0.015,
+            "delta_pct": -50.4
+          }
+        ],
+        "largest_products_current": [
+          {
+            "cn8": "28442035",
+            "label": "28442035 (CN8)",
+            "value_current_eur_bn": 0.119,
+            "value_previous_eur_bn": 0.107,
+            "delta_eur_bn": 0.013,
+            "delta_pct": 12.0
+          },
+          {
+            "cn8": "38221900",
+            "label": "38221900 (CN8)",
+            "value_current_eur_bn": 0.046,
+            "value_previous_eur_bn": 0.048,
+            "delta_eur_bn": -0.001,
+            "delta_pct": -2.6
+          },
+          {
+            "cn8": "33049900",
+            "label": "33049900 (CN8)",
+            "value_current_eur_bn": 0.044,
+            "value_previous_eur_bn": 0.046,
+            "delta_eur_bn": -0.002,
+            "delta_pct": -4.0
+          }
+        ],
+        "explain_50pct_variation": {
+          "product_count": 3,
+          "cumulative_share": 0.59,
+          "base": "net_variation",
+          "products": [
+            {
+              "cn8": "27079999",
+              "label": "27079999 (CN8)",
+              "delta_eur_bn": -0.085,
+              "cumulative_share_pct": 36.9
+            },
+            {
+              "cn8": "29225000",
+              "label": "29225000 (CN8)",
+              "delta_eur_bn": 0.026,
+              "cumulative_share_pct": 48.4
+            },
+            {
+              "cn8": "39011090",
+              "label": "39011090 (CN8)",
+              "delta_eur_bn": -0.024,
+              "cumulative_share_pct": 59.0
+            }
+          ]
+        }
+      }
+    },
+    "historical_series": {
+      "trade_balance_monthly": [
+        {
+          "period": "2021-03",
+          "value_eur_bn": 3.961
+        },
+        {
+          "period": "2021-04",
+          "value_eur_bn": 2.162
+        },
+        {
+          "period": "2021-05",
+          "value_eur_bn": 1.651
+        },
+        {
+          "period": "2021-06",
+          "value_eur_bn": 2.229
+        },
+        {
+          "period": "2021-07",
+          "value_eur_bn": 2.181
+        },
+        {
+          "period": "2021-08",
+          "value_eur_bn": 2.143
+        },
+        {
+          "period": "2021-09",
+          "value_eur_bn": 2.293
+        },
+        {
+          "period": "2021-10",
+          "value_eur_bn": 1.324
+        },
+        {
+          "period": "2021-11",
+          "value_eur_bn": 2.226
+        },
+        {
+          "period": "2021-12",
+          "value_eur_bn": 2.122
+        },
+        {
+          "period": "2022-01",
+          "value_eur_bn": 0.626
+        },
+        {
+          "period": "2022-02",
+          "value_eur_bn": 1.433
+        },
+        {
+          "period": "2022-03",
+          "value_eur_bn": -0.557
+        },
+        {
+          "period": "2022-04",
+          "value_eur_bn": -1.8
+        },
+        {
+          "period": "2022-05",
+          "value_eur_bn": -4.595
+        },
+        {
+          "period": "2022-06",
+          "value_eur_bn": -0.935
+        },
+        {
+          "period": "2022-07",
+          "value_eur_bn": -0.868
+        },
+        {
+          "period": "2022-08",
+          "value_eur_bn": 0.431
+        },
+        {
+          "period": "2022-09",
+          "value_eur_bn": 2.36
+        },
+        {
+          "period": "2022-10",
+          "value_eur_bn": 2.748
+        },
+        {
+          "period": "2022-11",
+          "value_eur_bn": 1.654
+        },
+        {
+          "period": "2022-12",
+          "value_eur_bn": 2.359
+        },
+        {
+          "period": "2023-01",
+          "value_eur_bn": -0.536
+        },
+        {
+          "period": "2023-02",
+          "value_eur_bn": 2.478
+        },
+        {
+          "period": "2023-03",
+          "value_eur_bn": 3.816
+        },
+        {
+          "period": "2023-04",
+          "value_eur_bn": 0.682
+        },
+        {
+          "period": "2023-05",
+          "value_eur_bn": 1.153
+        },
+        {
+          "period": "2023-06",
+          "value_eur_bn": 6.114
+        },
+        {
+          "period": "2023-07",
+          "value_eur_bn": 3.774
+        },
+        {
+          "period": "2023-08",
+          "value_eur_bn": 3.253
+        },
+        {
+          "period": "2023-09",
+          "value_eur_bn": 2.318
+        },
+        {
+          "period": "2023-10",
+          "value_eur_bn": 2.664
+        },
+        {
+          "period": "2023-11",
+          "value_eur_bn": 0.983
+        },
+        {
+          "period": "2023-12",
+          "value_eur_bn": 2.017
+        },
+        {
+          "period": "2024-01",
+          "value_eur_bn": 3.579
+        },
+        {
+          "period": "2024-02",
+          "value_eur_bn": 3.565
+        },
+        {
+          "period": "2024-03",
+          "value_eur_bn": 5.071
+        },
+        {
+          "period": "2024-04",
+          "value_eur_bn": 1.941
+        },
+        {
+          "period": "2024-05",
+          "value_eur_bn": 2.498
+        },
+        {
+          "period": "2024-06",
+          "value_eur_bn": 4.297
+        },
+        {
+          "period": "2024-07",
+          "value_eur_bn": 4.162
+        },
+        {
+          "period": "2024-08",
+          "value_eur_bn": 4.405
+        },
+        {
+          "period": "2024-09",
+          "value_eur_bn": 4.018
+        },
+        {
+          "period": "2024-10",
+          "value_eur_bn": 1.789
+        },
+        {
+          "period": "2024-11",
+          "value_eur_bn": 3.814
+        },
+        {
+          "period": "2024-12",
+          "value_eur_bn": 4.398
+        },
+        {
+          "period": "2025-01",
+          "value_eur_bn": 9.063
+        },
+        {
+          "period": "2025-02",
+          "value_eur_bn": 12.422
+        },
+        {
+          "period": "2025-03",
+          "value_eur_bn": 20.238
+        },
+        {
+          "period": "2025-04",
+          "value_eur_bn": 1.728
+        },
+        {
+          "period": "2025-05",
+          "value_eur_bn": 5.074
+        },
+        {
+          "period": "2025-06",
+          "value_eur_bn": 0.026
+        },
+        {
+          "period": "2025-07",
+          "value_eur_bn": 0.002
+        },
+        {
+          "period": "2025-08",
+          "value_eur_bn": -0.118
+        },
+        {
+          "period": "2025-09",
+          "value_eur_bn": 9.398
+        },
+        {
+          "period": "2025-10",
+          "value_eur_bn": -1.586
+        },
+        {
+          "period": "2025-11",
+          "value_eur_bn": 0.929
+        },
+        {
+          "period": "2025-12",
+          "value_eur_bn": 1.088
+        },
+        {
+          "period": "2026-01",
+          "value_eur_bn": 0.797
+        },
+        {
+          "period": "2026-02",
+          "value_eur_bn": 0.211
+        }
+      ],
+      "exports_by_partner_monthly": {
+        "US": [
+          {
+            "period": "2021-03",
+            "value_eur_bn": 3.421
+          },
+          {
+            "period": "2021-04",
+            "value_eur_bn": 3.08
+          },
+          {
+            "period": "2021-05",
+            "value_eur_bn": 2.908
+          },
+          {
+            "period": "2021-06",
+            "value_eur_bn": 3.676
+          },
+          {
+            "period": "2021-07",
+            "value_eur_bn": 2.944
+          },
+          {
+            "period": "2021-08",
+            "value_eur_bn": 3.453
+          },
+          {
+            "period": "2021-09",
+            "value_eur_bn": 3.035
+          },
+          {
+            "period": "2021-10",
+            "value_eur_bn": 3.192
+          },
+          {
+            "period": "2021-11",
+            "value_eur_bn": 3.501
+          },
+          {
+            "period": "2021-12",
+            "value_eur_bn": 3.641
+          },
+          {
+            "period": "2022-01",
+            "value_eur_bn": 4.478
+          },
+          {
+            "period": "2022-02",
+            "value_eur_bn": 4.676
+          },
+          {
+            "period": "2022-03",
+            "value_eur_bn": 5.151
+          },
+          {
+            "period": "2022-04",
+            "value_eur_bn": 4.659
+          },
+          {
+            "period": "2022-05",
+            "value_eur_bn": 4.546
+          },
+          {
+            "period": "2022-06",
+            "value_eur_bn": 5.006
+          },
+          {
+            "period": "2022-07",
+            "value_eur_bn": 4.118
+          },
+          {
+            "period": "2022-08",
+            "value_eur_bn": 5.476
+          },
+          {
+            "period": "2022-09",
+            "value_eur_bn": 6.459
+          },
+          {
+            "period": "2022-10",
+            "value_eur_bn": 6.014
+          },
+          {
+            "period": "2022-11",
+            "value_eur_bn": 5.302
+          },
+          {
+            "period": "2022-12",
+            "value_eur_bn": 4.239
+          },
+          {
+            "period": "2023-01",
+            "value_eur_bn": 3.763
+          },
+          {
+            "period": "2023-02",
+            "value_eur_bn": 4.881
+          },
+          {
+            "period": "2023-03",
+            "value_eur_bn": 5.231
+          },
+          {
+            "period": "2023-04",
+            "value_eur_bn": 4.686
+          },
+          {
+            "period": "2023-05",
+            "value_eur_bn": 5.196
+          },
+          {
+            "period": "2023-06",
+            "value_eur_bn": 6.115
+          },
+          {
+            "period": "2023-07",
+            "value_eur_bn": 4.541
+          },
+          {
+            "period": "2023-08",
+            "value_eur_bn": 4.451
+          },
+          {
+            "period": "2023-09",
+            "value_eur_bn": 4.428
+          },
+          {
+            "period": "2023-10",
+            "value_eur_bn": 4.871
+          },
+          {
+            "period": "2023-11",
+            "value_eur_bn": 3.661
+          },
+          {
+            "period": "2023-12",
+            "value_eur_bn": 3.933
+          },
+          {
+            "period": "2024-01",
+            "value_eur_bn": 5.24
+          },
+          {
+            "period": "2024-02",
+            "value_eur_bn": 4.295
+          },
+          {
+            "period": "2024-03",
+            "value_eur_bn": 5.331
+          },
+          {
+            "period": "2024-04",
+            "value_eur_bn": 4.814
+          },
+          {
+            "period": "2024-05",
+            "value_eur_bn": 5.493
+          },
+          {
+            "period": "2024-06",
+            "value_eur_bn": 5.468
+          },
+          {
+            "period": "2024-07",
+            "value_eur_bn": 5.222
+          },
+          {
+            "period": "2024-08",
+            "value_eur_bn": 5.775
+          },
+          {
+            "period": "2024-09",
+            "value_eur_bn": 6.695
+          },
+          {
+            "period": "2024-10",
+            "value_eur_bn": 6.774
+          },
+          {
+            "period": "2024-11",
+            "value_eur_bn": 7.184
+          },
+          {
+            "period": "2024-12",
+            "value_eur_bn": 5.323
+          },
+          {
+            "period": "2025-01",
+            "value_eur_bn": 12.058
+          },
+          {
+            "period": "2025-02",
+            "value_eur_bn": 12.953
+          },
+          {
+            "period": "2025-03",
+            "value_eur_bn": 23.717
+          },
+          {
+            "period": "2025-04",
+            "value_eur_bn": 7.925
+          },
+          {
+            "period": "2025-05",
+            "value_eur_bn": 8.863
+          },
+          {
+            "period": "2025-06",
+            "value_eur_bn": 4.119
+          },
+          {
+            "period": "2025-07",
+            "value_eur_bn": 3.888
+          },
+          {
+            "period": "2025-08",
+            "value_eur_bn": 2.725
+          },
+          {
+            "period": "2025-09",
+            "value_eur_bn": 14.351
+          },
+          {
+            "period": "2025-10",
+            "value_eur_bn": 2.826
+          },
+          {
+            "period": "2025-11",
+            "value_eur_bn": 2.949
+          },
+          {
+            "period": "2025-12",
+            "value_eur_bn": 2.601
+          },
+          {
+            "period": "2026-01",
+            "value_eur_bn": 2.489
+          },
+          {
+            "period": "2026-02",
+            "value_eur_bn": 3.557
+          }
+        ],
+        "GB": [
+          {
+            "period": "2021-03",
+            "value_eur_bn": 2.038
+          },
+          {
+            "period": "2021-04",
+            "value_eur_bn": 1.824
+          },
+          {
+            "period": "2021-05",
+            "value_eur_bn": 1.887
+          },
+          {
+            "period": "2021-06",
+            "value_eur_bn": 2.228
+          },
+          {
+            "period": "2021-07",
+            "value_eur_bn": 2.291
+          },
+          {
+            "period": "2021-08",
+            "value_eur_bn": 1.866
+          },
+          {
+            "period": "2021-09",
+            "value_eur_bn": 2.124
+          },
+          {
+            "period": "2021-10",
+            "value_eur_bn": 1.945
+          },
+          {
+            "period": "2021-11",
+            "value_eur_bn": 2.598
+          },
+          {
+            "period": "2021-12",
+            "value_eur_bn": 1.842
+          },
+          {
+            "period": "2022-01",
+            "value_eur_bn": 2.574
+          },
+          {
+            "period": "2022-02",
+            "value_eur_bn": 2.152
+          },
+          {
+            "period": "2022-03",
+            "value_eur_bn": 2.722
+          },
+          {
+            "period": "2022-04",
+            "value_eur_bn": 2.808
+          },
+          {
+            "period": "2022-05",
+            "value_eur_bn": 2.759
+          },
+          {
+            "period": "2022-06",
+            "value_eur_bn": 3.277
+          },
+          {
+            "period": "2022-07",
+            "value_eur_bn": 2.634
+          },
+          {
+            "period": "2022-08",
+            "value_eur_bn": 2.727
+          },
+          {
+            "period": "2022-09",
+            "value_eur_bn": 2.606
+          },
+          {
+            "period": "2022-10",
+            "value_eur_bn": 2.935
+          },
+          {
+            "period": "2022-11",
+            "value_eur_bn": 2.694
+          },
+          {
+            "period": "2022-12",
+            "value_eur_bn": 2.033
+          },
+          {
+            "period": "2023-01",
+            "value_eur_bn": 2.609
+          },
+          {
+            "period": "2023-02",
+            "value_eur_bn": 2.335
+          },
+          {
+            "period": "2023-03",
+            "value_eur_bn": 2.924
+          },
+          {
+            "period": "2023-04",
+            "value_eur_bn": 2.136
+          },
+          {
+            "period": "2023-05",
+            "value_eur_bn": 2.547
+          },
+          {
+            "period": "2023-06",
+            "value_eur_bn": 3.359
+          },
+          {
+            "period": "2023-07",
+            "value_eur_bn": 2.756
+          },
+          {
+            "period": "2023-08",
+            "value_eur_bn": 2.338
+          },
+          {
+            "period": "2023-09",
+            "value_eur_bn": 2.056
+          },
+          {
+            "period": "2023-10",
+            "value_eur_bn": 2.18
+          },
+          {
+            "period": "2023-11",
+            "value_eur_bn": 2.642
+          },
+          {
+            "period": "2023-12",
+            "value_eur_bn": 1.473
+          },
+          {
+            "period": "2024-01",
+            "value_eur_bn": 2.42
+          },
+          {
+            "period": "2024-02",
+            "value_eur_bn": 2.252
+          },
+          {
+            "period": "2024-03",
+            "value_eur_bn": 2.668
+          },
+          {
+            "period": "2024-04",
+            "value_eur_bn": 2.337
+          },
+          {
+            "period": "2024-05",
+            "value_eur_bn": 2.207
+          },
+          {
+            "period": "2024-06",
+            "value_eur_bn": 2.211
+          },
+          {
+            "period": "2024-07",
+            "value_eur_bn": 2.333
+          },
+          {
+            "period": "2024-08",
+            "value_eur_bn": 2.047
+          },
+          {
+            "period": "2024-09",
+            "value_eur_bn": 2.075
+          },
+          {
+            "period": "2024-10",
+            "value_eur_bn": 2.246
+          },
+          {
+            "period": "2024-11",
+            "value_eur_bn": 2.087
+          },
+          {
+            "period": "2024-12",
+            "value_eur_bn": 1.743
+          },
+          {
+            "period": "2025-01",
+            "value_eur_bn": 2.085
+          },
+          {
+            "period": "2025-02",
+            "value_eur_bn": 2.032
+          },
+          {
+            "period": "2025-03",
+            "value_eur_bn": 2.331
+          },
+          {
+            "period": "2025-04",
+            "value_eur_bn": 2.124
+          },
+          {
+            "period": "2025-05",
+            "value_eur_bn": 2.261
+          },
+          {
+            "period": "2025-06",
+            "value_eur_bn": 2.201
+          },
+          {
+            "period": "2025-07",
+            "value_eur_bn": 2.317
+          },
+          {
+            "period": "2025-08",
+            "value_eur_bn": 2.074
+          },
+          {
+            "period": "2025-09",
+            "value_eur_bn": 2.161
+          },
+          {
+            "period": "2025-10",
+            "value_eur_bn": 2.221
+          },
+          {
+            "period": "2025-11",
+            "value_eur_bn": 2.213
+          },
+          {
+            "period": "2025-12",
+            "value_eur_bn": 1.779
+          },
+          {
+            "period": "2026-01",
+            "value_eur_bn": 1.957
+          },
+          {
+            "period": "2026-02",
+            "value_eur_bn": 2.131
+          }
+        ],
+        "CN": [
+          {
+            "period": "2021-03",
+            "value_eur_bn": 1.533
+          },
+          {
+            "period": "2021-04",
+            "value_eur_bn": 1.307
+          },
+          {
+            "period": "2021-05",
+            "value_eur_bn": 1.318
+          },
+          {
+            "period": "2021-06",
+            "value_eur_bn": 1.346
+          },
+          {
+            "period": "2021-07",
+            "value_eur_bn": 1.427
+          },
+          {
+            "period": "2021-08",
+            "value_eur_bn": 1.341
+          },
+          {
+            "period": "2021-09",
+            "value_eur_bn": 1.566
+          },
+          {
+            "period": "2021-10",
+            "value_eur_bn": 1.328
+          },
+          {
+            "period": "2021-11",
+            "value_eur_bn": 1.373
+          },
+          {
+            "period": "2021-12",
+            "value_eur_bn": 1.412
+          },
+          {
+            "period": "2022-01",
+            "value_eur_bn": 1.524
+          },
+          {
+            "period": "2022-02",
+            "value_eur_bn": 1.686
+          },
+          {
+            "period": "2022-03",
+            "value_eur_bn": 1.871
+          },
+          {
+            "period": "2022-04",
+            "value_eur_bn": 1.464
+          },
+          {
+            "period": "2022-05",
+            "value_eur_bn": 2.106
+          },
+          {
+            "period": "2022-06",
+            "value_eur_bn": 1.748
+          },
+          {
+            "period": "2022-07",
+            "value_eur_bn": 1.715
+          },
+          {
+            "period": "2022-08",
+            "value_eur_bn": 1.688
+          },
+          {
+            "period": "2022-09",
+            "value_eur_bn": 1.581
+          },
+          {
+            "period": "2022-10",
+            "value_eur_bn": 1.672
+          },
+          {
+            "period": "2022-11",
+            "value_eur_bn": 1.691
+          },
+          {
+            "period": "2022-12",
+            "value_eur_bn": 1.533
+          },
+          {
+            "period": "2023-01",
+            "value_eur_bn": 1.375
+          },
+          {
+            "period": "2023-02",
+            "value_eur_bn": 1.488
+          },
+          {
+            "period": "2023-03",
+            "value_eur_bn": 1.691
+          },
+          {
+            "period": "2023-04",
+            "value_eur_bn": 1.323
+          },
+          {
+            "period": "2023-05",
+            "value_eur_bn": 1.611
+          },
+          {
+            "period": "2023-06",
+            "value_eur_bn": 1.565
+          },
+          {
+            "period": "2023-07",
+            "value_eur_bn": 1.519
+          },
+          {
+            "period": "2023-08",
+            "value_eur_bn": 1.414
+          },
+          {
+            "period": "2023-09",
+            "value_eur_bn": 1.483
+          },
+          {
+            "period": "2023-10",
+            "value_eur_bn": 1.676
+          },
+          {
+            "period": "2023-11",
+            "value_eur_bn": 1.515
+          },
+          {
+            "period": "2023-12",
+            "value_eur_bn": 1.318
+          },
+          {
+            "period": "2024-01",
+            "value_eur_bn": 1.586
+          },
+          {
+            "period": "2024-02",
+            "value_eur_bn": 1.512
+          },
+          {
+            "period": "2024-03",
+            "value_eur_bn": 1.641
+          },
+          {
+            "period": "2024-04",
+            "value_eur_bn": 1.593
+          },
+          {
+            "period": "2024-05",
+            "value_eur_bn": 1.525
+          },
+          {
+            "period": "2024-06",
+            "value_eur_bn": 1.526
+          },
+          {
+            "period": "2024-07",
+            "value_eur_bn": 1.629
+          },
+          {
+            "period": "2024-08",
+            "value_eur_bn": 1.478
+          },
+          {
+            "period": "2024-09",
+            "value_eur_bn": 1.356
+          },
+          {
+            "period": "2024-10",
+            "value_eur_bn": 1.613
+          },
+          {
+            "period": "2024-11",
+            "value_eur_bn": 1.43
+          },
+          {
+            "period": "2024-12",
+            "value_eur_bn": 1.466
+          },
+          {
+            "period": "2025-01",
+            "value_eur_bn": 1.541
+          },
+          {
+            "period": "2025-02",
+            "value_eur_bn": 1.508
+          },
+          {
+            "period": "2025-03",
+            "value_eur_bn": 1.653
+          },
+          {
+            "period": "2025-04",
+            "value_eur_bn": 1.49
+          },
+          {
+            "period": "2025-05",
+            "value_eur_bn": 1.558
+          },
+          {
+            "period": "2025-06",
+            "value_eur_bn": 1.588
+          },
+          {
+            "period": "2025-07",
+            "value_eur_bn": 1.729
+          },
+          {
+            "period": "2025-08",
+            "value_eur_bn": 1.242
+          },
+          {
+            "period": "2025-09",
+            "value_eur_bn": 1.429
+          },
+          {
+            "period": "2025-10",
+            "value_eur_bn": 1.508
+          },
+          {
+            "period": "2025-11",
+            "value_eur_bn": 1.533
+          },
+          {
+            "period": "2025-12",
+            "value_eur_bn": 1.524
+          },
+          {
+            "period": "2026-01",
+            "value_eur_bn": 1.428
+          },
+          {
+            "period": "2026-02",
+            "value_eur_bn": 1.398
+          }
+        ],
+        "CH": [
+          {
+            "period": "2021-03",
+            "value_eur_bn": 0.875
+          },
+          {
+            "period": "2021-04",
+            "value_eur_bn": 0.783
+          },
+          {
+            "period": "2021-05",
+            "value_eur_bn": 0.766
+          },
+          {
+            "period": "2021-06",
+            "value_eur_bn": 0.843
+          },
+          {
+            "period": "2021-07",
+            "value_eur_bn": 0.808
+          },
+          {
+            "period": "2021-08",
+            "value_eur_bn": 0.783
+          },
+          {
+            "period": "2021-09",
+            "value_eur_bn": 0.883
+          },
+          {
+            "period": "2021-10",
+            "value_eur_bn": 0.856
+          },
+          {
+            "period": "2021-11",
+            "value_eur_bn": 0.952
+          },
+          {
+            "period": "2021-12",
+            "value_eur_bn": 0.812
+          },
+          {
+            "period": "2022-01",
+            "value_eur_bn": 1.028
+          },
+          {
+            "period": "2022-02",
+            "value_eur_bn": 1.017
+          },
+          {
+            "period": "2022-03",
+            "value_eur_bn": 1.293
+          },
+          {
+            "period": "2022-04",
+            "value_eur_bn": 1.06
+          },
+          {
+            "period": "2022-05",
+            "value_eur_bn": 1.071
+          },
+          {
+            "period": "2022-06",
+            "value_eur_bn": 1.162
+          },
+          {
+            "period": "2022-07",
+            "value_eur_bn": 1.045
+          },
+          {
+            "period": "2022-08",
+            "value_eur_bn": 1.042
+          },
+          {
+            "period": "2022-09",
+            "value_eur_bn": 1.076
+          },
+          {
+            "period": "2022-10",
+            "value_eur_bn": 1.07
+          },
+          {
+            "period": "2022-11",
+            "value_eur_bn": 1.155
+          },
+          {
+            "period": "2022-12",
+            "value_eur_bn": 0.964
+          },
+          {
+            "period": "2023-01",
+            "value_eur_bn": 1.273
+          },
+          {
+            "period": "2023-02",
+            "value_eur_bn": 1.184
+          },
+          {
+            "period": "2023-03",
+            "value_eur_bn": 1.219
+          },
+          {
+            "period": "2023-04",
+            "value_eur_bn": 0.889
+          },
+          {
+            "period": "2023-05",
+            "value_eur_bn": 1.073
+          },
+          {
+            "period": "2023-06",
+            "value_eur_bn": 1.261
+          },
+          {
+            "period": "2023-07",
+            "value_eur_bn": 0.842
+          },
+          {
+            "period": "2023-08",
+            "value_eur_bn": 0.917
+          },
+          {
+            "period": "2023-09",
+            "value_eur_bn": 0.92
+          },
+          {
+            "period": "2023-10",
+            "value_eur_bn": 0.914
+          },
+          {
+            "period": "2023-11",
+            "value_eur_bn": 0.942
+          },
+          {
+            "period": "2023-12",
+            "value_eur_bn": 0.834
+          },
+          {
+            "period": "2024-01",
+            "value_eur_bn": 0.99
+          },
+          {
+            "period": "2024-02",
+            "value_eur_bn": 1.046
+          },
+          {
+            "period": "2024-03",
+            "value_eur_bn": 1.015
+          },
+          {
+            "period": "2024-04",
+            "value_eur_bn": 0.999
+          },
+          {
+            "period": "2024-05",
+            "value_eur_bn": 1.003
+          },
+          {
+            "period": "2024-06",
+            "value_eur_bn": 1.0
+          },
+          {
+            "period": "2024-07",
+            "value_eur_bn": 1.03
+          },
+          {
+            "period": "2024-08",
+            "value_eur_bn": 0.913
+          },
+          {
+            "period": "2024-09",
+            "value_eur_bn": 0.966
+          },
+          {
+            "period": "2024-10",
+            "value_eur_bn": 0.989
+          },
+          {
+            "period": "2024-11",
+            "value_eur_bn": 1.042
+          },
+          {
+            "period": "2024-12",
+            "value_eur_bn": 0.835
+          },
+          {
+            "period": "2025-01",
+            "value_eur_bn": 1.128
+          },
+          {
+            "period": "2025-02",
+            "value_eur_bn": 3.993
+          },
+          {
+            "period": "2025-03",
+            "value_eur_bn": 1.578
+          },
+          {
+            "period": "2025-04",
+            "value_eur_bn": 0.905
+          },
+          {
+            "period": "2025-05",
+            "value_eur_bn": 0.995
+          },
+          {
+            "period": "2025-06",
+            "value_eur_bn": 0.95
+          },
+          {
+            "period": "2025-07",
+            "value_eur_bn": 1.04
+          },
+          {
+            "period": "2025-08",
+            "value_eur_bn": 0.808
+          },
+          {
+            "period": "2025-09",
+            "value_eur_bn": 0.993
+          },
+          {
+            "period": "2025-10",
+            "value_eur_bn": 0.992
+          },
+          {
+            "period": "2025-11",
+            "value_eur_bn": 0.975
+          },
+          {
+            "period": "2025-12",
+            "value_eur_bn": 0.873
+          },
+          {
+            "period": "2026-01",
+            "value_eur_bn": 0.936
+          },
+          {
+            "period": "2026-02",
+            "value_eur_bn": 0.974
+          }
+        ],
+        "OTHER": [
+          {
+            "period": "2021-03",
+            "value_eur_bn": 9.868
+          },
+          {
+            "period": "2021-04",
+            "value_eur_bn": 8.853
+          },
+          {
+            "period": "2021-05",
+            "value_eur_bn": 8.724
+          },
+          {
+            "period": "2021-06",
+            "value_eur_bn": 9.281
+          },
+          {
+            "period": "2021-07",
+            "value_eur_bn": 9.032
+          },
+          {
+            "period": "2021-08",
+            "value_eur_bn": 8.674
+          },
+          {
+            "period": "2021-09",
+            "value_eur_bn": 9.611
+          },
+          {
+            "period": "2021-10",
+            "value_eur_bn": 9.069
+          },
+          {
+            "period": "2021-11",
+            "value_eur_bn": 9.824
+          },
+          {
+            "period": "2021-12",
+            "value_eur_bn": 10.113
+          },
+          {
+            "period": "2022-01",
+            "value_eur_bn": 10.459
+          },
+          {
+            "period": "2022-02",
+            "value_eur_bn": 10.988
+          },
+          {
+            "period": "2022-03",
+            "value_eur_bn": 11.909
+          },
+          {
+            "period": "2022-04",
+            "value_eur_bn": 10.666
+          },
+          {
+            "period": "2022-05",
+            "value_eur_bn": 12.194
+          },
+          {
+            "period": "2022-06",
+            "value_eur_bn": 12.245
+          },
+          {
+            "period": "2022-07",
+            "value_eur_bn": 11.457
+          },
+          {
+            "period": "2022-08",
+            "value_eur_bn": 11.066
+          },
+          {
+            "period": "2022-09",
+            "value_eur_bn": 11.799
+          },
+          {
+            "period": "2022-10",
+            "value_eur_bn": 10.881
+          },
+          {
+            "period": "2022-11",
+            "value_eur_bn": 11.358
+          },
+          {
+            "period": "2022-12",
+            "value_eur_bn": 10.987
+          },
+          {
+            "period": "2023-01",
+            "value_eur_bn": 10.327
+          },
+          {
+            "period": "2023-02",
+            "value_eur_bn": 11.188
+          },
+          {
+            "period": "2023-03",
+            "value_eur_bn": 12.534
+          },
+          {
+            "period": "2023-04",
+            "value_eur_bn": 10.353
+          },
+          {
+            "period": "2023-05",
+            "value_eur_bn": 11.478
+          },
+          {
+            "period": "2023-06",
+            "value_eur_bn": 12.008
+          },
+          {
+            "period": "2023-07",
+            "value_eur_bn": 10.129
+          },
+          {
+            "period": "2023-08",
+            "value_eur_bn": 10.833
+          },
+          {
+            "period": "2023-09",
+            "value_eur_bn": 12.055
+          },
+          {
+            "period": "2023-10",
+            "value_eur_bn": 10.914
+          },
+          {
+            "period": "2023-11",
+            "value_eur_bn": 10.861
+          },
+          {
+            "period": "2023-12",
+            "value_eur_bn": 9.762
+          },
+          {
+            "period": "2024-01",
+            "value_eur_bn": 10.303
+          },
+          {
+            "period": "2024-02",
+            "value_eur_bn": 11.119
+          },
+          {
+            "period": "2024-03",
+            "value_eur_bn": 11.813
+          },
+          {
+            "period": "2024-04",
+            "value_eur_bn": 10.951
+          },
+          {
+            "period": "2024-05",
+            "value_eur_bn": 11.449
+          },
+          {
+            "period": "2024-06",
+            "value_eur_bn": 11.6
+          },
+          {
+            "period": "2024-07",
+            "value_eur_bn": 12.294
+          },
+          {
+            "period": "2024-08",
+            "value_eur_bn": 10.648
+          },
+          {
+            "period": "2024-09",
+            "value_eur_bn": 11.138
+          },
+          {
+            "period": "2024-10",
+            "value_eur_bn": 11.938
+          },
+          {
+            "period": "2024-11",
+            "value_eur_bn": 11.065
+          },
+          {
+            "period": "2024-12",
+            "value_eur_bn": 11.086
+          },
+          {
+            "period": "2025-01",
+            "value_eur_bn": 11.073
+          },
+          {
+            "period": "2025-02",
+            "value_eur_bn": 11.158
+          },
+          {
+            "period": "2025-03",
+            "value_eur_bn": 11.901
+          },
+          {
+            "period": "2025-04",
+            "value_eur_bn": 10.394
+          },
+          {
+            "period": "2025-05",
+            "value_eur_bn": 11.084
+          },
+          {
+            "period": "2025-06",
+            "value_eur_bn": 11.058
+          },
+          {
+            "period": "2025-07",
+            "value_eur_bn": 11.522
+          },
+          {
+            "period": "2025-08",
+            "value_eur_bn": 9.753
+          },
+          {
+            "period": "2025-09",
+            "value_eur_bn": 10.32
+          },
+          {
+            "period": "2025-10",
+            "value_eur_bn": 10.786
+          },
+          {
+            "period": "2025-11",
+            "value_eur_bn": 10.55
+          },
+          {
+            "period": "2025-12",
+            "value_eur_bn": 11.012
+          },
+          {
+            "period": "2026-01",
+            "value_eur_bn": 9.487
+          },
+          {
+            "period": "2026-02",
+            "value_eur_bn": 10.123
+          }
+        ]
+      }
+    }
+  },
+  "charts": [
+    "trade_imports_waterfall_cn8"
+  ],
+  "editorial_context": {
+    "latest_structural_break": "March 2022",
+    "notable_events": [
+      "US tariff measures since March 2025"
+    ],
+    "scope_note": "Extra-EU27 trade (declarant=EU, partner ≠ EU27), Comext CN 15/22/24/25–39 subset",
+    "narrative_hints": {
+      "apply_volume_value_duality": true,
+      "apply_pareto_if_concentrated": true,
+      "apply_drilldown_for_key_partners": true
+    }
+  }
+}
