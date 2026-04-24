@@ -136,16 +136,100 @@ Content-Type: application/json
 - **Audit** : chaque commit porte l'identité réelle comme `author` et `committer`. `git log` = log d'édition humaine gratuit.
 - **Pas de suppression** : l'endpoint ne supporte que les overwrites de fichiers existants. Pas de DELETE.
 
-## Open design items (à trancher en Phase 3)
+## Open design items
 
-### OD1 — Sveltia backend proxy
+### OD1 — Protocole backend Sveltia/Decap (décision : **Voie A**, cf. ci-dessous)
 
-Sveltia CMS (comme Decap) n'a pas nativement un backend "custom HTTP proxy". Deux voies :
+**Contexte.** Sveltia (comme son parent Decap, ex-Netlify CMS) attend un backend qui parle une API Git. Les backends natifs `github` / `gitlab` utilisent OAuth de l'utilisateur final pour s'authentifier ; `git-gateway` (legacy Netlify) proxie ces appels via un service intermédiaire qui injecte un token partagé. **Notre contrainte** : Moncef n'a pas de compte GitHub, l'auth passe par Azure SWA + Entra ID, et le token doit rester server-side (PAT machine).
 
-- **Voie A** : notre Azure Function implémente un sous-ensemble du **protocole git-gateway** (celui que Netlify utilise). Sveltia parle alors `backend: git-gateway` pointé sur `/api/`. Documenté, viable, ~4-6h de dev.
-- **Voie B** : plugin custom Sveltia qui enregistre un backend maison via `CMS.registerBackend()`. Plus de contrôle, plus de code custom à maintenir.
+Deux voies pour coller le CMS à notre Azure Function.
 
-Voie A privilégiée pour la compatibilité et la pérennité.
+---
+
+#### Voie A — Proxy type git-gateway (GitHub Contents API subset)
+
+**Idée** : notre Azure Function expose un sous-ensemble de l'API GitHub que Decap/Sveltia appelle. On utilise le backend `github` natif en redirigeant `api_root` vers notre domaine, et on court-circuite le flux OAuth via un hack localStorage dans `admin/index.html`.
+
+**Endpoints à proxifier** (pour le scope édition sans création/suppression/workflow) :
+
+| Méthode | Chemin | Usage CMS |
+|---------|--------|-----------|
+| `GET` | `/repos/{owner}/{repo}/git/trees/{branch}?recursive=1` | Lister les éditions de la collection |
+| `GET` | `/repos/{owner}/{repo}/contents/{path}?ref={branch}` | Ouvrir une édition pour édition |
+| `GET` | `/repos/{owner}/{repo}/branches/{branch}` | Vérifier le head du branch |
+| `PUT` | `/repos/{owner}/{repo}/contents/{path}` | Sauvegarder (déjà dans `/api/cms-commit`) |
+
+Soit **3 nouveaux endpoints GET** (lecture) + réutilisation du `/api/cms-commit` actuel pour le PUT. Chaque endpoint :
+1. Vérifie `x-ms-client-principal` (même chaîne que `cms-commit`)
+2. Allowlist + rate-limit
+3. Restreint `path` au whitelist (`site/src/content/editions/*.mdx`)
+4. Forwarde vers `api.github.com` en injectant le PAT, renvoie la réponse telle quelle
+
+**Contournement OAuth côté CMS** : on inject dans `admin/index.html` un script qui pose le token factice en localStorage avant que Sveltia/Decap démarre. Le CMS pense être authentifié, appelle le backend avec un `Authorization: Bearer <dummy>` — que notre proxy ignore (notre auth = la session SWA).
+
+```html
+<!-- admin/index.html, avant le bundle Sveltia -->
+<script>
+  localStorage.setItem('decap-cms-user', JSON.stringify({
+    backendName: 'github',
+    token: 'proxy-handles-auth',
+    login: 'proxy',
+    name: 'proxy',
+  }));
+</script>
+```
+
+Effort estimé : **~4-6 h**. Risques :
+- Hack localStorage peut casser si Sveltia change le format de son user state. Mitigation : pinner la version du bundle Sveltia, tests E2E pour détecter régression.
+- Chaque nouvelle feature du CMS (preview, media, editorial workflow) ajoute potentiellement des endpoints à proxifier.
+
+---
+
+#### Voie B — Backend custom via `registerBackend`
+
+**Idée** : écrire une classe Backend en JS qui implémente l'interface Decap (`getEntry`, `listEntries`, `persistEntry`, etc.), l'enregistrer via `CMS.registerBackend('iris-proxy', IrisBackend)` dans `admin/index.html`, et configurer `backend: { name: 'iris-proxy' }` dans `config.yml`. Cette classe parle directement à nos endpoints custom (pas besoin de mimer l'API GitHub).
+
+Interface à implémenter :
+
+```js
+class IrisBackend {
+  authComponent() { /* no-op, SWA auth is upstream */ }
+  restoreUser() { return Promise.resolve({ name: 'swa-user' }); }
+  async getEntry(collection, slug, path) { /* GET /api/cms-read */ }
+  async listEntries(collection) { /* GET /api/cms-list */ }
+  async persistEntry(entry, ...) { /* POST /api/cms-commit */ }
+}
+```
+
+Endpoints Azure Function : 2-3 custom et propres à nous.
+
+Effort estimé : **~8-12 h**. Risques :
+- L'interface Backend de Decap est documentée mais peu stable ; Sveltia l'a peut-être modifiée ou restreinte dans son fork Svelte (versus JSX Decap original).
+- L'écriture d'un backend custom demande de comprendre le cycle de vie interne du CMS (dirty state, optimistic updates, media handling). Plus de surface à débugger.
+- Plus de code frontend propriétaire à maintenir à chaque upgrade Sveltia.
+
+---
+
+#### Décision : **Voie A**
+
+**Raison principale** : périmètre d'implémentation plus petit (3 endpoints proxy + 1 hack localStorage) et s'appuie sur du code Sveltia battle-tested plutôt que sur un plugin fait maison. Le jour où Sveltia ajoute un vrai support SSO, la migration consiste à supprimer le hack localStorage — le reste de l'architecture (Azure Function, allowlist, PAT) reste pertinent.
+
+La Voie B est plus "propre" en théorie mais :
+- ~2× plus d'effort
+- Dépend plus fortement de l'API interne Sveltia (risque de casse à chaque upgrade)
+- N'élimine pas la nécessité d'endpoints côté Function, juste les déguise différemment
+
+**Plan d'implémentation Voie A (Phase 3)** :
+
+1. **Azure Function** : ajouter 3 handlers GET proxy (`github-tree`, `github-content`, `github-branch`) qui réutilisent `auth.ts` + `validation.ts` (path whitelist élargi pour accepter aussi les lectures) et forwardent vers `api.github.com` via Octokit ou fetch direct. ~2 h.
+2. **`site/public/admin/index.html`** : bundle Sveltia + script localStorage + redirect init. ~30 min.
+3. **`site/public/admin/config.yml`** : collection `editions`, champ `reviewed`, `api_root: https://iris.cefic.org/api/gh` (ou équivalent). ~1 h.
+4. **Tests E2E manuels** : ouvrir `/admin`, ouvrir une édition, modifier une phrase, save, vérifier commit GitHub + rebuild Azure. ~1 h.
+5. **Documentation GUIDE.md** pour Moncef (Phase 6.3 du plan original).
+
+Total Voie A : ~5 h net après le onboarding IT.
+
+**Fallback** : si le hack localStorage casse à l'usage (Sveltia refuse le user state sans vraie OAuth), pivoter vers Voie B sans refaire l'infra Azure Function — juste remplacer l'hack par une classe Backend.
 
 ### OD2 — Workflow Azure SWA
 
