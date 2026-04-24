@@ -375,6 +375,23 @@ button { font-family: inherit; }
   font-style: italic;
   color: var(--cefic-orange-300);
   font-weight: 300;
+  /* Heartbeat: inline-block so transform applies, origin centered so the
+     scale pulses outward rather than shifting the baseline. The keyframe
+     is a two-phase lub-dub-rest cycle (12% big pulse, 36% smaller pulse,
+     then rest) at ~50 bpm, which reads as alive without being noisy. */
+  display: inline-block;
+  transform-origin: 50% 60%;
+  animation: iris-heartbeat 1.2s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes iris-heartbeat {
+  0%, 50%, 100% { transform: scale(1); }
+  12%           { transform: scale(1.4); }
+  24%           { transform: scale(1); }
+  36%           { transform: scale(1.25); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .iris-hero h1 em { animation: none; }
 }
 .iris-hero-tagline {
   font-family: var(--iris-serif);
