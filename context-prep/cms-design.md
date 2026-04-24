@@ -1,8 +1,12 @@
 ---
 name: cms-design
 description: Architecture du portail d'édition human-in-the-loop (Azure SWA + Entra ID + Sveltia CMS + Azure Function commit proxy)
-status: design approuvé, Phase 2 en attente de blockers B1-B5
+status: **LIVE depuis 2026-04-24** sur iris.cefic.org/admin
 ---
+
+> **État 2026-04-24.** Phase 2 livrée en prod. Le portail `iris.cefic.org/admin` marche bout-en-bout :
+> Cefic SSO → liste des éditions → édition du wording → save = commit direct sur `main` → rebuild SWA ~90s.
+> Le chemin réel ship est **Voie B simplifiée** (Sveltia parle à `/api/gh/*` qui proxifie GitHub avec PAT machine) — l'endpoint `/api/cms-commit` existe en code mais n'est pas utilisé par Sveltia. Lire §"Shipped 2026-04-24 — lessons" en bas du doc avant toute modif ou upgrade.
 
 # Iris CMS — Design human-in-the-loop
 
@@ -341,7 +345,8 @@ Sveltia CMS est verrouillé sur une version spécifique dans `site/public/admin/
 |---|---|
 | Version | **0.156.3** |
 | Pinné le | 2026-04-24 |
-| CDN | `https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.mjs` |
+| CDN | `https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.js` |
+| Script tag | **pas** `type="module"`, **pas** `.mjs` — voir §"Shipped 2026-04-24" pour le pourquoi |
 | Changelog | `https://github.com/sveltia/sveltia-cms/releases/tag/v0.156.3` |
 
 ### Points sensibles qui dépendent de la version
@@ -363,20 +368,23 @@ Ne **jamais** bumper en prod directement. Étapes :
 
 1. **Préparer une branche** `chore/sveltia-upgrade-vX.Y.Z` depuis `main`.
 2. **Lire le changelog** entre version actuelle et version cible. Identifier tout ce qui touche :
-   - `src/lib/services/user/*` (auth flow, localStorage)
-   - `src/lib/services/backends/github*` (appels API)
-   - Config schema (`api_root`, `backend.*`)
+   - `src/lib/main.js` — bloc auto-init en fin de fichier (selector du script tag, `document.currentScript`, nom du bundle `.js` vs `.mjs`). Changement = casse silencieuse.
+   - `src/lib/services/user/auth.js` — `getUserCache` (clé localStorage) et `signInAutomatically` (flow de validation)
+   - `src/lib/services/backends/git/github/api.js` — `normalizeRestBaseURL` (préfixe `/api/v3` auto). Changement = notre strip n'est plus bon.
+   - `src/lib/services/backends/git/github/repository.js` — `checkRepositoryAccess` (path du collaborator check)
+   - `src/lib/services/backends/git/github/files.js` — queries GraphQL utilisées (structure, nouveaux endpoints)
+   - Config schema (`api_root`, `media_folder`, `backend.*`)
 3. **Bumper** `site/public/admin/index.html` :
-   - URL du `<script type="module" src="...">`
+   - URL du `<script src="...">` (pas `type="module"`, pas `.mjs` — voir §"Shipped 2026-04-24" #8)
    - Commentaire de tête "pinned YYYY-MM-DD"
    - Lien changelog
-4. **Relire le hack `sveltia-auth-stub`** ligne par ligne et confronter aux commits upstream sur `src/lib/services/user/auth.js`. Si un des 6 points sensibles ci-dessus a changé, adapter le stub.
+4. **Relire le hack `sveltia-auth-stub`** ligne par ligne et confronter aux commits upstream sur `src/lib/services/user/auth.js`. Si un des points sensibles ci-dessus a changé, adapter le stub.
 5. **Tester en local** avec les App Settings Azure pointant sur un fork de prod ou un repo sandbox :
-   - Login SWA Entra ID → `/admin/` → ne PAS être redirigé sur l'écran "Sign in with GitHub"
+   - Login SWA Entra ID → `/admin/` → UI Sveltia **s'ouvre directement** (sans devoir taper `CMS.init()` en console)
    - Ouvrir une édition existante → le contenu s'affiche correctement dans l'éditeur
-   - Modifier un mot → Save → vérifier que le commit apparaît sur le repo sandbox avec l'identité Entra ID
-   - Vérifier les logs Azure Function : aucun 403 de `/api/gh/*`, status 200 sur `/api/cms-commit`
-6. **Déployer en prod** seulement après les 4 checks réussis. Garder la version précédente taggée en git (`git tag sveltia-pre-vX.Y.Z <sha>`) pour revert rapide.
+   - Modifier un mot → Save → vérifier que le commit apparaît sur le repo sandbox
+   - Vérifier les logs Azure Function : aucun 403 de `/api/gh/*`, les GraphQL POST passent en 200
+6. **Déployer en prod** seulement après les checks réussis. Garder la version précédente taggée en git (`git tag sveltia-pre-vX.Y.Z <sha>`) pour revert rapide.
 7. **Mettre à jour cette section** : nouvelle version, nouvelle date.
 
 ### Fallback si ça casse
@@ -388,10 +396,55 @@ Si le hack n'est plus tenable après upgrade (ou si Sveltia ajoute un vrai suppo
 
 Effort estimé : ~1 jour si le besoin se présente.
 
+## Shipped 2026-04-24 — lessons
+
+Phase 2 a été déployée en une session itérative. Chaque fix ci-dessous a été un commit isolé et un redéploy SWA (~1-2 min). À relire avant toute refonte ou upgrade.
+
+### Les 8 trous (et pourquoi ils étaient silencieux)
+
+| # | Symptôme | Cause | Fix | Commit |
+|---|----------|-------|-----|--------|
+| 1 | Boucle MFA infinie après le code Authenticator | **Case "ID tokens" décochée** sur l'App Registration. SWA fait un hybrid flow `response_type=code+id_token` qui exige ce flag. Sans lui, callback incomplet → SWA relance. Ma propre reco initiale ("rien coché sous Implicit grant") était **fausse** pour le combo SWA+Entra. | IT coche **Authentication → Implicit grant and hybrid flows → ID tokens** sur l'app `Iris CMS`. | (config Azure, pas de commit) |
+| 2 | Post-login atterrit sur `/` au lieu de `/admin` | Notre responseOverride 401 redirigeait sans `post_login_redirect_uri`. | `"redirect": "/.auth/login/aad?post_login_redirect_uri=/admin"` dans `site/public/staticwebapp.config.json`. | `b00fb95` |
+| 3 | `/admin` rend une page blanche, console vide, pas d'UI Sveltia | Sveltia v0.156+ exige `media_folder` défini dans `config.yml` même sans widget media. Sans lui, `CMS.init()` throw silencieusement "The media folder is not defined" et sort sans monter le Svelte App. | `media_folder: site/public/admin/media` + `.gitkeep` dans le dossier (public_folder: `/admin/media`). | `00b3cf5` |
+| 4 | Deploys SWA "verts" mais la nouvelle version de la Function ne tourne jamais en prod | Oryx installe les deps prod dans `api/.oryx_prod_node_modules` et déclenche le `postinstall: tsc` **avant** de renommer ce dossier en `node_modules`. tsc ne trouve pas `@azure/functions`, échoue, Oryx swallow l'erreur avec "Oryx was unable to determine the build steps. Continuing assuming the assets in this folder are already built." — la Function App garde la révision précédente, le workflow reporte green. | Drop `postinstall`, ajouter `api_build_command: "npm ci && npm run build"` dans l'action SWA. `skip_api_build: true` est **faux escape hatch** (échoue avec "Function language info isn't provided"). | `101291e` |
+| 5 | Tous les appels `/api/gh/*` renvoient 403 côté UI Sveltia | Sveltia v0.156+ traite tout `api_root` non-`api.github.com` comme un GitHub Enterprise Server et préfixe **`/api/v3`** à chaque appel REST (`normalizeRestBaseURL` dans `src/lib/services/backends/git/github/api.js`). Notre proxy voyait `api/v3/user`, `api/v3/repos/...` → path whitelist rejette. | Strip transparent de `api/v3/` au début du handler `gh-proxy.ts`. | `e8f0b7c` |
+| 6 | Après `/user` OK, Sveltia affiche "You don't have access to the iris repository" et revient au login | Sveltia appelle `/repos/{owner}/{repo}/collaborators/{userName}` post-signIn (`checkRepositoryAccess` dans `repository.js`). Le `userName` est le stub `login` = email Cefic, que GitHub ne peut pas résoudre. La réponse 403 de notre proxy est interprétée comme "Not a collaborator" → clear user cache → login screen. | Stub 204 pour le bon owner/repo. Identité déjà vérifiée par SWA + CMS_ALLOWED_EMAILS. | `7f13d81` |
+| 7 | CMS liste les fichiers mais les bodies sont vides | Sveltia batch-fetch les contenus de fichiers via GraphQL (`getFileContentsQuery` dans `files.js`) sur `POST <root>/api/graphql`. Notre proxy n'acceptait que GET. | Ajouter `methods: ['GET', 'POST']` sur la route Function, et router `POST api/graphql` vers `https://api.github.com/graphql` avec le PAT. Pas de sous-allowlist — le PAT fine-grained scope l'accès à ce repo uniquement, c'est la vraie frontière. | `7f13d81` |
+| 8 | Page toujours blanche, `window.CMS` défini mais UI n'apparaît pas ; `CMS.init()` tapé à la main ouvre l'UI | Sveltia v0.156+ n'est plus un ES module et son auto-init dans `src/lib/main.js` ne fire que si **(a)** `document.currentScript` est non-null (null pour les scripts `type="module"`) ET **(b)** un script avec `src$="/sveltia-cms.js"` existe (le `.mjs` ne matche pas). Notre tag `<script type="module" src=".../sveltia-cms.mjs">` cassait les deux. La source Sveltia commente littéralement "Claude tends to add `type=module` due to outdated knowledge". | `<script src=".../sveltia-cms.js"></script>`, rien d'autre. | `fcf7add` |
+
+### Architecture réelle vs architecture dessinée
+
+Le schéma "Flow utilisateur" plus haut dit que Sveltia tape sur `/api/cms-commit` (Voie A). **Dans les faits** Sveltia tape sur `/api/gh/*` (backend github natif) qui proxifie `api.github.com`. Le save est un `PUT /repos/.../contents/{path}` avec un commit auto-stampé `kendrick7410` (owner du PAT), pas l'identité Entra ID.
+
+Conséquences :
+- `api/src/functions/cms-commit.ts` + `lib/validation.ts` + `lib/rate-limit.ts` + `lib/github.ts` sont **du code mort** dans la config actuelle. On les laisse en repo : ils restent valides comme fallback Voie A si un jour on bascule, et leurs tests docummentent l'intention.
+- L'audit Git dit que c'est kendrick7410 qui a commit, pas Moncef — pas bloquant Phase 2 (SWA log garde la trace Entra ID côté serveur), mais à adresser avec Voie B (custom backend via `CMS.registerBackend`) si l'audit éditorial formel devient un requirement.
+
+### Pipeline de debug à réutiliser
+
+Si `/admin` revient blanc ou bugué, la séquence la plus efficace (testée sur les 8 bugs ci-dessus) :
+
+1. **View Source** sur `/admin` — confirme que notre HTML est servi
+2. Visiter `/admin/config.yml` direct — confirme que les fichiers statiques `/admin/*` sont bien déployés
+3. Console DevTools :
+   - `1+1` — console alive
+   - `window.CMS` — bundle exécuté ? (Proxy object = oui)
+   - `CMS.init()` — colle le message d'erreur
+   - `Object.keys(localStorage)` — `sveltia-cms.user` + `sveltia-cms.prefs` = Sveltia a booté
+4. Network filtré sur `api/gh` — la première requête non-2xx est le point de blocage courant
+5. Si toujours blanc sans erreur : suspecter auto-init, vérifier que le script tag est sans `type="module"` et pointe sur `.js`
+
+### Rappel non négligeable
+
+Les recordings Chrome DevTools (`.json` exportés) **capturent les valeurs des champs input en clair, mots de passe inclus**. Toujours changer le mot de passe après un debug partagé, et filtrer les HAR avec DevTools → Settings → Network → "Allow to generate HAR with sensitive data" désactivé avant l'export.
+
 ## Références
 
-- STATE.md §9 — état du chantier CMS
+- STATE.md §9 — état du chantier CMS (à jour : Phase 2 livrée)
 - `api/README.md` — doc technique de l'Azure Function
-- `site/public/admin/index.html` — scaffold CMS (Phase 3.2, fait)
-- `site/public/admin/config.yml` — config Sveltia (Phase 3.3, à créer)
+- `site/public/admin/index.html` — scaffold CMS (livré, lire le commentaire du script tag avant upgrade Sveltia)
+- `site/public/admin/config.yml` — config Sveltia (livré)
+- `site/public/admin/GUIDE.md` — guide éditeur (Moncef-facing, une page)
+- `~/.claude/projects/-home-jme/memory/reference_sveltia_cms_v0156_integration.md` — mémoire cross-conversation des 8 pièges (valide pour tout projet Cefic SSO + Sveltia futur)
 - `site/public/staticwebapp.config.json` — config auth SWA (sous `public/` pour être copié en sortie de build par Astro ; tenant ID substitué au build via workflow + secret GitHub)

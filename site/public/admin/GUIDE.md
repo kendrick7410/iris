@@ -9,8 +9,8 @@ drafts the text automatically from Eurostat and Comext data. This CMS is
 where you (the editor) refine the wording before the edition is considered
 final.
 
-Your edits are saved as git commits under your name and go live on
-`iris.cefic.org` within about two minutes.
+Your edits are saved as git commits and go live on `iris.cefic.org`
+within about two minutes.
 
 ## How to log in
 
@@ -76,10 +76,14 @@ pipeline.
 
 ## What happens after Save
 
-1. Your commit appears in the `kendrick7410/iris` GitHub repo under your
-   name (`Moncef Hadhri <mha@cefic.be>`).
+1. A commit is created on the `kendrick7410/iris` GitHub repo with your
+   edit. The commit message names the edition you changed.
 2. Azure rebuilds the site (takes ~90 seconds).
 3. The change is live on `iris.cefic.org`.
+
+Cefic-side audit trail of who did what is in Azure (your Cefic login is
+logged server-side). Every save passes through Cefic SSO so only
+allowlisted editors can reach the CMS.
 
 ## If something goes wrong
 

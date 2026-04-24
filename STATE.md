@@ -157,7 +157,7 @@ Aujourd'hui le site ne lit que `site/src/content/editions/*.mdx`. Le markdown pi
 
 ## 9. Human-in-the-loop CMS
 
-**État (2026-04-24)** : Phase 1 discovery terminée, décisions prises (Cas B + O2 Azure Function), scaffold `api/` créé, Phase 2 en attente des blockers B1-B5.
+**État (2026-04-24) : Phase 2 LIVE.** Portail `iris.cefic.org/admin` fonctionnel bout-en-bout. Login Cefic SSO → Sveltia CMS → save → commit `main` → rebuild Azure SWA (~90s) → visible sur le site live. Testé avec `jme@cefic.be` (commit `069dfed` fait depuis l'UI). Reste avant invitation Moncef : check rate-limit et confirmation que le guard `reviewed: true` tient dans le prochain run pipeline.
 
 **Objectif** : Dr Moncef Hadhri (chef économiste Cefic) peut se connecter à `iris.cefic.org/admin`, reformuler une phrase dans une édition, sauvegarder, et voir le changement live en ~2 min sans passer par Jonathan, CLI ou GitHub.
 
@@ -173,33 +173,61 @@ Aujourd'hui le site ne lit que `site/src/content/editions/*.mdx`. Le markdown pi
 
 Design complet : `context-prep/cms-design.md`.
 
-### 9.2 — Azure Function — libs implémentées (non déployé)
+### 9.2 — Azure Function — code déployé en prod
 
 ```
 api/
 ├── host.json, package.json, tsconfig.json, .funcignore
-├── local.settings.json.example     # copier, remplir, gitignored
-├── src/functions/cms-commit.ts     # handler HTTP, orchestration uniquement
-├── src/lib/auth.ts                 # verifyClientPrincipal, isAllowlisted ✅
-├── src/lib/validation.ts           # validateCommitPayload, isPathAllowed ✅
-├── src/lib/rate-limit.ts           # checkRateLimit (in-memory, per email) ✅
-├── src/lib/github.ts               # commitFile via Octokit (PAT + stamped author) ✅
-└── test/                           # 36 tests, 0 fail, 0 skip
+├── local.settings.json.example
+├── src/functions/
+│   ├── gh-proxy.ts       ✅ USED — GET + POST proxy sur api.github.com, strip api/v3/ prefix,
+│   │                       stub /user et /collaborators, forward GraphQL
+│   └── cms-commit.ts     ⚠️ DEAD CODE — Voie A, Sveltia ne tape pas dessus (il fait PUT contents
+│                           via gh-proxy). Laissé en repo comme fallback Voie A et doc.
+├── src/lib/
+│   ├── auth.ts           ✅ USED — verifyClientPrincipal, isAllowlisted
+│   ├── proxy-paths.ts    ✅ USED — whitelist de paths REST (trees/contents/branches)
+│   ├── validation.ts     ⚠️ DEAD CODE (cms-commit only)
+│   ├── rate-limit.ts     ⚠️ DEAD CODE (cms-commit only)
+│   └── github.ts         ⚠️ DEAD CODE (cms-commit only, Octokit + author-stamping)
+└── test/                 64 tests verts (cms-commit + gh-proxy + lib)
 ```
 
-Type-check `npx tsc --noEmit` clean. `node --test dist/test` : 36/36.
+Build déployé via `api_build_command: "npm ci && npm run build"` dans le workflow (Oryx tombait en fail silencieux sur le postinstall sinon — voir §"Shipped 2026-04-24" de `context-prep/cms-design.md` #4).
 
-Reste à faire quand B1+B2 arrivent : écrire `staticwebapp.config.json` (auth Entra ID + route `/admin/*` authenticated), activer `api_location: "api"` dans le workflow SWA, configurer les App Settings Azure (`AAD_CLIENT_ID`, `AAD_CLIENT_SECRET`, `CMS_ALLOWED_EMAILS`), créer `site/public/admin/{index.html,config.yml}` pour Sveltia, et trancher OD1 (protocole backend Sveltia, cf. `cms-design.md`).
+### 9.2bis — Frontend CMS déployé
 
-### 9.3 — Blockers (B1-B5) — owner Jonathan
+```
+site/public/
+├── staticwebapp.config.json              ✅ auth Entra ID + routes + post_login_redirect_uri=/admin
+└── admin/
+    ├── index.html                        ✅ Sveltia v0.156.3, script classique (PAS type=module, PAS .mjs)
+    ├── config.yml                        ✅ backend github → /api/gh, publish_mode: simple,
+    │                                       media_folder sandbox obligatoire
+    ├── media/.gitkeep                    ✅ sandbox Sveltia (jamais vu par le site)
+    └── GUIDE.md                          ✅ guide éditeur une page (Moncef)
+```
+
+Workflow GitHub Actions `.github/workflows/azure-static-web-apps-delightful-cliff-04d721f03.yml` étendu : step envsubst `AAD_TENANT_ID` + `api_build_command` custom.
+
+Azure App Settings (SWA) posés : `AAD_TENANT_ID`, `AAD_CLIENT_ID`, `AAD_CLIENT_SECRET`, `GITHUB_PAT`, `GITHUB_OWNER`, `GITHUB_REPO`, `CMS_ALLOWED_EMAILS`.
+
+### 9.3 — Blockers (B1-B5) — tous levés
 
 | # | Item | Statut |
 |---|------|--------|
-| B1 | Tenant ID Entra ID Cefic | ⏳ Ticket IT Cefic envoyé |
-| B2 | App registration Entra ID "Iris CMS" (Client ID + Secret, Assignment required: Yes, Moncef + Jonathan assignés) | ⏳ Ticket IT Cefic envoyé |
-| B3 | PAT GitHub fine-grained, scope `kendrick7410/iris`, `contents: write` | ✅ 2026-04-24 — token ajouté aux App Settings Azure SWA comme `GITHUB_PAT` |
-| B4 | Domaine `iris.cefic.org` | ✅ Pointé sur Azure SWA, CMS sera sur `iris.cefic.org/admin` |
-| B5 | Liste éditeurs MVP | ✅ `jme@cefic.be` + `mha@cefic.be` (emails à reconfirmer par l'IT lors du setup de l'app registration) |
+| B1 | Tenant ID Entra ID Cefic | ✅ `2aa31c1f-01c3-45fb-ac5d-93315bf8649e`, substitué au build via GitHub Secret + envsubst, jamais commité |
+| B2 | App registration Entra ID "Iris CMS" | ✅ Client ID `08a96389-3efa-4dc1-9a28-916d979af51b`. **Checks critiques à garder sous la main si upgrade** : Redirect URI `https://iris.cefic.org/.auth/login/aad/callback` (Web), **Implicit grant → ID tokens coché** (hybrid flow SWA), `accessTokenAcceptedVersion: 2` dans le Manifest |
+| B3 | PAT GitHub fine-grained, scope `kendrick7410/iris`, `contents: write` | ✅ Posé comme `GITHUB_PAT` dans Azure SWA App Settings |
+| B4 | Domaine `iris.cefic.org` | ✅ Azure SWA, CMS sur `iris.cefic.org/admin` |
+| B5 | Liste éditeurs MVP | ✅ `CMS_ALLOWED_EMAILS=jme@cefic.be,mha@cefic.be` |
+
+### 9.3bis — Reste à faire avant d'inviter Moncef
+
+- [ ] Check interactif rate-limit (3 saves en <10s → la 4e doit être 429, puis passer après la fenêtre)
+- [ ] Check interactif que le widget text preserve bien les `<img/>` et `---` separators après save (Sveltia text widget ne devrait pas les toucher)
+- [ ] Check que le prochain run `monthly_run.py` respecte bien le flag `reviewed: true` et refuse de régénérer l'édition. Tests unitaires OK ; reste le E2E sur le cron mardi prochain (ou force un run manuel)
+- [ ] Envoyer l'invite + le `GUIDE.md` à Moncef
 
 ### 9.4 — Framing produit
 
