@@ -59,7 +59,19 @@ export async function ghProxy(
   }
 
   // 2. Resolve target path from the {*path} route parameter.
-  const targetPath = (req.params.path ?? '').replace(/^\/+/, '');
+  //
+  // Sveltia v0.156+ normalizes any non-default api_root as a GitHub Enterprise
+  // Server base and auto-appends `/api/v3` (see sveltia-cms
+  // src/lib/services/backends/git/github/api.js `normalizeRestBaseURL`). Our
+  // configured api_root is https://iris.cefic.org/api/gh, so every request
+  // arrives here as `api/v3/<real-path>`. Strip it so the rest of the routing
+  // (user stub + whitelist) sees the real GitHub path.
+  let targetPath = (req.params.path ?? '').replace(/^\/+/, '');
+  if (targetPath === 'api/v3' || targetPath === 'api/v3/') {
+    targetPath = '';
+  } else if (targetPath.startsWith('api/v3/')) {
+    targetPath = targetPath.slice('api/v3/'.length);
+  }
 
   // /user is stubbed from the principal — no GitHub call.
   if (targetPath === 'user') {

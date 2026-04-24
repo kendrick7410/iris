@@ -116,6 +116,50 @@ test('gh-proxy: /user returns stub from principal, no upstream call', async () =
   assert.equal(calls.length, 0, 'fetch must not be called for /user');
 });
 
+// Sveltia v0.156+ prepends `/api/v3` to every call (it treats any custom
+// api_root as a GHES base). Our proxy strips that prefix transparently so
+// routing still works. The next two tests pin that behavior.
+
+test('gh-proxy: strips api/v3/ prefix for /user (Sveltia v0.156 compat)', async () => {
+  setBaseEnv();
+  const { fn, calls } = mockFetch({ status: 200, body: '{}' });
+  __setFetchForTests(fn);
+  const res = await ghProxy(
+    mockReq({ path: 'api/v3/user', principal: validPrincipalHeader }),
+    mockCtx(),
+  );
+  __setFetchForTests(null);
+  assert.equal(res.status, 200);
+  const body = res.jsonBody as Record<string, unknown>;
+  assert.equal(body.login, 'mha@cefic.be');
+  assert.equal(calls.length, 0, 'fetch must not be called for /user');
+});
+
+test('gh-proxy: strips api/v3/ prefix for repo paths (Sveltia v0.156 compat)', async () => {
+  setBaseEnv();
+  const { fn, calls } = mockFetch({
+    status: 200,
+    body: '{"name":"main","commit":{"sha":"abc"}}',
+  });
+  __setFetchForTests(fn);
+  const res = await ghProxy(
+    mockReq({
+      path: 'api/v3/repos/kendrick7410/iris/branches/main',
+      principal: validPrincipalHeader,
+    }),
+    mockCtx(),
+  );
+  __setFetchForTests(null);
+  assert.equal(res.status, 200);
+  assert.equal(calls.length, 1);
+  // Upstream URL must NOT contain the /api/v3/ prefix — that was Sveltia’s
+  // synthetic addition, not a real api.github.com path.
+  assert.match(
+    calls[0].url,
+    /^https:\/\/api\.github\.com\/repos\/kendrick7410\/iris\/branches\/main$/,
+  );
+});
+
 test('gh-proxy: happy path — branches forwards to github with PAT', async () => {
   setBaseEnv();
   const { fn, calls } = mockFetch({
