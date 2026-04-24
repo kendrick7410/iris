@@ -147,6 +147,64 @@ Cf §4 (charts renderer, règle single-month, test intégration).
 
 Pour valider la reproductibilité et la cohérence éditoriale entre éditions.
 
+### 5.8 — Alignment patch (dette planifiée)
+
+Aujourd'hui le site ne lit que `site/src/content/editions/*.mdx`. Le markdown pipeline (`editorial/drafts/YYYY-MM/{edition.md, sections/*.md}`) n'est plus consommé après écriture du MDX par `pipelines/monthly_run.py:267-270`. Le CMS (§9) édite donc les MDX, pas les drafts — divergence structurelle entre les deux copies.
+
+**Patch à planifier** : faire converger site + drafts vers `editorial/drafts/` comme source unique, le site lit directement depuis là, le PDF et la long-form aussi. Une fois appliqué, la migration CMS se résume à changer `folder:` dans `site/public/admin/config.yml` (cf. `context-prep/cms-design.md` §Migration path vers Cas A).
+
+**Pourquoi différé** : bloquerait le CMS. Cas B (CMS sur les MDX) débloque Moncef rapidement, alignment ensuite.
+
+## 9. Human-in-the-loop CMS
+
+**État (2026-04-24)** : Phase 1 discovery terminée, décisions prises (Cas B + O2 Azure Function), scaffold `api/` créé, Phase 2 en attente des blockers B1-B5.
+
+**Objectif** : Dr Moncef Hadhri (chef économiste Cefic) peut se connecter à `iris.cefic.org/admin`, reformuler une phrase dans une édition, sauvegarder, et voir le changement live en ~2 min sans passer par Jonathan, CLI ou GitHub.
+
+### 9.1 — Architecture retenue
+
+| Composant | Choix | Justification |
+|---|---|---|
+| Auth portail | Azure SWA + Entra ID (SSO Cefic) | Pas de compte séparé pour Moncef |
+| CMS frontend | Sveltia CMS (drop-in Decap moderne) | Gratuit, config YAML, supporte MDX |
+| Commit GitHub | **Azure Function `/api/cms-commit`** (O2) | Moncef n'a pas de GitHub ; la Function commit via PAT machine en stampant l'auteur = identité Entra ID réelle |
+| Source éditable | `site/src/content/editions/*.mdx` (Cas B, cf. §5.8) | Chemin rapide ; migration triviale vers drafts quand l'alignment patch sera fait |
+| Deploy trigger | Push sur `main` → workflow Azure SWA existant | Rien à changer dans la chaîne CI |
+
+Design complet : `context-prep/cms-design.md`.
+
+### 9.2 — Scaffold Azure Function (créé, non déployé)
+
+```
+api/
+├── host.json, package.json, tsconfig.json, .funcignore
+├── local.settings.json.example     # copier, remplir, gitignored
+├── src/functions/cms-commit.ts     # handler HTTP, orchestration uniquement
+├── src/lib/auth.ts                 # verifyClientPrincipal, isAllowlisted (stubs)
+├── src/lib/validation.ts           # isPathAllowed actif, validateCommitPayload stub
+├── src/lib/rate-limit.ts           # checkRateLimit stub (in-memory, per email)
+├── src/lib/github.ts               # commitFile stub (Octokit)
+└── test/                           # node:test, validation path tests actifs, reste skip
+```
+
+Type-check passe (`npx tsc --noEmit`), 3 tests `isPathAllowed` passent, 5 autres en `test.skip` jusqu'à implémentation Phase 2.
+
+### 9.3 — Blockers (B1-B5) — owner Jonathan
+
+| # | Item | Détail |
+|---|------|--------|
+| B1 | Tenant ID Entra ID Cefic | Portail Azure AD → "Overview" → Tenant ID. Sinon IT Cefic. |
+| B2 | App registration Entra ID "Iris CMS" | Azure AD → App registrations → New. Récupérer Client ID + créer Client Secret. **`Assignment required: Yes`** + assigner Moncef + Jonathan |
+| B3 | PAT GitHub fine-grained | Settings → Developer settings → Personal access tokens → Fine-grained. Scope = `kendrick7410/iris` uniquement, permission `contents: write`. (Remplace B3 initial "OAuth App" — PAT plus propre avec l'architecture O2.) |
+| B4 | Domaine iris.cefic.org | Confirmer que DNS + certif pointent bien vers le slot Azure SWA `delightful-cliff-04d721f03`. Sinon utiliser le subdomain `.azurestaticapps.net` par défaut en MVP. |
+| B5 | Liste éditeurs initiale | MVP : Moncef (`mha@cefic.be` ?) + Jonathan. Préciser emails exacts. |
+
+Une fois B1-B5 reçus, Phase 2 reprend : écriture `staticwebapp.config.json`, app settings Azure (AAD_CLIENT_ID/SECRET + GITHUB_PAT + CMS_ALLOWED_EMAILS), implémentation des 4 libs stubbed, activation workflow SWA `api_location: "api"`.
+
+### 9.4 — Framing produit
+
+Le CMS n'est pas un confort, c'est une validation structurelle. Iris passe d'un pipeline automatique à un produit hybride humain-machine. À terme, la homepage mentionnera que chaque édition est revue par l'équipe économique Cefic — réponse à l'objection *"c'est un LLM qui écrit ça"*.
+
 ## 6. Bloqueurs et questions ouvertes
 
 - **Git remote :** non configuré. `git remote -v` dans `C:/Users/jme` = vide. Le repo `kendrick7410/iris` existe sur GitHub mais n'est lié à rien localement.

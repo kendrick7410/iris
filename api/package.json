@@ -1,0 +1,26 @@
+{
+  "name": "iris-cms-api",
+  "version": "0.1.0",
+  "description": "Azure Function proxy for Iris CMS: commits MDX edits to GitHub with Entra ID identity",
+  "private": true,
+  "type": "module",
+  "main": "dist/src/functions/cms-commit.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist",
+    "start": "npm run build && func start",
+    "test": "npm run build && node --test dist/test"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0",
+    "@octokit/rest": "^21.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
