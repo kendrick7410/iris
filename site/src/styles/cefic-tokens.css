@@ -381,14 +381,14 @@ button { font-family: inherit; }
      then rest) at ~50 bpm, which reads as alive without being noisy. */
   display: inline-block;
   transform-origin: 50% 60%;
-  animation: iris-heartbeat 2.4s ease-in-out infinite;
+  animation: iris-heartbeat 4s ease-in-out infinite;
   will-change: transform;
 }
 @keyframes iris-heartbeat {
   0%, 50%, 100% { transform: scale(1); }
-  12%           { transform: scale(1.4); }
+  12%           { transform: scale(1.12); }
   24%           { transform: scale(1); }
-  36%           { transform: scale(1.25); }
+  36%           { transform: scale(1.06); }
 }
 @media (prefers-reduced-motion: reduce) {
   .iris-hero h1 em { animation: none; }
