@@ -1,0 +1,16 @@
+{
+  "source": "test fixture",
+  "overlap_year": 2021,
+  "precrisis_avg_i21_by_country": {
+    "DE": 100.0,
+    "FR": 90.0,
+    "IT": 80.0,
+    "NL": 95.0,
+    "ES": 85.0,
+    "BE": 92.0,
+    "PL": 70.0
+  },
+  "conversion_factor_by_country": {
+    "DE": 1.0, "FR": 1.0, "IT": 1.0, "NL": 1.0, "ES": 1.0, "BE": 1.0, "PL": 1.0
+  }
+}

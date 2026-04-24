@@ -451,3 +451,111 @@ def _write_unavailable(cache_dir: Path, reason: str) -> Path:
     )
     logger.info(f"Trade unavailable: {reason}")
     return out
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Extension for Phase A scatter analytics (analysis/scatters/cu_trade.py).
+# ─────────────────────────────────────────────────────────────────────────
+
+def fetch_country_trade_balance(
+    month: str,
+    cache_dir: Path,
+    window_months: int = 3,
+    full_parquet_path: str | None = None,
+    chemistry_chapters: tuple[str, ...] = ("28", "29", "30", "31", "32", "33", "34", "35", "38", "39"),
+) -> Path:
+    """Compute the extra-EU27 chemical trade balance per declarant country.
+
+    Reads `comext_export_full.parquet` (per-country declarants) filtered to
+    chemical CN chapters and extra-EU partners, then sums exports minus
+    imports over the trailing `window_months`.
+
+    Saves data/cache/{month}/country_trade_balance.json with:
+      {
+        "window_months": ["2025-10", "2025-11", "2025-12"],
+        "window_end": "2025-12",
+        "chapters": ["28", "29", ...],
+        "balance_eur_bn_by_country": {"DE": 2.34, "FR": -0.5, ...}
+      }
+
+    Only the TOP7 declarant set is kept (DE, FR, IT, NL, ES, BE, PL).
+    """
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    out = cache_dir / "country_trade_balance.json"
+
+    parquet_path = Path(
+        full_parquet_path
+        or os.environ.get("COMEXT_FULL_PARQUET")
+        or "/home/jme/comext-etl/comext_export_full.parquet"
+    )
+    if not parquet_path.exists():
+        raise FileNotFoundError(f"Per-country parquet missing: {parquet_path}")
+
+    top7 = {"DE", "FR", "IT", "NL", "ES", "BE", "PL"}
+    # EU27 member states — used to drop intra-EU partner rows. In the
+    # per-country parquet, `partner` can be either an individual country
+    # code (including fellow EU members) or the synthetic "EU27" aggregate;
+    # both must be excluded to isolate extra-EU flows.
+    eu27_members = {
+        "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI",
+        "FR", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT",
+        "NL", "PL", "PT", "RO", "SE", "SI", "SK",
+    }
+    df = pd.read_parquet(parquet_path)
+    df["chapter_cn"] = df["chapter_cn"].astype(str)
+    df = df[
+        (df["declarant"].isin(top7))
+        & (~df["partner"].isin(eu27_members))
+        & (df["partner"] != INTRA_EU_PARTNER)
+        & (df["chapter_cn"].isin(chemistry_chapters))
+    ]
+    if df.empty:
+        raise RuntimeError("No per-country rows after filtering.")
+
+    # Trailing `window_months` ending at min(edition month, latest in data).
+    try:
+        edition_end = pd.Timestamp(f"{month}-01") + pd.offsets.MonthEnd(0)
+    except Exception:
+        edition_end = df["period"].max()
+    latest_in_data = df["period"].max()
+    window_end = min(edition_end, latest_in_data)
+    window_start = window_end - pd.DateOffset(months=window_months - 1)
+    dfw = df[(df["period"] >= window_start) & (df["period"] <= window_end)]
+    if dfw.empty:
+        raise RuntimeError(
+            f"No per-country rows in rolling {window_months} months "
+            f"ending {window_end.strftime('%Y-%m')}."
+        )
+
+    # flow=2 exports, flow=1 imports
+    agg = dfw.groupby(["declarant", "flow"])["value_in_euros"].sum().unstack(fill_value=0)
+    exports = agg.get(2, pd.Series(dtype=float))
+    imports = agg.get(1, pd.Series(dtype=float))
+    balance_eur = exports.subtract(imports, fill_value=0)
+    balance_bn = (balance_eur / 1e9).round(3)
+
+    balance_by_ctry = {
+        ctry: float(balance_bn.get(ctry, 0.0)) for ctry in sorted(top7)
+    }
+    window_months_list = sorted({
+        dt.strftime("%Y-%m")
+        for dt in pd.date_range(window_start, window_end, freq="ME")
+    })
+
+    result = {
+        "source": str(parquet_path),
+        "window_months": window_months_list,
+        "window_end": window_end.strftime("%Y-%m"),
+        "chapters": list(chemistry_chapters),
+        "balance_eur_bn_by_country": balance_by_ctry,
+        "note": (
+            "Extra-EU27 trade balance (partner != EU27); chemistry chapters "
+            "28-39 summed. Figures are in €bn, positive = surplus."
+        ),
+    }
+    out.write_text(json.dumps(result, indent=2), encoding="utf-8")
+    logger.info(
+        "Country trade balance saved to %s (window %s, %d countries)",
+        out, result["window_end"], len(balance_by_ctry),
+    )
+    return out

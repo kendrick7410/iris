@@ -1,0 +1,22 @@
+{
+  "source": "Eurostat sts_inpr_m I15 2014-2019 with country-level I15\u2192I21 overlap (2021)",
+  "overlap_year": 2021,
+  "precrisis_avg_i21_by_country": {
+    "DE": 98.8,
+    "FR": 99.6,
+    "IT": 97.2,
+    "NL": 96.8,
+    "ES": 92.4,
+    "BE": 96.5,
+    "PL": 76.2
+  },
+  "conversion_factor_by_country": {
+    "DE": 0.9899,
+    "FR": 0.9615,
+    "IT": 0.9443,
+    "NL": 0.9269,
+    "ES": 0.8978,
+    "BE": 0.9415,
+    "PL": 0.7214
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "scatter_id": "concentration",
+  "title": "Strategic exposure: partner vs product concentration by CN chapter",
+  "x_axis_label": "HHI on export partners (0 = diversified, 10000 = one partner)",
+  "y_axis_label": "HHI on CN 8-digit products (0 = diversified, 10000 = one product)",
+  "points": [
+    {
+      "label": "28",
+      "x": 1170.0,
+      "y": 1270.0,
+      "annotations": {
+        "chapter_cn": "28",
+        "chapter_name": "Inorganic chemicals",
+        "hhi_partners": 1170.0,
+        "hhi_products_cn8": 1270.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 22.3,
+        "top_product_cn8": "28442035",
+        "top_product_share_pct": 33.4,
+        "n_partners": 176,
+        "n_products_cn8": 243,
+        "total_value_eur_bn": 3.86
+      }
+    },
+    {
+      "label": "29",
+      "x": 989.0,
+      "y": 325.0,
+      "annotations": {
+        "chapter_cn": "29",
+        "chapter_name": "Organic chemicals",
+        "hhi_partners": 989.0,
+        "hhi_products_cn8": 325.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 24.7,
+        "top_product_cn8": "29349990",
+        "top_product_share_pct": 10.5,
+        "n_partners": 177,
+        "n_products_cn8": 475,
+        "total_value_eur_bn": 9.44
+      }
+    },
+    {
+      "label": "30",
+      "x": 2730.0,
+      "y": 7256.0,
+      "annotations": {
+        "chapter_cn": "30",
+        "chapter_name": "Pharmaceutical products",
+        "hhi_partners": 2730.0,
+        "hhi_products_cn8": 7256.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 50.7,
+        "top_product_cn8": "30024900",
+        "top_product_share_pct": 84.9,
+        "n_partners": 150,
+        "n_products_cn8": 10,
+        "total_value_eur_bn": 1.66
+      }
+    },
+    {
+      "label": "31",
+      "x": 557.0,
+      "y": 794.0,
+      "annotations": {
+        "chapter_cn": "31",
+        "chapter_name": "Fertilisers",
+        "hhi_partners": 557.0,
+        "hhi_products_cn8": 794.0,
+        "top_partner": "GB",
+        "top_partner_share_pct": 13.3,
+        "top_product_cn8": "31052010",
+        "top_product_share_pct": 20.1,
+        "n_partners": 155,
+        "n_products_cn8": 33,
+        "total_value_eur_bn": 1.24
+      }
+    },
+    {
+      "label": "32",
+      "x": 541.0,
+      "y": 460.0,
+      "annotations": {
+        "chapter_cn": "32",
+        "chapter_name": "Dyes, pigments, paints",
+        "hhi_partners": 541.0,
+        "hhi_products_cn8": 460.0,
+        "top_partner": "GB",
+        "top_partner_share_pct": 12.0,
+        "top_product_cn8": "32141010",
+        "top_product_share_pct": 12.4,
+        "n_partners": 186,
+        "n_products_cn8": 59,
+        "total_value_eur_bn": 2.86
+      }
+    },
+    {
+      "label": "33",
+      "x": 517.0,
+      "y": 1257.0,
+      "annotations": {
+        "chapter_cn": "33",
+        "chapter_name": "Essential oils, cosmetics",
+        "hhi_partners": 517.0,
+        "hhi_products_cn8": 1257.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 12.6,
+        "top_product_cn8": "33049900",
+        "top_product_share_pct": 26.9,
+        "n_partners": 193,
+        "n_products_cn8": 49,
+        "total_value_eur_bn": 10.75
+      }
+    },
+    {
+      "label": "34",
+      "x": 680.0,
+      "y": 1105.0,
+      "annotations": {
+        "chapter_cn": "34",
+        "chapter_name": "Soaps, detergents, waxes",
+        "hhi_partners": 680.0,
+        "hhi_products_cn8": 1105.0,
+        "top_partner": "GB",
+        "top_partner_share_pct": 19.5,
+        "top_product_cn8": "34025090",
+        "top_product_share_pct": 25.3,
+        "n_partners": 188,
+        "n_products_cn8": 30,
+        "total_value_eur_bn": 2.72
+      }
+    },
+    {
+      "label": "35",
+      "x": 661.0,
+      "y": 1809.0,
+      "annotations": {
+        "chapter_cn": "35",
+        "chapter_name": "Albuminoidal, glues",
+        "hhi_partners": 661.0,
+        "hhi_products_cn8": 1809.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 15.1,
+        "top_product_cn8": "35079090",
+        "top_product_share_pct": 33.4,
+        "n_partners": 182,
+        "n_products_cn8": 23,
+        "total_value_eur_bn": 1.55
+      }
+    },
+    {
+      "label": "38",
+      "x": 542.0,
+      "y": 897.0,
+      "annotations": {
+        "chapter_cn": "38",
+        "chapter_name": "Miscellaneous chemicals",
+        "hhi_partners": 542.0,
+        "hhi_products_cn8": 897.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 13.6,
+        "top_product_cn8": "38221900",
+        "top_product_share_pct": 25.4,
+        "n_partners": 196,
+        "n_products_cn8": 147,
+        "total_value_eur_bn": 8.95
+      }
+    },
+    {
+      "label": "39",
+      "x": 741.0,
+      "y": 315.0,
+      "annotations": {
+        "chapter_cn": "39",
+        "chapter_name": "Plastics",
+        "hhi_partners": 741.0,
+        "hhi_products_cn8": 315.0,
+        "top_partner": "US",
+        "top_partner_share_pct": 13.3,
+        "top_product_cn8": "39069090",
+        "top_product_share_pct": 7.0,
+        "n_partners": 170,
+        "n_products_cn8": 96,
+        "total_value_eur_bn": 6.29
+      }
+    }
+  ],
+  "reference_lines": {
+    "x_thresholds": [
+      {
+        "value": 1500,
+        "label": "moderately concentrated"
+      },
+      {
+        "value": 2500,
+        "label": "highly concentrated"
+      }
+    ],
+    "y_thresholds": [
+      {
+        "value": 1500,
+        "label": "moderately concentrated"
+      },
+      {
+        "value": 2500,
+        "label": "highly concentrated"
+      }
+    ]
+  },
+  "signal_strength": 0.1,
+  "signal_explanation": "1 of 10 chapters sit in the 'highly concentrated' zone (HHI > 2500 on at least one axis). Higher share = more strategic exposure across the export portfolio.",
+  "metadata": {
+    "source": "Comext EU parquet (extra-EU27 exports, flow=2)",
+    "window_months": 3,
+    "window_end": "2026-02",
+    "edition_month": "2026-02",
+    "year": 2026,
+    "hhi_thresholds": {
+      "moderate": 1500,
+      "high": 2500
+    }
+  }
+}

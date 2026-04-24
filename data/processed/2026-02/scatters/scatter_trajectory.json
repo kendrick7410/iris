@@ -1,0 +1,105 @@
+{
+  "scatter_id": "trajectory",
+  "title": "From crisis onset to now: chemical production by country",
+  "x_axis_label": "Production index, Jan 2020 (% of 2014-2019 average)",
+  "y_axis_label": "Production index, 2026-02 (% of 2014-2019 average)",
+  "points": [
+    {
+      "label": "DE",
+      "x": 97.8,
+      "y": 78.2,
+      "annotations": {
+        "country_name": "Germany",
+        "precrisis_i21": 98.8,
+        "jan_2020_i21": 96.6,
+        "current_i21": 77.3,
+        "delta_from_diagonal_pp": -19.5
+      }
+    },
+    {
+      "label": "FR",
+      "x": 101.2,
+      "y": 93.9,
+      "annotations": {
+        "country_name": "France",
+        "precrisis_i21": 99.6,
+        "jan_2020_i21": 100.8,
+        "current_i21": 93.5,
+        "delta_from_diagonal_pp": -7.3
+      }
+    },
+    {
+      "label": "IT",
+      "x": 98.3,
+      "y": 83.3,
+      "annotations": {
+        "country_name": "Italy",
+        "precrisis_i21": 97.2,
+        "jan_2020_i21": 95.5,
+        "current_i21": 81.0,
+        "delta_from_diagonal_pp": -14.9
+      }
+    },
+    {
+      "label": "NL",
+      "x": 101.9,
+      "y": 78.0,
+      "annotations": {
+        "country_name": "Netherlands",
+        "precrisis_i21": 96.8,
+        "jan_2020_i21": 98.6,
+        "current_i21": 75.5,
+        "delta_from_diagonal_pp": -23.9
+      }
+    },
+    {
+      "label": "ES",
+      "x": 102.3,
+      "y": 101.3,
+      "annotations": {
+        "country_name": "Spain",
+        "precrisis_i21": 92.4,
+        "jan_2020_i21": 94.5,
+        "current_i21": 93.6,
+        "delta_from_diagonal_pp": -1.0
+      }
+    },
+    {
+      "label": "BE",
+      "x": 103.9,
+      "y": 93.9,
+      "annotations": {
+        "country_name": "Belgium",
+        "precrisis_i21": 96.5,
+        "jan_2020_i21": 100.3,
+        "current_i21": 90.6,
+        "delta_from_diagonal_pp": -10.1
+      }
+    },
+    {
+      "label": "PL",
+      "x": 110.8,
+      "y": 132.4,
+      "annotations": {
+        "country_name": "Poland",
+        "precrisis_i21": 76.2,
+        "jan_2020_i21": 84.4,
+        "current_i21": 100.9,
+        "delta_from_diagonal_pp": 21.7
+      }
+    }
+  ],
+  "reference_lines": {
+    "diagonal": true,
+    "x_ref": 100.0,
+    "y_ref": 100.0
+  },
+  "signal_strength": 0.9545,
+  "signal_explanation": "Max distance to the diagonal: -23.9 pp (capped at 25pp for normalisation). Higher = more structural drift between Jan 2020 and today.",
+  "metadata": {
+    "unit": "index, 2021=100 normalised to 2014-2019 pre-crisis mean",
+    "source": "Eurostat sts_inpr_m (I21, SCA), 2014-2019 baseline converted via I15 overlap",
+    "edition_month": "2026-02",
+    "year": 2026
+  }
+}

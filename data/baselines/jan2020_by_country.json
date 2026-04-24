@@ -1,0 +1,12 @@
+{
+  "source": "Eurostat sts_inpr_m (I21, SCA), 2020-01",
+  "jan_2020_i21_by_country": {
+    "BE": 100.3,
+    "DE": 96.6,
+    "ES": 94.5,
+    "FR": 100.8,
+    "IT": 95.5,
+    "NL": 98.6,
+    "PL": 84.4
+  }
+}

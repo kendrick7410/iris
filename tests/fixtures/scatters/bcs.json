@@ -1,0 +1,15 @@
+{
+  "dataset": "ei_bsin_q_r2",
+  "indicator": "BS-ICU-PC",
+  "note": "manufacturing total; NACE C20 not published per country",
+  "latest_quarter": "2026-Q1",
+  "cu_by_country": {
+    "DE": 77.0,
+    "FR": 75.5,
+    "IT": 74.0,
+    "NL": 78.5,
+    "ES": 80.2,
+    "BE": 79.0,
+    "PL": 76.1
+  }
+}

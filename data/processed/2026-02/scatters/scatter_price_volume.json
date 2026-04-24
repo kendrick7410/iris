@@ -1,0 +1,81 @@
+{
+  "scatter_id": "price_volume",
+  "title": "Demand issue or price issue: sub-sector YoY price vs volume",
+  "x_axis_label": "Producer price, YoY change (%)",
+  "y_axis_label": "Production volume, YoY change (%)",
+  "points": [
+    {
+      "label": "2011",
+      "x": -5.1,
+      "y": -0.9,
+      "annotations": {
+        "nace4": "C2011",
+        "sector_name": "Industrial gases",
+        "price_yoy_pct": -5.1,
+        "volume_yoy_pct": -0.9,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "2013",
+      "x": 1.7,
+      "y": -0.8,
+      "annotations": {
+        "nace4": "C2013",
+        "sector_name": "Inorganic basic chemicals",
+        "price_yoy_pct": 1.7,
+        "volume_yoy_pct": -0.8,
+        "quadrant": "prices up, volumes down (demand weakness)"
+      }
+    },
+    {
+      "label": "2014",
+      "x": -8.0,
+      "y": -10.6,
+      "annotations": {
+        "nace4": "C2014",
+        "sector_name": "Organic basic chemicals",
+        "price_yoy_pct": -8.0,
+        "volume_yoy_pct": -10.6,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "2016",
+      "x": -6.0,
+      "y": -8.1,
+      "annotations": {
+        "nace4": "C2016",
+        "sector_name": "Plastics in primary forms",
+        "price_yoy_pct": -6.0,
+        "volume_yoy_pct": -8.1,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "2059",
+      "x": -0.2,
+      "y": 2.8,
+      "annotations": {
+        "nace4": "C2059",
+        "sector_name": "Other chemical products",
+        "price_yoy_pct": -0.2,
+        "volume_yoy_pct": 2.8,
+        "quadrant": "prices down, volumes up (market-share push)"
+      }
+    }
+  ],
+  "reference_lines": {
+    "x_ref": 0.0,
+    "y_ref": 0.0
+  },
+  "signal_strength": 0.6,
+  "signal_explanation": "3 of 5 sub-sectors outside |3%| YoY on either axis. Higher share = more polarised sector-level story.",
+  "metadata": {
+    "source": "Eurostat sts_inpr_m + sts_inppd_m (NACE 4-digit, EU27, I21, SCA/NSA)",
+    "yoy_anchor": "2025-02",
+    "edition_month": "2026-02",
+    "year": 2026,
+    "extreme_threshold_pct": 3.0
+  }
+}
