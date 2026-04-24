@@ -250,9 +250,67 @@ Quand l'alignment patch sera appliqué et que la source de vérité site = `edit
 
 Coût estimé : 1-2h. Le reste de l'infra (auth, Azure Function, allowlist) est inchangé.
 
+## Sveltia version lock
+
+Sveltia CMS est verrouillé sur une version spécifique dans `site/public/admin/index.html`. Le `auth-stub` (hack localStorage, cf. OD1) s'appuie sur des détails internes qui peuvent changer sans semver — d'où le pinning strict.
+
+### Version courante
+
+| | |
+|---|---|
+| Version | **0.156.3** |
+| Pinné le | 2026-04-24 |
+| CDN | `https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.mjs` |
+| Changelog | `https://github.com/sveltia/sveltia-cms/releases/tag/v0.156.3` |
+
+### Points sensibles qui dépendent de la version
+
+Si un de ces points change dans une future version, le hack peut casser silencieusement (pas d'erreur, juste le CMS qui renvoie Moncef sur un écran de login GitHub).
+
+| # | Dépendance | Source | Signal de casse |
+|---|------------|--------|-----------------|
+| 1 | Clé localStorage primaire `sveltia-cms.user` | `src/lib/services/user/auth.js` (`getUserCache`) | Au boot, le CMS affiche l'écran "Sign in with GitHub" au lieu d'ouvrir l'éditeur directement |
+| 2 | Shape de l'objet `User` (au moins : `backendName`, `token`, `login`, `name`) | `src/lib/types/private` | Idem — le user stub est rejeté silencieusement |
+| 3 | Validation du token côté client (ex: vérification de signature, appel `/user` avec assertions) | `signInAutomatically()` / backend github | Stub rejeté même avec la bonne shape |
+| 4 | Champ de config `api_root` et son interprétation | Doc backend GitHub Sveltia | Les appels CMS partent vers `api.github.com` au lieu de notre proxy → 401/404 côté GitHub avec notre token factice |
+| 5 | Structure des appels GET que le github backend émet (path patterns) | backend source | Le proxy renvoie 403 (path whitelist) sur des endpoints que Sveltia appelle désormais |
+| 6 | Format de la réponse `/user` (stub renvoyé par notre Function) | backend source (validation de la shape user) | Le CMS rejette l'identité renvoyée par notre stub |
+
+### Procédure d'upgrade
+
+Ne **jamais** bumper en prod directement. Étapes :
+
+1. **Préparer une branche** `chore/sveltia-upgrade-vX.Y.Z` depuis `main`.
+2. **Lire le changelog** entre version actuelle et version cible. Identifier tout ce qui touche :
+   - `src/lib/services/user/*` (auth flow, localStorage)
+   - `src/lib/services/backends/github*` (appels API)
+   - Config schema (`api_root`, `backend.*`)
+3. **Bumper** `site/public/admin/index.html` :
+   - URL du `<script type="module" src="...">`
+   - Commentaire de tête "pinned YYYY-MM-DD"
+   - Lien changelog
+4. **Relire le hack `sveltia-auth-stub`** ligne par ligne et confronter aux commits upstream sur `src/lib/services/user/auth.js`. Si un des 6 points sensibles ci-dessus a changé, adapter le stub.
+5. **Tester en local** avec les App Settings Azure pointant sur un fork de prod ou un repo sandbox :
+   - Login SWA Entra ID → `/admin/` → ne PAS être redirigé sur l'écran "Sign in with GitHub"
+   - Ouvrir une édition existante → le contenu s'affiche correctement dans l'éditeur
+   - Modifier un mot → Save → vérifier que le commit apparaît sur le repo sandbox avec l'identité Entra ID
+   - Vérifier les logs Azure Function : aucun 403 de `/api/gh/*`, status 200 sur `/api/cms-commit`
+6. **Déployer en prod** seulement après les 4 checks réussis. Garder la version précédente taggée en git (`git tag sveltia-pre-vX.Y.Z <sha>`) pour revert rapide.
+7. **Mettre à jour cette section** : nouvelle version, nouvelle date.
+
+### Fallback si ça casse
+
+Si le hack n'est plus tenable après upgrade (ou si Sveltia ajoute un vrai support SSO client-side qui court-circuite notre proxy), pivoter sur **Voie B** (custom backend via `CMS.registerBackend()`). Les endpoints Azure Function (`/api/gh/*`, `/api/cms-commit`) restent identiques ; seul `site/public/admin/` change :
+- Supprimer le `sveltia-auth-stub`
+- Ajouter un bundle JS local `iris-backend.js` qui implémente `getEntry/listEntries/persistEntry` contre nos endpoints custom
+- Changer `config.yml` : `backend: { name: 'iris-proxy' }`
+
+Effort estimé : ~1 jour si le besoin se présente.
+
 ## Références
 
 - STATE.md §9 — état du chantier CMS
 - `api/README.md` — doc technique de l'Azure Function
-- `site/public/admin/config.yml` — config Sveltia (à créer Phase 4)
-- `staticwebapp.config.json` — config auth SWA (à créer Phase 2.1)
+- `site/public/admin/index.html` — scaffold CMS (Phase 3.2, fait)
+- `site/public/admin/config.yml` — config Sveltia (Phase 3.3, à créer)
+- `staticwebapp.config.json` — config auth SWA (à créer après réception du Tenant ID Entra ID)

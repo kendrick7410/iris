@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Iris — Editorial CMS</title>
+
+  <!--
+    Sveltia CMS pinned to v0.156.3 (pinned 2026-04-24).
+    Changelog: https://github.com/sveltia/sveltia-cms/releases/tag/v0.156.3
+
+    Do NOT change to "latest" or a major-range tag. The auth-stub script below
+    depends on internal details of Sveltia (localStorage keys, User object
+    shape) that can change without semver guarantees. Upgrading must follow
+    the checklist in context-prep/cms-design.md § "Sveltia version lock".
+  -->
+
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  </style>
+
+  <script id="sveltia-auth-stub">
+    /*
+     * HACK — Sveltia-CMS OAuth bypass via localStorage stub.
+     *
+     * WHY THIS EXISTS:
+     *   Sveltia CMS (and its parent Decap) expects GitHub OAuth for the
+     *   `github` backend. Our editors (Moncef Hadhri, Jonathan Mead) do
+     *   NOT have GitHub accounts. They authenticate via Azure Static Web
+     *   Apps + Entra ID (Cefic SSO). The GitHub machine identity lives
+     *   server-side as a fine-grained PAT in the Azure Function, never in
+     *   the browser.
+     *
+     * WHAT THIS SCRIPT DOES:
+     *   Before the Sveltia bundle loads, we write a synthetic User record
+     *   to localStorage key `sveltia-cms.user`. On boot Sveltia calls
+     *   signInAutomatically(), reads that record, and proceeds as if OAuth
+     *   had succeeded. The `token` field is a placeholder string — every
+     *   outgoing request to /api/gh/* is received by our Azure Function,
+     *   which ignores the Authorization header and substitutes the real
+     *   PAT from its environment.
+     *
+     * HOW IT FITS THE CHAIN:
+     *   browser ──(Entra ID)──► Azure SWA ──► /admin/index.html
+     *     │
+     *     │ (this script runs; user stub written)
+     *     ▼
+     *   Sveltia bundle boots, reads stub, starts API calls
+     *     │
+     *     ▼
+     *   /api/gh/* ──► Azure Function (validates x-ms-client-principal,
+     *                  rewrites auth with PAT) ──► api.github.com
+     *
+     * FAILURE MODE:
+     *   If Sveltia tightens its User validation in a future release
+     *   (e.g. starts verifying a JWT signature on the token), this hack
+     *   silently breaks — the CMS will show the login screen instead of
+     *   the editor. Mitigations:
+     *     - version is pinned (see Sveltia CMS script tag below)
+     *     - fallback path documented in cms-design.md: migrate to Voie B
+     *       (custom backend via CMS.registerBackend), Azure Function
+     *       stays the same.
+     *
+     * KEYS USED BY SVELTIA (verified from src/lib/services/user/auth.js):
+     *   - sveltia-cms.user  (primary, what we write)
+     *   - decap-cms-user    (fallback, read on migration from Decap)
+     *   - netlify-cms-user  (fallback, read on migration from Netlify CMS)
+     */
+    (function primeAuthStub() {
+      var stubUser = {
+        backendName: 'github',
+        // Placeholder. Our proxy ignores it and substitutes the real PAT.
+        token: 'swa-proxy-handles-auth',
+        login: 'cefic-editor',
+        name: 'Cefic Editor',
+        email: '',
+        avatarUrl: '',
+        avatar_url: '', // Decap-era snake_case, kept for compatibility
+        id: 1,
+      };
+      try {
+        localStorage.setItem('sveltia-cms.user', JSON.stringify(stubUser));
+      } catch (e) {
+        // localStorage may be unavailable in private-mode / sandboxed
+        // contexts. The CMS will fall back to its login screen, which
+        // will NOT work (we have no GitHub OAuth app) — surface loudly.
+        console.error('[iris-cms] failed to prime auth stub:', e);
+      }
+    })();
+  </script>
+
+  <!--
+    Sveltia CMS bundle, pinned. When upgrading:
+      1. Bump the version here
+      2. Update the "pinned 20YY-MM-DD" date in the comment at top of file
+      3. Follow the procedure in cms-design.md § "Sveltia version lock"
+  -->
+  <script
+    type="module"
+    src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.mjs"
+  ></script>
+</head>
+<body>
+  <!-- Sveltia injects its editor UI into document.body on load. -->
+</body>
+</html>
