@@ -293,6 +293,44 @@ Soit ~2-3 jours. Logique avec l'alignment patch (§5.8) : quand on refactor pipe
 - Côté Function : `validation.ts` cap la taille du payload à 256 KB et refuse tout path hors éditions
 - Côté pipeline : `reviewed: true` gèle la régénération → un save Moncef reste intact même si le pipeline tourne
 
+## Tenant ID substitution
+
+Le `AAD_TENANT_ID` (GUID du tenant Cefic Entra ID) n'est **jamais committé** dans le repo. `staticwebapp.config.json` porte le placeholder `$AAD_TENANT_ID` dans le champ `openIdIssuer`, et le workflow GitHub Actions substitue la valeur au moment du build via `envsubst`.
+
+### Pourquoi
+
+Le tenant ID n'est pas un secret (il apparaît dans toutes les URLs OAuth publiques), mais :
+- Règle interne Cefic : tout identifiant institutionnel reste hors repo (ceinture + bretelles).
+- Template réutilisable : si un second environnement (staging, autre tenant) est monté plus tard, le même `staticwebapp.config.json` sert en changeant juste le secret GitHub.
+- Audit git plus lisible : une revue du repo ne montre jamais de GUIDs Azure.
+
+### Comment ça marche
+
+1. `staticwebapp.config.json` dans le repo contient `"openIdIssuer": "https://login.microsoftonline.com/$AAD_TENANT_ID/v2.0"`.
+2. Le workflow `.github/workflows/azure-static-web-apps-delightful-cliff-04d721f03.yml` a une étape **"Substitute AAD_TENANT_ID into staticwebapp.config.json"** entre le checkout et le `Azure/static-web-apps-deploy`.
+3. Cette étape :
+   - Lit `AAD_TENANT_ID` depuis les secrets GitHub Actions (`${{ secrets.AAD_TENANT_ID }}`).
+   - Fail-fast si le secret est absent, avec un message pointant sur où l'ajouter.
+   - `envsubst '$AAD_TENANT_ID' < config > config.tmp && mv` — seul cet nom est substitué, tout autre `$...` est préservé.
+   - Post-check : `grep -F '$AAD_TENANT_ID'` — si le placeholder subsiste (renaming oublié, typo), on sort en erreur avant que SWA déploie une config cassée.
+   - Log le `openIdIssuer` résolu pour confiance visuelle dans les logs du run.
+4. `Azure/static-web-apps-deploy@v1` uploade alors la version substituée.
+
+### Comment vérifier que ça marche
+
+- **Pendant le run GitHub Actions** : le step "Substitute AAD_TENANT_ID..." doit afficher `openIdIssuer resolved to: https://login.microsoftonline.com/<vrai GUID>/v2.0`. Si `$AAD_TENANT_ID` apparaît tel quel dans ce log, la substitution a échoué.
+- **Après déploiement** : tenter `/admin` en navigation privée. Redirect attendu vers `login.microsoftonline.com/<GUID>/oauth2/v2.0/authorize?...` avec le bon tenant dans l'URL.
+- **Si auth tenant-missing** (erreur Azure "Tenant not found") : le secret est vide ou mal orthographié. Vérifier `Settings → Secrets → Actions → AAD_TENANT_ID`.
+
+### Troubleshooting
+
+| Symptôme | Cause probable | Fix |
+|----------|----------------|-----|
+| Workflow échoue au step "Substitute" avec "AAD_TENANT_ID secret is not set" | Secret absent ou mal nommé côté GitHub | `gh secret set AAD_TENANT_ID --body "<guid>"` ou via l'UI |
+| Workflow échoue avec "Placeholder `$AAD_TENANT_ID` still present" | `envsubst` pas installé sur le runner, ou le placeholder a été renommé dans la config sans mettre à jour le step | `envsubst` est dans `gettext-base` (préinstallé sur ubuntu-latest). Sinon `apt-get install -y gettext-base` en prélude. |
+| Au runtime, `/admin` renvoie "AADSTS90002 — Tenant not found" | Le secret contient une valeur erronée (mauvais GUID) | Corriger le secret, re-trigger le workflow |
+| Au runtime, `/admin` rend la page en clair sans redirect | `staticwebapp.config.json` absent du déploiement (route rules non chargées) | Vérifier que `staticwebapp.config.json` est à la racine du repo (Azure SWA cherche à la racine par défaut) |
+
 ## Sveltia version lock
 
 Sveltia CMS est verrouillé sur une version spécifique dans `site/public/admin/index.html`. Le `auth-stub` (hack localStorage, cf. OD1) s'appuie sur des détails internes qui peuvent changer sans semver — d'où le pinning strict.
