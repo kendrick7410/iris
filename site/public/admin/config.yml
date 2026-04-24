@@ -26,7 +26,21 @@ backend:
 # to `editorial_workflow` which creates a PR per save.
 publish_mode: simple
 
-# media_folder intentionally omitted — CMS is read+write on text only.
+# Media folder is a sandbox. Sveltia v0.156+ requires `media_folder` to be
+# defined even when no field uses widget: image or widget: file — an empty
+# or omitted value throws "The media folder is not defined" during init
+# and the whole CMS UI silently refuses to render.
+#
+# We point it at a dedicated sandbox `site/public/admin/media/` that is
+# NEVER referenced by the site itself. None of our fields use an image
+# widget, so in normal use Moncef will not see or interact with media.
+# If he clicks the Media button in the top bar out of curiosity, he sees
+# an empty folder — nothing on the live site changes.
+#
+# Charts produced by the pipeline live under site/public/charts/<month>/
+# and are committed by monthly_run.py, not via the CMS.
+media_folder: site/public/admin/media
+public_folder: /admin/media
 
 collections:
   - name: editions

@@ -1,0 +1,8 @@
+# Sandbox media folder for Sveltia CMS.
+#
+# Sveltia requires `media_folder` to be defined in admin/config.yml even
+# when no field uses an image/file widget. This folder exists only to
+# satisfy that check. Nothing on the public site references it.
+#
+# Do not delete this file — it keeps the directory tracked by git so the
+# path resolves in the deployed artifact.
