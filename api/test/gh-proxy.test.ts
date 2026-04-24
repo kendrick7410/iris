@@ -20,6 +20,8 @@ function mockReq(opts: {
   path?: string;
   principal?: string | null;
   query?: Record<string, string>;
+  method?: string;
+  body?: string;
 }): HttpRequest {
   const headers = new Map<string, string>();
   if (opts.principal !== null && opts.principal !== undefined) {
@@ -31,10 +33,12 @@ function mockReq(opts: {
   const url = `https://iris.cefic.org/api/gh/${opts.path ?? ''}${qs}`;
   return {
     url,
+    method: opts.method ?? 'GET',
     headers: {
       get: (k: string) => headers.get(k.toLowerCase()) ?? headers.get(k) ?? null,
     },
     params: { path: opts.path ?? '' },
+    text: async () => opts.body ?? '',
   } as unknown as HttpRequest;
 }
 
@@ -158,6 +162,93 @@ test('gh-proxy: strips api/v3/ prefix for repo paths (Sveltia v0.156 compat)', a
     calls[0].url,
     /^https:\/\/api\.github\.com\/repos\/kendrick7410\/iris\/branches\/main$/,
   );
+});
+
+// Sveltia calls /repos/{owner}/{repo}/collaborators/{userName} after signIn
+// to confirm repo access. We stub 204 ("is a collaborator") since identity
+// was already verified by SWA + CMS_ALLOWED_EMAILS.
+
+test('gh-proxy: collaborator check stubs 204 for matching owner/repo', async () => {
+  setBaseEnv();
+  const { fn, calls } = mockFetch({ status: 200, body: '{}' });
+  __setFetchForTests(fn);
+  const res = await ghProxy(
+    mockReq({
+      path: 'api/v3/repos/kendrick7410/iris/collaborators/jme%40cefic.be',
+      principal: validPrincipalHeader,
+    }),
+    mockCtx(),
+  );
+  __setFetchForTests(null);
+  assert.equal(res.status, 204);
+  assert.equal(calls.length, 0, 'fetch must not be called for stubbed collaborator check');
+});
+
+test('gh-proxy: collaborator check rejected for wrong owner/repo', async () => {
+  setBaseEnv();
+  const res = await ghProxy(
+    mockReq({
+      path: 'api/v3/repos/attacker/secret/collaborators/someone',
+      principal: validPrincipalHeader,
+    }),
+    mockCtx(),
+  );
+  assert.equal(res.status, 403);
+});
+
+// GraphQL endpoint — Sveltia uses it for fetchFileContents. POST only.
+
+test('gh-proxy: forwards POST /api/graphql to api.github.com/graphql', async () => {
+  setBaseEnv();
+  const { fn, calls } = mockFetch({
+    status: 200,
+    body: '{"data":{"repository":{"defaultBranchRef":{"name":"main"}}}}',
+  });
+  __setFetchForTests(fn);
+  const queryBody = '{"query":"query { repository(owner:\\"x\\", name:\\"y\\") { id } }"}';
+  const res = await ghProxy(
+    mockReq({
+      path: 'api/graphql',
+      principal: validPrincipalHeader,
+      method: 'POST',
+      body: queryBody,
+    }),
+    mockCtx(),
+  );
+  __setFetchForTests(null);
+  assert.equal(res.status, 200);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, 'https://api.github.com/graphql');
+  assert.equal(calls[0].init!.method, 'POST');
+  assert.equal(calls[0].init!.body, queryBody);
+  const headers = (calls[0].init!.headers ?? {}) as Record<string, string>;
+  assert.equal(headers.Authorization, 'Bearer test-pat');
+});
+
+test('gh-proxy: GET on /api/graphql returns 405', async () => {
+  setBaseEnv();
+  const res = await ghProxy(
+    mockReq({
+      path: 'api/graphql',
+      principal: validPrincipalHeader,
+      method: 'GET',
+    }),
+    mockCtx(),
+  );
+  assert.equal(res.status, 405);
+});
+
+test('gh-proxy: POST on a REST path returns 405', async () => {
+  setBaseEnv();
+  const res = await ghProxy(
+    mockReq({
+      path: 'api/v3/repos/kendrick7410/iris/branches/main',
+      principal: validPrincipalHeader,
+      method: 'POST',
+    }),
+    mockCtx(),
+  );
+  assert.equal(res.status, 405);
 });
 
 test('gh-proxy: happy path — branches forwards to github with PAT', async () => {

@@ -3,15 +3,21 @@ import { verifyClientPrincipal, isAllowlisted, Principal } from '../lib/auth.js'
 import { checkProxyPath } from '../lib/proxy-paths.js';
 
 /**
- * GET /api/gh/{*path}
+ * /api/gh/{*path}
  *
- * Read-only proxy for the GitHub Contents API subset that Sveltia/Decap's
- * `github` backend calls when `api_root` is set to this endpoint.
+ * Proxy for the subset of api.github.com that Sveltia's `github` backend
+ * calls when `api_root` points here. Sveltia v0.156+ normalizes any custom
+ * api_root as a GitHub Enterprise Server base and prepends `/api/v3` to
+ * REST calls (and posts GraphQL to `<root>/api/graphql`). Both flavours
+ * land on this same function; the prefix is stripped below.
  *
- *   GET /api/gh/repos/{owner}/{repo}/git/trees/{branch}?recursive=1
- *   GET /api/gh/repos/{owner}/{repo}/contents/{path}?ref={branch}
- *   GET /api/gh/repos/{owner}/{repo}/branches/{branch}
- *   GET /api/gh/user                       (stubbed — see below)
+ * Allowed flows:
+ *   GET  /api/gh/api/v3/user                                   (stubbed)
+ *   GET  /api/gh/api/v3/repos/{owner}/{repo}/collaborators/:u  (stubbed 204)
+ *   GET  /api/gh/api/v3/repos/{owner}/{repo}/git/trees/{branch}?recursive=1
+ *   GET  /api/gh/api/v3/repos/{owner}/{repo}/contents/{path}?ref={branch}
+ *   GET  /api/gh/api/v3/repos/{owner}/{repo}/branches/{branch}
+ *   POST /api/gh/api/graphql                                   (forwarded)
  *
  * The CMS is expected to authenticate via Azure SWA (Entra ID). We verify
  * the injected principal, apply the allowlist, validate the path against a
@@ -20,7 +26,9 @@ import { checkProxyPath } from '../lib/proxy-paths.js';
  *
  * /user is served from the principal rather than proxied: GitHub would
  * otherwise return the PAT owner's identity and the CMS would display the
- * wrong user.
+ * wrong user. /collaborators/:user is stubbed 204 for the same reason —
+ * the username Sveltia sends is the Cefic email, which GitHub cannot
+ * resolve to a login.
  */
 
 // Test hook — mirrors __setOctokitForTests on github.ts.
@@ -78,6 +86,72 @@ export async function ghProxy(
     return { status: 200, jsonBody: userStubFromPrincipal(principal) };
   }
 
+  // Sveltia v0.156+ calls `/repos/{owner}/{repo}/collaborators/{userName}`
+  // right after signIn to verify the user can access the repo (see
+  // sveltia-cms src/lib/services/backends/git/github/repository.js
+  // `checkRepositoryAccess`). We've already verified the identity via
+  // SWA principal + CMS_ALLOWED_EMAILS, and `userName` here is the
+  // Cefic email (stubbed as `login` in /user above) which GitHub would
+  // not recognize as a login anyway. Stub 204 No Content (= "is a
+  // collaborator") so Sveltia proceeds to fetchFiles.
+  const collaboratorMatch = /^repos\/([^/]+)\/([^/]+)\/collaborators\/[^/]+$/.exec(targetPath);
+  if (collaboratorMatch) {
+    const expectedOwner = process.env.GITHUB_OWNER ?? '';
+    const expectedRepo = process.env.GITHUB_REPO ?? '';
+    if (collaboratorMatch[1] === expectedOwner && collaboratorMatch[2] === expectedRepo) {
+      return { status: 204 };
+    }
+    // Allowlist has already restricted which repo is visible; fall through to
+    // the 403 below for any other owner/repo.
+  }
+
+  const pat = process.env.GITHUB_PAT;
+  if (!pat) {
+    ctx.log('[gh-proxy] GITHUB_PAT not configured');
+    return { status: 500, jsonBody: { error: 'misconfigured' } };
+  }
+
+  // GraphQL — Sveltia uses this for batched file-content fetches and for
+  // default-branch discovery. It is a single POST endpoint, so there is no
+  // per-path allowlist to apply; the PAT itself is fine-grained and scoped
+  // to the iris repo only, which is the real boundary.
+  if (targetPath === 'api/graphql') {
+    if (req.method !== 'POST') {
+      return { status: 405, jsonBody: { error: 'method_not_allowed' } };
+    }
+    const body = await req.text();
+    let upstream: Response;
+    try {
+      upstream = await fetchImpl('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${pat}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'User-Agent': 'iris-cms-proxy',
+        },
+        body,
+      });
+    } catch (e) {
+      ctx.log(`[gh-proxy] graphql fetch failed: ${(e as Error).message}`);
+      return { status: 502, jsonBody: { error: 'github_unreachable' } };
+    }
+    const respBody = await upstream.text();
+    ctx.log(`[gh-proxy] ${upstream.status} graphql user=${principal.email}`);
+    return {
+      status: upstream.status,
+      body: respBody,
+      headers: {
+        'content-type': upstream.headers.get('content-type') ?? 'application/json',
+      },
+    };
+  }
+
+  // Everything else is a REST call — method must be GET.
+  if (req.method !== 'GET') {
+    return { status: 405, jsonBody: { error: 'method_not_allowed' } };
+  }
+
   // 3. Whitelist check.
   const check = checkProxyPath(targetPath);
   if (!check.allowed) {
@@ -86,12 +160,6 @@ export async function ghProxy(
   }
 
   // 4. Forward to api.github.com with the PAT.
-  const pat = process.env.GITHUB_PAT;
-  if (!pat) {
-    ctx.log('[gh-proxy] GITHUB_PAT not configured');
-    return { status: 500, jsonBody: { error: 'misconfigured' } };
-  }
-
   const url = new URL(`https://api.github.com/${targetPath}`);
   // Preserve incoming query string (e.g. ?recursive=1, ?ref=main).
   const incoming = new URL(req.url);
@@ -126,7 +194,7 @@ export async function ghProxy(
 }
 
 app.http('gh-proxy', {
-  methods: ['GET'],
+  methods: ['GET', 'POST'], // POST is only honored for /api/graphql
   authLevel: 'anonymous', // SWA is upstream trust anchor.
   route: 'gh/{*path}',
   handler: ghProxy,
