@@ -607,7 +607,7 @@
           },
           {
             "cn8": "29012100",
-            "label": "29012100 (CN8)",
+            "label": "29012100 (ethylene)",
             "value_current_eur_bn": 0.074,
             "value_previous_eur_bn": 0.041,
             "delta_eur_bn": 0.034,
@@ -625,7 +625,7 @@
           },
           {
             "cn8": "29419000",
-            "label": "29419000 (CN8)",
+            "label": "29419000 (antibiotics)",
             "value_current_eur_bn": 0.002,
             "value_previous_eur_bn": 0.073,
             "delta_eur_bn": -0.072,
@@ -633,7 +633,7 @@
           },
           {
             "cn8": "29372900",
-            "label": "29372900 (CN8)",
+            "label": "29372900 (steroidal hormones, their derivatives and structural a)",
             "value_current_eur_bn": 0.008,
             "value_previous_eur_bn": 0.052,
             "delta_eur_bn": -0.044,
@@ -659,7 +659,7 @@
           },
           {
             "cn8": "29012100",
-            "label": "29012100 (CN8)",
+            "label": "29012100 (ethylene)",
             "value_current_eur_bn": 0.074,
             "value_previous_eur_bn": 0.041,
             "delta_eur_bn": 0.034,
@@ -706,7 +706,7 @@
           },
           {
             "cn8": "29091990",
-            "label": "29091990 (CN8)",
+            "label": "29091990 (acyclic ethers and their halogenated, sulphonated, nit)",
             "value_current_eur_bn": 0.056,
             "value_previous_eur_bn": 0.001,
             "delta_eur_bn": 0.055,
@@ -724,7 +724,7 @@
           },
           {
             "cn8": "28419085",
-            "label": "28419085 (CN8)",
+            "label": "28419085 (salts of oxometallic or peroxometallic acids)",
             "value_current_eur_bn": 0.0,
             "value_previous_eur_bn": 0.021,
             "delta_eur_bn": -0.021,
@@ -732,7 +732,7 @@
           },
           {
             "cn8": "31022100",
-            "label": "31022100 (CN8)",
+            "label": "31022100 (ammonium sulphate)",
             "value_current_eur_bn": 0.008,
             "value_previous_eur_bn": 0.026,
             "delta_eur_bn": -0.019,
@@ -789,7 +789,7 @@
         "top_movers_up": [
           {
             "cn8": "29225000",
-            "label": "29225000 (CN8)",
+            "label": "29225000 (amino-alcohol-phenols, amino-acid-phenols and other am)",
             "value_current_eur_bn": 0.03,
             "value_previous_eur_bn": 0.004,
             "delta_eur_bn": 0.026,
@@ -797,7 +797,7 @@
           },
           {
             "cn8": "84013000",
-            "label": "84013000 (CN8)",
+            "label": "84013000 (fuel elements \"cartridges\", non-irradiated, in casing)",
             "value_current_eur_bn": 0.037,
             "value_previous_eur_bn": 0.017,
             "delta_eur_bn": 0.02,
@@ -805,7 +805,7 @@
           },
           {
             "cn8": "30024900",
-            "label": "30024900 (CN8)",
+            "label": "30024900 (toxins, cultures of micro-organisms and similar produc)",
             "value_current_eur_bn": 0.043,
             "value_previous_eur_bn": 0.024,
             "delta_eur_bn": 0.019,
@@ -815,7 +815,7 @@
         "top_movers_down": [
           {
             "cn8": "27079999",
-            "label": "27079999 (CN8)",
+            "label": "27079999 (oils and other products of the distillation of high te)",
             "value_current_eur_bn": 0.039,
             "value_previous_eur_bn": 0.124,
             "delta_eur_bn": -0.085,
@@ -823,7 +823,7 @@
           },
           {
             "cn8": "39011090",
-            "label": "39011090 (CN8)",
+            "label": "39011090 (polyethylene with a specific gravity of < 0,94, in pri)",
             "value_current_eur_bn": 0.003,
             "value_previous_eur_bn": 0.027,
             "delta_eur_bn": -0.024,
@@ -831,7 +831,7 @@
           },
           {
             "cn8": "39100000",
-            "label": "39100000 (CN8)",
+            "label": "39100000 (silicones in primary forms)",
             "value_current_eur_bn": 0.015,
             "value_previous_eur_bn": 0.03,
             "delta_eur_bn": -0.015,
@@ -857,7 +857,7 @@
           },
           {
             "cn8": "33049900",
-            "label": "33049900 (CN8)",
+            "label": "33049900 (beauty or make-up preparations and preparations for th)",
             "value_current_eur_bn": 0.044,
             "value_previous_eur_bn": 0.046,
             "delta_eur_bn": -0.002,
@@ -871,19 +871,19 @@
           "products": [
             {
               "cn8": "27079999",
-              "label": "27079999 (CN8)",
+              "label": "27079999 (oils and other products of the distillation of high te)",
               "delta_eur_bn": -0.085,
               "cumulative_share_pct": 36.9
             },
             {
               "cn8": "29225000",
-              "label": "29225000 (CN8)",
+              "label": "29225000 (amino-alcohol-phenols, amino-acid-phenols and other am)",
               "delta_eur_bn": 0.026,
               "cumulative_share_pct": 48.4
             },
             {
               "cn8": "39011090",
-              "label": "39011090 (CN8)",
+              "label": "39011090 (polyethylene with a specific gravity of < 0,94, in pri)",
               "delta_eur_bn": -0.024,
               "cumulative_share_pct": 59.0
             }

@@ -533,7 +533,7 @@
           },
           {
             "cn8": "29337900",
-            "label": "29337900 (CN8)",
+            "label": "29337900 (lactams)",
             "value_current_eur_bn": 0.077,
             "value_previous_eur_bn": 0.002,
             "delta_eur_bn": 0.074,
@@ -559,7 +559,7 @@
           },
           {
             "cn8": "33021040",
-            "label": "33021040 (CN8)",
+            "label": "33021040 (mixtures of odoriferous substances and mixtures, incl)",
             "value_current_eur_bn": 0.024,
             "value_previous_eur_bn": 0.253,
             "delta_eur_bn": -0.229,
@@ -585,7 +585,7 @@
           },
           {
             "cn8": "30024900",
-            "label": "30024900 (CN8)",
+            "label": "30024900 (toxins, cultures of micro-organisms and similar produc)",
             "value_current_eur_bn": 0.214,
             "value_previous_eur_bn": 0.307,
             "delta_eur_bn": -0.094,
@@ -616,7 +616,7 @@
         "top_movers_up": [
           {
             "cn8": "38249915",
-            "label": "38249915 (CN8)",
+            "label": "38249915 (ion-exchangers)",
             "value_current_eur_bn": 0.019,
             "value_previous_eur_bn": 0.001,
             "delta_eur_bn": 0.018,
@@ -624,7 +624,7 @@
           },
           {
             "cn8": "33049900",
-            "label": "33049900 (CN8)",
+            "label": "33049900 (beauty or make-up preparations and preparations for th)",
             "value_current_eur_bn": 0.142,
             "value_previous_eur_bn": 0.124,
             "delta_eur_bn": 0.017,
@@ -632,7 +632,7 @@
           },
           {
             "cn8": "39100000",
-            "label": "39100000 (CN8)",
+            "label": "39100000 (silicones in primary forms)",
             "value_current_eur_bn": 0.016,
             "value_previous_eur_bn": 0.006,
             "delta_eur_bn": 0.011,
@@ -642,7 +642,7 @@
         "top_movers_down": [
           {
             "cn8": "38180010",
-            "label": "38180010 (CN8)",
+            "label": "38180010 (silicon doped for use in electronics, in the form of d)",
             "value_current_eur_bn": 0.0,
             "value_previous_eur_bn": 0.036,
             "delta_eur_bn": -0.036,
@@ -668,7 +668,7 @@
         "largest_products_current": [
           {
             "cn8": "33049900",
-            "label": "33049900 (CN8)",
+            "label": "33049900 (beauty or make-up preparations and preparations for th)",
             "value_current_eur_bn": 0.142,
             "value_previous_eur_bn": 0.124,
             "delta_eur_bn": 0.017,
@@ -698,7 +698,7 @@
           "products": [
             {
               "cn8": "38180010",
-              "label": "38180010 (CN8)",
+              "label": "38180010 (silicon doped for use in electronics, in the form of d)",
               "delta_eur_bn": -0.036,
               "cumulative_share_pct": 32.5
             },
@@ -710,7 +710,7 @@
             },
             {
               "cn8": "38249915",
-              "label": "38249915 (CN8)",
+              "label": "38249915 (ion-exchangers)",
               "delta_eur_bn": 0.018,
               "cumulative_share_pct": 65.5
             }
@@ -743,7 +743,7 @@
           },
           {
             "cn8": "29332990",
-            "label": "29332990 (CN8)",
+            "label": "29332990 (heterocyclic compounds with nitrogen hetero-atom{s} on)",
             "value_current_eur_bn": 0.011,
             "value_previous_eur_bn": 0.001,
             "delta_eur_bn": 0.01,
@@ -753,7 +753,7 @@
         "top_movers_down": [
           {
             "cn8": "28433000",
-            "label": "28433000 (CN8)",
+            "label": "28433000 (gold compounds, inorganic or organic, whether or not c)",
             "value_current_eur_bn": 0.017,
             "value_previous_eur_bn": 0.039,
             "delta_eur_bn": -0.022,
@@ -761,7 +761,7 @@
           },
           {
             "cn8": "27079999",
-            "label": "27079999 (CN8)",
+            "label": "27079999 (oils and other products of the distillation of high te)",
             "value_current_eur_bn": 0.016,
             "value_previous_eur_bn": 0.037,
             "delta_eur_bn": -0.021,
@@ -769,7 +769,7 @@
           },
           {
             "cn8": "39076100",
-            "label": "39076100 (CN8)",
+            "label": "39076100 (poly\"ethylene terephthalate\", in primary forms, having)",
             "value_current_eur_bn": 0.008,
             "value_previous_eur_bn": 0.019,
             "delta_eur_bn": -0.011,
@@ -787,7 +787,7 @@
           },
           {
             "cn8": "33049900",
-            "label": "33049900 (CN8)",
+            "label": "33049900 (beauty or make-up preparations and preparations for th)",
             "value_current_eur_bn": 0.103,
             "value_previous_eur_bn": 0.096,
             "delta_eur_bn": 0.007,
@@ -795,7 +795,7 @@
           },
           {
             "cn8": "34025090",
-            "label": "34025090 (CN8)",
+            "label": "34025090 (washing preparations, incl. auxiliary washing preparat)",
             "value_current_eur_bn": 0.082,
             "value_previous_eur_bn": 0.086,
             "delta_eur_bn": -0.004,

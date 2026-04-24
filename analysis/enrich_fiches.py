@@ -20,6 +20,7 @@ logger = logging.getLogger("iris.analysis.enrich_fiches")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PARQUET_PATH = Path("/home/jme/comext-etl/comext_export.parquet")
+PRODUCT_DIM_PATH = PARQUET_PATH.parent / "product_dim.parquet"
 
 STRUCTURAL_PARTNERS = ["US", "CN", "GB"]
 TOP_PARTNERS_CHART = ["US", "GB", "CN", "CH"]   # lines on the 60m chart
@@ -51,14 +52,26 @@ def _truncate_cn8_label(label: str, limit: int = 55) -> str:
     return head[:limit - 1].rstrip() + "…"
 
 
-def _cn8_catalog(df: pd.DataFrame) -> Dict[str, str]:
-    """Return a CN8 -> label map from the parquet's product_nc column.
+def _cn8_catalog() -> Dict[str, str]:
+    """Load CN8 -> truncated English label from the Comext product_dim parquet.
 
-    Comext stores the CN8 code as product_nc; descriptive labels are not in
-    this parquet snapshot. For the MVP, we show the code alone when no
-    external label source is wired (follow-up: join with Comext nomenclature).
+    The fact parquet stores only CN8 codes; human-readable descriptions live
+    in the sibling product_dim.parquet (~29k CN rows). We apply the same
+    §5.10 truncation used for cache labels so the fiche stays terse.
+
+    Returns an empty dict if the dim parquet is absent — the enrichment then
+    falls back to the narrower cache lookup or the bare '{code} (CN8)' label.
     """
-    return {}
+    if not PRODUCT_DIM_PATH.exists():
+        return {}
+    df = pd.read_parquet(PRODUCT_DIM_PATH,
+                         columns=["product_code", "label_en", "level"])
+    cn = df[df["level"] == "cn_code"]
+    return {
+        str(code): truncated
+        for code, label in zip(cn["product_code"], cn["label_en"].fillna(""))
+        if (truncated := _truncate_cn8_label(str(label)))
+    }
 
 
 def _load_cn8_labels_from_cache(month: str) -> Dict[str, str]:
@@ -285,9 +298,16 @@ def enrich(month: str) -> None:
         else:
             logger.warning(f"  {section_type}: no monthly_series available (cache missing)")
 
-    cn8_labels = _load_cn8_labels_from_cache(month)
+    cache_labels = _load_cn8_labels_from_cache(month)
+    catalog_labels = _cn8_catalog()
+    # Cache labels take precedence (already formatted by the Comext fetcher);
+    # the product_dim catalog fills the long tail that the fetcher did not cover.
+    cn8_labels = {**catalog_labels, **cache_labels}
     if cn8_labels:
-        logger.info(f"  CN8 label lookup: {len(cn8_labels)} codes")
+        logger.info(
+            f"  CN8 label lookup: {len(cn8_labels)} codes "
+            f"(cache {len(cache_labels)}, product_dim {len(catalog_labels)})"
+        )
 
     for section_type, flow in (("trade_exports", FLOW_EXPORTS),
                                 ("trade_imports", FLOW_IMPORTS)):
