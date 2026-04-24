@@ -96,11 +96,17 @@
       1. Bump the version here
       2. Update the "pinned 20YY-MM-DD" date in the comment at top of file
       3. Follow the procedure in cms-design.md § "Sveltia version lock"
+
+    IMPORTANT: no `type="module"` and URL ends in `.js` (not `.mjs`).
+    Sveltia v0.156 ships as a classic (non-module) script and auto-initializes
+    via `document.currentScript`, which is null for module scripts. It also
+    detects itself via `document.querySelector('script[src$="/sveltia-cms.js"]')`
+    — the `.mjs` variant exists on the CDN but does not match that query. Using
+    `type="module"` + `.mjs` was the silent cause of the blank /admin page on
+    first deploy (window.CMS defined but init() never called). See
+    sveltia-cms src/lib/main.js auto-init block.
   -->
-  <script
-    type="module"
-    src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.mjs"
-  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.js"></script>
 </head>
 <body>
   <!-- Sveltia injects its editor UI into document.body on load. -->
