@@ -250,6 +250,49 @@ Quand l'alignment patch sera appliqué et que la source de vérité site = `edit
 
 Coût estimé : 1-2h. Le reste de l'infra (auth, Azure Function, allowlist) est inchangé.
 
+## Décisions de config CMS (Phase 3.3)
+
+### Cas B confirmé, source de vérité = MDX site
+
+Le CMS édite `site/src/content/editions/*.mdx` directement (collection `editions` dans `config.yml`, `folder: site/src/content/editions`). Pas de couche intermédiaire, pas de structure sectionnée — la flat MDX écrite par `pipelines/monthly_run.py` est éditée telle quelle.
+
+Migration future (§5.8) : bascule de `folder:` vers `editorial/drafts/...` une fois l'alignment patch appliqué.
+
+### `publish_mode: simple` (pas d'editorial workflow)
+
+Chaque save Moncef = commit direct sur `main`. Pas de branche de review, pas de PR. Rationale :
+- Moncef EST l'autorité éditoriale (senior economist, relecteur humain). Pas besoin d'une étape de validation supplémentaire.
+- Un save = une phrase reformulée, périmètre minimal, risque faible.
+- Si besoin de PR review plus tard (ex: second économiste Cefic onboarded), bascule `editorial_workflow` triviale dans `config.yml`.
+
+### Pas de `media_folder`
+
+Moncef n'upload pas d'images. Les charts SVG sont générés par `pipelines/monthly_run.py` (`charts/render.py`) et committés sous `site/public/charts/{month}/` par le pipeline, pas par le CMS. Désactiver le media_folder évite qu'il apparaisse dans l'UI et que Moncef tente accidentellement un upload qui irait 404 (le PAT a `contents: write` mais pas de permission large).
+
+### `create: false`, `delete: false`
+
+Moncef ne crée pas d'éditions (c'est le rôle du pipeline mensuel). Il ne supprime pas d'archives. L'UI Sveltia masque ces actions quand `create`/`delete` sont `false`. Deuxième barrière côté Function : `validation.ts` rejette tout path hors `site/src/content/editions/\d{4}-\d{2}\.mdx$` — les créations seraient bloquées server-side aussi.
+
+### Déviation assumée : `body: text` vs `sections: list`
+
+**Spec initiale** : `sections: list of {heading, body, chart_id}` avec chaque heading repris comme titre de vue dashboard.
+
+**Implémenté** : un seul champ `body` en widget `text` qui édite tout le contenu post-frontmatter.
+
+**Raison** : le MDX courant est plat (H2 + `---` + `<img/>` inline), sans structure `sections:` en frontmatter. Livrer la spec sectionnée demande :
+1. Réécriture du pipeline pour assembler un tableau `sections[]` dans le frontmatter
+2. Réécriture du template Astro `[id].astro` pour lire `entry.data.sections` au lieu de `entry.body`
+3. Migration des éditions existantes
+
+Soit ~2-3 jours. Logique avec l'alignment patch (§5.8) : quand on refactor pipeline + template pour lire `editorial/drafts/*/sections/*.md`, on en profite pour passer au format sectionné côté CMS.
+
+**Widget `text` (pas `markdown`)** : protection contre la réécriture automatique de Sveltia qui pourrait massacrer les `<img/>` JSX, reformater les `---` separators ou altérer l'espacement. Moncef voit le MDX brut — moins joli, mais zéro corruption des références aux charts.
+
+**Garde-fous compensatoires** (en attendant le passage sectionné) :
+- Hint explicite sur le champ `body` : ne pas toucher aux chiffres, aux `<img/>`, aux `---`
+- Côté Function : `validation.ts` cap la taille du payload à 256 KB et refuse tout path hors éditions
+- Côté pipeline : `reviewed: true` gèle la régénération → un save Moncef reste intact même si le pipeline tourne
+
 ## Sveltia version lock
 
 Sveltia CMS est verrouillé sur une version spécifique dans `site/public/admin/index.html`. Le `auth-stub` (hack localStorage, cf. OD1) s'appuie sur des détails internes qui peuvent changer sans semver — d'où le pinning strict.
