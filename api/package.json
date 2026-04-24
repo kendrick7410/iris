@@ -4,7 +4,7 @@
   "description": "Azure Function proxy for Iris CMS: commits MDX edits to GitHub with Entra ID identity",
   "private": true,
   "type": "module",
-  "main": "dist/src/functions/cms-commit.js",
+  "main": "dist/src/functions/*.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
