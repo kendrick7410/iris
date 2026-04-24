@@ -5,5 +5,10 @@
 local.settings.json
 test
 tsconfig.json
+tsconfig.test.json
 README.md
-node_modules
+# node_modules is intentionally NOT excluded — with skip_api_build=true
+# on the SWA deploy action, we pre-build in CI and the Function App runs
+# directly from the uploaded bundle. If node_modules is stripped here,
+# the Function App boots but every function throws
+# "Cannot find module '@azure/functions'".

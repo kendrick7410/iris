@@ -10,8 +10,7 @@
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "start": "npm run build && func start",
-    "test": "tsc -p tsconfig.test.json && node --test dist/test",
-    "postinstall": "tsc"
+    "test": "tsc -p tsconfig.test.json && node --test dist/test"
   },
   "dependencies": {
     "@azure/functions": "^4.5.0",
