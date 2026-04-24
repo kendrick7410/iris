@@ -65,32 +65,6 @@ jobs:
           # Log the issuer URL for confidence (tenant ID is public metadata).
           issuer=$(python3 -c "import json; print(json.load(open('site/public/staticwebapp.config.json'))['auth']['identityProviders']['azureActiveDirectory']['registration']['openIdIssuer'])")
           echo "openIdIssuer resolved to: $issuer"
-      # Pre-compile the Azure Function here instead of letting SWA/Oryx do
-      # it. Oryx installs production deps into `api/.oryx_prod_node_modules`
-      # and runs the npm `postinstall` script BEFORE renaming that directory
-      # to `node_modules`. At that moment `tsc` cannot resolve `@azure/functions`
-      # / `@types/node`, the postinstall fails, and Oryx swallows the error
-      # with "assuming the assets in this folder are already built". The
-      # consequence is a silent deploy where the Function App keeps running
-      # the previous revision and none of the new code reaches prod.
-      #
-      # Building here avoids the whole mess: the runner has a clean
-      # node_modules at api/node_modules, tsc resolves types correctly, and
-      # we pass skip_api_build=true to the SWA action so Oryx does not
-      # retry (and cannot fail again).
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Build Azure Function (TypeScript)
-        working-directory: api
-        run: |
-          set -euo pipefail
-          npm ci
-          npm run build
-          test -f dist/src/functions/gh-proxy.js
-          test -f dist/src/functions/cms-commit.js
-          echo "Built api/dist/ with $(find dist -name '*.js' | wc -l) .js files"
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -102,7 +76,13 @@ jobs:
           app_location: "site" # Astro app lives under /site
           api_location: "api" # Azure Function for the CMS proxy (cms-commit + gh-proxy)
           output_location: "dist" # Astro default build output
-          skip_api_build: true # we pre-built above, see the note there
+          # Explicit build command so Oryx compiles the TypeScript AFTER
+          # installing deps, not via an npm postinstall hook. The postinstall
+          # hook previously fired BEFORE Oryx renamed .oryx_prod_node_modules
+          # to node_modules, so tsc could not resolve @azure/functions and
+          # Oryx swallowed the error as "assuming assets are already built" —
+          # silently keeping the prior Function App revision live.
+          api_build_command: "npm ci && npm run build"
           github_id_token: ${{ steps.idtoken.outputs.result }}
           ###### End of Repository/Build Configurations ######
 
