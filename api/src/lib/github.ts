@@ -32,12 +32,56 @@ export interface CommitResult {
   commitUrl: string;
 }
 
+import { Octokit } from '@octokit/rest';
+
+let octokitInstance: Octokit | null = null;
+
+/** Test hook — inject a mock client. */
+export function __setOctokitForTests(client: Octokit | null): void {
+  octokitInstance = client;
+}
+
+function getOctokit(): Octokit {
+  if (octokitInstance) return octokitInstance;
+  const pat = process.env.GITHUB_PAT;
+  if (!pat) throw new Error('GITHUB_PAT not configured');
+  octokitInstance = new Octokit({ auth: pat });
+  return octokitInstance;
+}
+
+function repoConfig() {
+  const owner = process.env.GITHUB_OWNER;
+  const repo = process.env.GITHUB_REPO;
+  const branch = process.env.GITHUB_BRANCH ?? 'main';
+  if (!owner || !repo) throw new Error('GITHUB_OWNER and GITHUB_REPO must be set');
+  return { owner, repo, branch };
+}
+
 export async function commitFile(input: CommitInput): Promise<CommitResult> {
-  // TODO: read GITHUB_PAT, GITHUB_OWNER, GITHUB_REPO, GITHUB_BRANCH from env
-  // TODO: instantiate Octokit with auth = PAT
-  // TODO: GET current file sha (rest.repos.getContent)
-  // TODO: PUT new content (rest.repos.createOrUpdateFileContents)
-  //        committer = author = input.author
-  // TODO: return { sha, commitUrl } from response
-  throw new Error('NOT_IMPLEMENTED: commitFile');
+  const octokit = getOctokit();
+  const { owner, repo, branch } = repoConfig();
+
+  // 1. Fetch current sha of the target file. Overwrite-only semantics:
+  //    validation.ts already rejected paths that shouldn't exist, so a 404
+  //    here is a real error (file missing on main) not a create-intent.
+  const existing = await octokit.rest.repos.getContent({
+    owner, repo, path: input.path, ref: branch,
+  });
+  if (Array.isArray(existing.data) || existing.data.type !== 'file') {
+    throw new Error(`path is not a file: ${input.path}`);
+  }
+  const priorSha = existing.data.sha;
+
+  // 2. PUT new content, stamping author + committer with the Entra ID identity.
+  const result = await octokit.rest.repos.createOrUpdateFileContents({
+    owner, repo, path: input.path, branch, sha: priorSha,
+    message: input.message,
+    content: Buffer.from(input.content, 'utf8').toString('base64'),
+    committer: { name: input.author.name, email: input.author.email },
+    author: { name: input.author.name, email: input.author.email },
+  });
+
+  const commitSha = result.data.commit.sha ?? '';
+  const commitUrl = result.data.commit.html_url ?? '';
+  return { sha: commitSha, commitUrl };
 }

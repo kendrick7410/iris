@@ -17,10 +17,13 @@ const lastCommitAt = new Map<string, number>();
  * Updates the internal window on a successful call.
  */
 export function checkRateLimit(email: string, now: number = Date.now()): boolean {
-  // TODO: compare now - lastCommitAt.get(email) against WINDOW_MS
-  // TODO: if allowed, set lastCommitAt.set(email, now) and return true
-  // TODO: otherwise return false
-  throw new Error('NOT_IMPLEMENTED: checkRateLimit');
+  const key = email.trim().toLowerCase();
+  const last = lastCommitAt.get(key);
+  if (last !== undefined && now - last < WINDOW_MS) {
+    return false;
+  }
+  lastCommitAt.set(key, now);
+  return true;
 }
 
 /**

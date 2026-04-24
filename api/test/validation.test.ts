@@ -20,26 +20,41 @@ test('isPathAllowed: rejects subdirectories and wrong extensions', () => {
   assert.equal(isPathAllowed('site/src/content/editions/bad-slug.mdx'), false);
 });
 
-test.skip('validateCommitPayload: happy path', () => {
+test('validateCommitPayload: happy path', () => {
   const payload = validateCommitPayload({
     path: 'site/src/content/editions/2026-02.mdx',
     content: '---\nmonth: 2026-02\n---\n\n## Heading\n\nBody.\n',
     message: 'edit: rephrase',
   });
   assert.equal(payload.path, 'site/src/content/editions/2026-02.mdx');
+  assert.equal(payload.message, 'edit: rephrase');
 });
 
-test.skip('validateCommitPayload: rejects missing fields', () => {
+test('validateCommitPayload: sanitises metadata to known keys', () => {
+  const payload = validateCommitPayload({
+    path: 'site/src/content/editions/2026-02.mdx',
+    content: 'x',
+    message: 'y',
+    metadata: { edition: '2026-02', reviewed: true, sneaky: 'drop me' },
+  });
+  assert.deepEqual(payload.metadata, { edition: '2026-02', reviewed: true });
+});
+
+test('validateCommitPayload: rejects missing fields', () => {
   assert.throws(() => validateCommitPayload({ path: 'x', content: 'y' }), /message/);
-  assert.throws(() => validateCommitPayload({ path: 'x', message: 'y' }), /content/);
+  assert.throws(
+    () => validateCommitPayload({ path: 'site/src/content/editions/2026-02.mdx', message: 'y' }),
+    /content/,
+  );
 });
 
-test.skip('validateCommitPayload: rejects non-object', () => {
+test('validateCommitPayload: rejects non-object', () => {
   assert.throws(() => validateCommitPayload(null), /object/);
   assert.throws(() => validateCommitPayload('not-an-object'), /object/);
+  assert.throws(() => validateCommitPayload([]), /object/);
 });
 
-test.skip('validateCommitPayload: rejects path outside whitelist', () => {
+test('validateCommitPayload: rejects path outside whitelist', () => {
   assert.throws(
     () =>
       validateCommitPayload({
@@ -47,11 +62,11 @@ test.skip('validateCommitPayload: rejects path outside whitelist', () => {
         content: 'x',
         message: 'y',
       }),
-    /path/,
+    /path not allowed/,
   );
 });
 
-test.skip('validateCommitPayload: rejects oversize content', () => {
+test('validateCommitPayload: rejects oversize content', () => {
   const huge = 'x'.repeat(300 * 1024);
   assert.throws(
     () =>
@@ -60,6 +75,18 @@ test.skip('validateCommitPayload: rejects oversize content', () => {
         content: huge,
         message: 'y',
       }),
-    /size|bytes|too large/i,
+    /max size/,
+  );
+});
+
+test('validateCommitPayload: rejects overly long message', () => {
+  assert.throws(
+    () =>
+      validateCommitPayload({
+        path: 'site/src/content/editions/2026-02.mdx',
+        content: 'x',
+        message: 'y'.repeat(501),
+      }),
+    /chars/,
   );
 });

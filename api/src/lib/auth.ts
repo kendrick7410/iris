@@ -30,14 +30,42 @@ interface RawPrincipal {
   claims?: RawClaim[];
 }
 
+const EMAIL_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
+
 export function verifyClientPrincipal(headerValue: string | null | undefined): Principal {
   if (!headerValue) {
     throw new Error('missing x-ms-client-principal header');
   }
-  // TODO: decode base64 → JSON → validate shape → return Principal
-  // TODO: extract email from userDetails OR from claims (emailaddress claim)
-  // TODO: extract displayName from 'name' claim, fallback to userDetails
-  throw new Error('NOT_IMPLEMENTED: verifyClientPrincipal');
+
+  let raw: RawPrincipal;
+  try {
+    const decoded = Buffer.from(headerValue, 'base64').toString('utf-8');
+    raw = JSON.parse(decoded) as RawPrincipal;
+  } catch {
+    throw new Error('invalid x-ms-client-principal: not base64-encoded JSON');
+  }
+
+  if (!raw || typeof raw !== 'object') {
+    throw new Error('invalid principal payload');
+  }
+
+  const claimOf = (typ: string): string | undefined =>
+    raw.claims?.find((c) => c.typ === typ)?.val;
+
+  const email = (raw.userDetails ?? claimOf(EMAIL_CLAIM) ?? '').trim();
+  if (!email) {
+    throw new Error('principal has no email (userDetails or emailaddress claim)');
+  }
+
+  const displayName = (claimOf('name') ?? raw.userDetails ?? email).trim();
+
+  return {
+    email,
+    displayName,
+    identityProvider: raw.identityProvider ?? 'unknown',
+    userId: raw.userId ?? '',
+    userRoles: raw.userRoles ?? [],
+  };
 }
 
 /**
@@ -45,6 +73,11 @@ export function verifyClientPrincipal(headerValue: string | null | undefined): P
  * Reads CMS_ALLOWED_EMAILS (CSV) from env. Case-insensitive match.
  */
 export function isAllowlisted(email: string): boolean {
-  // TODO: parse process.env.CMS_ALLOWED_EMAILS, normalise, compare
-  throw new Error('NOT_IMPLEMENTED: isAllowlisted');
+  const csv = process.env.CMS_ALLOWED_EMAILS ?? '';
+  if (!csv) return false;
+  const allowed = csv
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return allowed.includes(email.trim().toLowerCase());
 }

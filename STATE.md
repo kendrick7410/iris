@@ -173,33 +173,33 @@ Aujourd'hui le site ne lit que `site/src/content/editions/*.mdx`. Le markdown pi
 
 Design complet : `context-prep/cms-design.md`.
 
-### 9.2 — Scaffold Azure Function (créé, non déployé)
+### 9.2 — Azure Function — libs implémentées (non déployé)
 
 ```
 api/
 ├── host.json, package.json, tsconfig.json, .funcignore
 ├── local.settings.json.example     # copier, remplir, gitignored
 ├── src/functions/cms-commit.ts     # handler HTTP, orchestration uniquement
-├── src/lib/auth.ts                 # verifyClientPrincipal, isAllowlisted (stubs)
-├── src/lib/validation.ts           # isPathAllowed actif, validateCommitPayload stub
-├── src/lib/rate-limit.ts           # checkRateLimit stub (in-memory, per email)
-├── src/lib/github.ts               # commitFile stub (Octokit)
-└── test/                           # node:test, validation path tests actifs, reste skip
+├── src/lib/auth.ts                 # verifyClientPrincipal, isAllowlisted ✅
+├── src/lib/validation.ts           # validateCommitPayload, isPathAllowed ✅
+├── src/lib/rate-limit.ts           # checkRateLimit (in-memory, per email) ✅
+├── src/lib/github.ts               # commitFile via Octokit (PAT + stamped author) ✅
+└── test/                           # 36 tests, 0 fail, 0 skip
 ```
 
-Type-check passe (`npx tsc --noEmit`), 3 tests `isPathAllowed` passent, 5 autres en `test.skip` jusqu'à implémentation Phase 2.
+Type-check `npx tsc --noEmit` clean. `node --test dist/test` : 36/36.
+
+Reste à faire quand B1+B2 arrivent : écrire `staticwebapp.config.json` (auth Entra ID + route `/admin/*` authenticated), activer `api_location: "api"` dans le workflow SWA, configurer les App Settings Azure (`AAD_CLIENT_ID`, `AAD_CLIENT_SECRET`, `CMS_ALLOWED_EMAILS`), créer `site/public/admin/{index.html,config.yml}` pour Sveltia, et trancher OD1 (protocole backend Sveltia, cf. `cms-design.md`).
 
 ### 9.3 — Blockers (B1-B5) — owner Jonathan
 
-| # | Item | Détail |
+| # | Item | Statut |
 |---|------|--------|
-| B1 | Tenant ID Entra ID Cefic | Portail Azure AD → "Overview" → Tenant ID. Sinon IT Cefic. |
-| B2 | App registration Entra ID "Iris CMS" | Azure AD → App registrations → New. Récupérer Client ID + créer Client Secret. **`Assignment required: Yes`** + assigner Moncef + Jonathan |
-| B3 | PAT GitHub fine-grained | Settings → Developer settings → Personal access tokens → Fine-grained. Scope = `kendrick7410/iris` uniquement, permission `contents: write`. (Remplace B3 initial "OAuth App" — PAT plus propre avec l'architecture O2.) |
-| B4 | Domaine iris.cefic.org | Confirmer que DNS + certif pointent bien vers le slot Azure SWA `delightful-cliff-04d721f03`. Sinon utiliser le subdomain `.azurestaticapps.net` par défaut en MVP. |
-| B5 | Liste éditeurs initiale | MVP : Moncef (`mha@cefic.be` ?) + Jonathan. Préciser emails exacts. |
-
-Une fois B1-B5 reçus, Phase 2 reprend : écriture `staticwebapp.config.json`, app settings Azure (AAD_CLIENT_ID/SECRET + GITHUB_PAT + CMS_ALLOWED_EMAILS), implémentation des 4 libs stubbed, activation workflow SWA `api_location: "api"`.
+| B1 | Tenant ID Entra ID Cefic | ⏳ Ticket IT Cefic envoyé |
+| B2 | App registration Entra ID "Iris CMS" (Client ID + Secret, Assignment required: Yes, Moncef + Jonathan assignés) | ⏳ Ticket IT Cefic envoyé |
+| B3 | PAT GitHub fine-grained, scope `kendrick7410/iris`, `contents: write` | ✅ 2026-04-24 — token ajouté aux App Settings Azure SWA comme `GITHUB_PAT` |
+| B4 | Domaine `iris.cefic.org` | ✅ Pointé sur Azure SWA, CMS sera sur `iris.cefic.org/admin` |
+| B5 | Liste éditeurs MVP | ✅ `jme@cefic.be` + `mha@cefic.be` (emails à reconfirmer par l'IT lors du setup de l'app registration) |
 
 ### 9.4 — Framing produit
 
