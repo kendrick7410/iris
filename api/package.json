@@ -11,7 +11,7 @@
     "clean": "rm -rf dist",
     "start": "npm run build && func start",
     "test": "npm run build && node --test dist/test",
-    "postinstall": "tsc"
+    "postinstall": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "@azure/functions": "^4.5.0",

@@ -306,7 +306,7 @@ Le tenant ID n'est pas un secret (il apparaît dans toutes les URLs OAuth publiq
 
 ### Comment ça marche
 
-1. `staticwebapp.config.json` dans le repo contient `"openIdIssuer": "https://login.microsoftonline.com/$AAD_TENANT_ID/v2.0"`.
+1. `site/public/staticwebapp.config.json` (dans le public d'Astro pour qu'il soit copié tel quel à la racine de `site/dist/`, où SWA le lit) contient `"openIdIssuer": "https://login.microsoftonline.com/$AAD_TENANT_ID/v2.0"`.
 2. Le workflow `.github/workflows/azure-static-web-apps-delightful-cliff-04d721f03.yml` a une étape **"Substitute AAD_TENANT_ID into staticwebapp.config.json"** entre le checkout et le `Azure/static-web-apps-deploy`.
 3. Cette étape :
    - Lit `AAD_TENANT_ID` depuis les secrets GitHub Actions (`${{ secrets.AAD_TENANT_ID }}`).
@@ -329,7 +329,7 @@ Le tenant ID n'est pas un secret (il apparaît dans toutes les URLs OAuth publiq
 | Workflow échoue au step "Substitute" avec "AAD_TENANT_ID secret is not set" | Secret absent ou mal nommé côté GitHub | `gh secret set AAD_TENANT_ID --body "<guid>"` ou via l'UI |
 | Workflow échoue avec "Placeholder `$AAD_TENANT_ID` still present" | `envsubst` pas installé sur le runner, ou le placeholder a été renommé dans la config sans mettre à jour le step | `envsubst` est dans `gettext-base` (préinstallé sur ubuntu-latest). Sinon `apt-get install -y gettext-base` en prélude. |
 | Au runtime, `/admin` renvoie "AADSTS90002 — Tenant not found" | Le secret contient une valeur erronée (mauvais GUID) | Corriger le secret, re-trigger le workflow |
-| Au runtime, `/admin` rend la page en clair sans redirect | `staticwebapp.config.json` absent du déploiement (route rules non chargées) | Vérifier que `staticwebapp.config.json` est à la racine du repo (Azure SWA cherche à la racine par défaut) |
+| Au runtime, `/admin` rend la page en clair sans redirect | `staticwebapp.config.json` absent du build output Astro (route rules non chargées côté SWA) | Vérifier qu'il est bien dans `site/public/staticwebapp.config.json` pour qu'Astro le copie dans `site/dist/`. SWA cherche le fichier à la racine de l'output, pas à la racine du repo. |
 
 ## Sveltia version lock
 
@@ -394,4 +394,4 @@ Effort estimé : ~1 jour si le besoin se présente.
 - `api/README.md` — doc technique de l'Azure Function
 - `site/public/admin/index.html` — scaffold CMS (Phase 3.2, fait)
 - `site/public/admin/config.yml` — config Sveltia (Phase 3.3, à créer)
-- `staticwebapp.config.json` — config auth SWA (à créer après réception du Tenant ID Entra ID)
+- `site/public/staticwebapp.config.json` — config auth SWA (sous `public/` pour être copié en sortie de build par Astro ; tenant ID substitué au build via workflow + secret GitHub)

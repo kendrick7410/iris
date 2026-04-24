@@ -32,7 +32,7 @@ jobs:
                const coredemo = require('@actions/core')
                return await coredemo.getIDToken()
            result-encoding: string
-      - name: Substitute AAD_TENANT_ID into staticwebapp.config.json
+      - name: Substitute AAD_TENANT_ID into site/public/staticwebapp.config.json
         # The tenant ID is not a secret but we keep it out of the repo to
         # sidestep any Cefic policy on committing tenant identifiers and
         # to make per-environment reuse of the template trivial. See
@@ -52,18 +52,18 @@ jobs:
           # left untouched (defense in depth; we control the file so in
           # practice nothing else matches).
           envsubst '$AAD_TENANT_ID' \
-            < staticwebapp.config.json \
-            > staticwebapp.config.json.tmp
-          mv staticwebapp.config.json.tmp staticwebapp.config.json
+            < site/public/staticwebapp.config.json \
+            > site/public/staticwebapp.config.json.tmp
+          mv site/public/staticwebapp.config.json.tmp site/public/staticwebapp.config.json
           # Fail fast if the placeholder survived (e.g. someone renamed
           # the marker and forgot to update this step).
-          if grep -qF '$AAD_TENANT_ID' staticwebapp.config.json; then
+          if grep -qF '$AAD_TENANT_ID' site/public/staticwebapp.config.json; then
             echo "::error::Placeholder \$AAD_TENANT_ID still present after substitution."
-            cat staticwebapp.config.json
+            cat site/public/staticwebapp.config.json
             exit 1
           fi
           # Log the issuer URL for confidence (tenant ID is public metadata).
-          issuer=$(python3 -c "import json; print(json.load(open('staticwebapp.config.json'))['auth']['identityProviders']['azureActiveDirectory']['registration']['openIdIssuer'])")
+          issuer=$(python3 -c "import json; print(json.load(open('site/public/staticwebapp.config.json'))['auth']['identityProviders']['azureActiveDirectory']['registration']['openIdIssuer'])")
           echo "openIdIssuer resolved to: $issuer"
       - name: Build And Deploy
         id: builddeploy
