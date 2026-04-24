@@ -40,6 +40,13 @@ const outputFiche  = loadFiche('output');
 const pricesFiche  = loadFiche('prices');
 const salesFiche   = loadFiche('sales');
 
+// Derive view titles from the MDX body H2s. Pipeline order is stable:
+// 0 macro_brief, 1 output, 2 prices, 3 sales, 4 trade_exports, 5 trade_imports.
+const sectionHeadings = [...(entry.body ?? '').matchAll(/^##\s+(.+)$/gm)].map(m => m[1].trim());
+const overviewTitle  = sectionHeadings[0] ?? `Overview, ${monthName(entry.id)}`;
+const macroTitle     = sectionHeadings[1] ?? `Macro brief, ${monthName(entry.id)}`;
+const drilldownTitle = sectionHeadings[4] ?? `Drill-down, ${monthName(entry.id)}`;
+
 // ---------- Smooth inline SVG line chart helper ----------
 type SeriesPoint = { period: string; value: number };
 type SparkSpec = {
@@ -472,7 +479,7 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
       <header class="iris-view-header">
         <div>
           <div class="iris-view-eyebrow">Overview, {monthName(entry.id)}</div>
-          <h1 class="iris-view-title">EU27 chemical export value down ~10% YoY in Jan-Feb 2026 against normal base, after 2025 pre-tariff spike</h1>
+          <h1 class="iris-view-title">{overviewTitle}</h1>
         </div>
         <div class="iris-view-subtitle">Published {entry.data.publication_date}</div>
       </header>
@@ -556,7 +563,7 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
       <header class="iris-view-header">
         <div>
           <div class="iris-view-eyebrow">Macro brief, {monthName(entry.id)}</div>
-          <h1 class="iris-view-title">EU27 chemical output down 3.9% YoY in February 2026, 18% below 2014-2019 average</h1>
+          <h1 class="iris-view-title">{macroTitle}</h1>
         </div>
         <div class="iris-view-subtitle">Production, prices, sales</div>
       </header>
@@ -655,7 +662,7 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
       <header class="iris-view-header">
         <div>
           <div class="iris-view-eyebrow">Drill-down, {monthName(entry.id)}</div>
-          <h1 class="iris-view-title">EU27 chemical exports to US retrace toward China/UK band in Jan-Feb 2026, unwinding February 2025 pre-tariff peak</h1>
+          <h1 class="iris-view-title">{drilldownTitle}</h1>
         </div>
         <div class="iris-view-subtitle">US, China, United Kingdom</div>
       </header>
