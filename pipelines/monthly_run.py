@@ -41,12 +41,49 @@ SECTION_ORDER = ["output", "prices", "sales", "trade_exports", "trade_imports"]
 PIPELINE_VERSION = "0.2.0"   # L5 — macro brief enabled; v1 editions stay at 0.1.0
 
 
+def _edition_mdx_path(month: str) -> Path:
+    """Canonical site MDX path for an edition."""
+    return PROJECT_ROOT / "site" / "src" / "content" / "editions" / f"{month}.mdx"
+
+
+_REVIEWED_TRUE_RE = re.compile(
+    r"^\s*reviewed:\s*true\s*$",
+    re.MULTILINE | re.IGNORECASE,
+)
+
+
+def _mdx_has_reviewed_flag(mdx_path: Path) -> bool:
+    """Return True iff the MDX's YAML frontmatter carries `reviewed: true`.
+
+    The CMS (Moncef) sets this flag once an edition is signed off. The
+    pipeline treats it as a hard freeze: the MDX belongs to the human,
+    and automated regeneration must be explicit (--force).
+
+    Done without PyYAML to avoid adding a dependency for one regex.
+    """
+    if not mdx_path.exists():
+        return False
+    text = mdx_path.read_text(encoding="utf-8")
+    if not text.startswith("---"):
+        return False
+    # Find the closing '---' of the frontmatter block.
+    end = text.find("\n---", 3)
+    if end == -1:
+        return False
+    frontmatter = text[3:end]
+    return bool(_REVIEWED_TRUE_RE.search(frontmatter))
+
+
 def setup_logging():
+    # force=True so the handler rebinds to the current sys.stderr when this is
+    # invoked under CliRunner (which replaces stderr). Harmless in production
+    # where setup_logging runs once.
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S",
         stream=sys.stderr,
+        force=True,
     )
 
 
@@ -342,6 +379,26 @@ def main(month, dry_run, only_step, force, variant):
     if not re.match(r"^\d{4}-\d{2}$", month):
         logger.error(f"Invalid month format: {month}. Use YYYY-MM.")
         sys.exit(1)
+
+    # Human-in-the-loop guard: once Moncef has signed off an edition via the
+    # CMS (reviewed: true in the MDX frontmatter), the pipeline must not
+    # regenerate it without an explicit override. Variants are exempt since
+    # they write to editorial/drafts/{month}-{variant}/ and skip step_build.
+    if not variant:
+        reviewed = _mdx_has_reviewed_flag(_edition_mdx_path(month))
+        if reviewed and not force:
+            logger.warning(
+                f"Edition {month} is marked reviewed=True in the site MDX. "
+                f"Pipeline refusing to regenerate. Use --force to overwrite "
+                f"human-edited content, or --variant to write a side-by-side "
+                f"draft without touching the MDX."
+            )
+            sys.exit(0)
+        if reviewed and force:
+            logger.warning(
+                f"Edition {month} is reviewed but --force given. "
+                f"Pipeline will overwrite human-edited content."
+            )
 
     try:
         # 1. FETCH
