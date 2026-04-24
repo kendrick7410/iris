@@ -381,7 +381,7 @@ button { font-family: inherit; }
      then rest) at ~50 bpm, which reads as alive without being noisy. */
   display: inline-block;
   transform-origin: 50% 60%;
-  animation: iris-heartbeat 1.2s ease-in-out infinite;
+  animation: iris-heartbeat 2.4s ease-in-out infinite;
   will-change: transform;
 }
 @keyframes iris-heartbeat {
