@@ -1,6 +1,15 @@
-# Iris CMS — Editor Guide
+# Iris CMS Editor Guide
 
 *Short guide for reviewing and refining monthly editions.*
+
+## Who this is for
+
+Two groups of reviewers share the same tool:
+
+- **Cefic Economic Analysis team** (Moncef Hadhri and colleagues). You check that the figures, framing, and causal language are sound.
+- **Cefic Communications team**. You polish tone, clarity, and alignment with Cefic voice.
+
+Both edit the same MDX body; changes from either team go live as soon as you click Save.
 
 ## What this is
 
@@ -28,7 +37,7 @@ Each edition has these fields:
 
 | Field | Edit? |
 |-------|-------|
-| Month | ⛔ Do not edit — drives the URL and file name |
+| Month | ⛔ Do not edit (drives the URL and file name) |
 | Publication date | ⛔ Do not edit |
 | Pipeline version | ⛔ Do not edit |
 | Reviewed | ✅ Tick when your review is complete (see below) |
@@ -44,7 +53,7 @@ Each edition has these fields:
 ### ⛔ Never
 - **Change a number.** All figures (`42.1%`, `€34.5 bn`, `79.3 on the 2021
   index`) come from Eurostat/Comext and must match the charts. If a number
-  looks wrong, contact Jonathan — do not edit it yourself.
+  looks wrong, contact Jonathan. Do not edit it yourself.
 - **Touch the chart tags.** Lines like:
 
   ```html
@@ -87,19 +96,19 @@ allowlisted editors can reach the CMS.
 
 ## If something goes wrong
 
-- **"Save" button does nothing** — refresh the page; if still broken,
+- **"Save" button does nothing**: refresh the page; if still broken,
   contact Jonathan.
-- **Edit looks cut off** — do not save. Close the tab, reopen. Report to
+- **Edit looks cut off**: do not save. Close the tab, reopen. Report to
   Jonathan.
-- **CMS shows a "Sign in with GitHub" screen** — this means the SSO bridge
-  broke. Do not try to sign in with GitHub. Contact Jonathan — the CMS is
+- **CMS shows a "Sign in with GitHub" screen**: this means the SSO bridge
+  broke. Do not try to sign in with GitHub. Contact Jonathan; the CMS is
   in a broken state.
-- **Wrong number in the text** — do NOT edit it. Report to Jonathan so the
+- **Wrong number in the text**: do NOT edit it. Report to Jonathan so the
   data source can be fixed and the pipeline re-run.
 
 ## Contact
 
-Jonathan Mead — `jme@cefic.be`
+Jonathan Mead, `jme@cefic.be`
 
 ---
 

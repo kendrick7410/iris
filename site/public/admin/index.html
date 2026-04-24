@@ -4,7 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Iris — Editorial CMS</title>
+  <title>Iris · Editorial CMS</title>
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%23F47B20'/><text x='50%25' y='54%25' font-family='Noto Serif,serif' font-weight='700' font-size='26' fill='white' text-anchor='middle' dominant-baseline='middle'>I</text></svg>" />
+
+  <!-- Cefic typography (matches iris.cefic.org site) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet" />
 
   <!--
     Sveltia CMS pinned to v0.156.3 (pinned 2026-04-24).
@@ -17,51 +23,311 @@
   -->
 
   <style>
+    :root {
+      /* Cefic brand tokens. Canonical values from
+         ~/.claude/projects/-home-jme/memory/reference_cefic_visual_identity.md
+         and site/src/styles/cefic-tokens.css. Keep in sync. */
+      --iris-cefic-orange: #F47B20;
+      --iris-cefic-orange-dark: #D66516;
+      --iris-cefic-orange-light: #FFA766;
+      --iris-ink: #1E1E1E;
+      --iris-ink-soft: #4A4A4A;
+      --iris-mute: #7A7A7A;
+      --iris-rule: #E5E5E5;
+      --iris-surface: #FAFAF8;
+      --iris-surface-alt: #FFFFFF;
+      --iris-serif: 'Noto Serif', 'Times New Roman', serif;
+      --iris-sans: 'Lato', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+      /* Sveltia UI theming. Overrides the library's own CSS custom
+         properties so buttons, links, selected rows etc. match Cefic orange.
+         Base hue drives every derived color inside Sveltia (default 210 / blue,
+         we shift to 27 for orange). Explicit accent colors pin the exact
+         Cefic tone where Sveltia uses the accent directly. */
+      --sui-base-hue: 27;
+      --sui-primary-accent-color: var(--iris-cefic-orange);
+      --sui-primary-accent-color-dark: var(--iris-cefic-orange-dark);
+      --sui-primary-accent-color-light: var(--iris-cefic-orange-light);
+      --sui-primary-accent-color-inverted: #FFFFFF;
+      --sui-primary-accent-color-text: #FFFFFF;
+    }
+
+    /* ── Reset + shell layout ─────────────────────────────────────────── */
     html, body { margin: 0; padding: 0; height: 100%; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      font-family: var(--iris-sans);
+      color: var(--iris-ink);
+      background: var(--iris-surface);
+    }
+
+    /* ── Iris header (sits above Sveltia) ─────────────────────────────── */
+    .iris-header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 20px;
+      background: var(--iris-surface-alt);
+      border-bottom: 1px solid var(--iris-rule);
+      position: relative;
+    }
+    .iris-header::before {
+      /* Cefic Notch: a thin orange accent bar on the left edge */
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--iris-cefic-orange);
+    }
+    .iris-wordmark {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .iris-wordmark-title {
+      font-family: var(--iris-serif);
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--iris-cefic-orange);
+      letter-spacing: 0.01em;
+    }
+    .iris-wordmark-sub {
+      font-family: var(--iris-sans);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--iris-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .iris-header-spacer { flex: 1 1 auto; }
+    .iris-header-link {
+      font-family: var(--iris-sans);
+      font-size: 13px;
+      color: var(--iris-ink-soft);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      transition: background 120ms ease;
+    }
+    .iris-header-link:hover,
+    .iris-header-link:focus-visible { background: var(--iris-surface); outline: none; }
+    .iris-header-link--primary {
+      color: var(--iris-cefic-orange);
+      border: 1px solid var(--iris-cefic-orange);
+      font-weight: 700;
+    }
+    .iris-header-link--primary:hover,
+    .iris-header-link--primary:focus-visible {
+      background: var(--iris-cefic-orange);
+      color: #fff;
+    }
+
+    /* ── Sveltia mount point ──────────────────────────────────────────── */
+    #nc-root {
+      flex: 1 1 auto;
+      position: relative;
+      min-height: 0;
+    }
+
+    /* Mild Sveltia internal tweaks where CSS custom properties don't cover
+       everything. Scoped to avoid accidental regressions on version bumps. */
+    #nc-root button[aria-pressed='true'] { background-color: rgba(244, 123, 32, 0.12); }
+
+    /* ── Onboarding modal ─────────────────────────────────────────────── */
+    .iris-welcome-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 30, 30, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .iris-welcome-backdrop[data-open='true'] { display: flex; }
+    .iris-welcome {
+      max-width: 640px;
+      width: 100%;
+      background: var(--iris-surface-alt);
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      padding: 32px 36px 28px;
+      font-family: var(--iris-sans);
+      color: var(--iris-ink);
+      line-height: 1.55;
+      position: relative;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
+    .iris-welcome h2 {
+      font-family: var(--iris-serif);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--iris-ink);
+      margin: 0 0 6px;
+      line-height: 1.2;
+    }
+    .iris-welcome h2 span {
+      color: var(--iris-cefic-orange);
+    }
+    .iris-welcome-kicker {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--iris-mute);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 18px;
+    }
+    .iris-welcome p { margin: 0 0 14px; font-size: 15px; color: var(--iris-ink-soft); }
+    .iris-welcome p strong { color: var(--iris-ink); }
+    .iris-welcome-audiences {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+      margin: 4px 0 18px;
+    }
+    @media (min-width: 520px) {
+      .iris-welcome-audiences { grid-template-columns: 1fr 1fr; gap: 14px; }
+    }
+    .iris-welcome-audience {
+      background: var(--iris-surface);
+      border-left: 3px solid var(--iris-cefic-orange);
+      padding: 12px 14px;
+      border-radius: 0 6px 6px 0;
+      font-size: 14px;
+    }
+    .iris-welcome-audience strong {
+      display: block;
+      font-size: 13px;
+      color: var(--iris-cefic-orange);
+      margin-bottom: 2px;
+      letter-spacing: 0.01em;
+    }
+    .iris-welcome-rules {
+      background: var(--iris-surface);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 6px 0 20px;
+      font-size: 14px;
+    }
+    .iris-welcome-rules h3 {
+      margin: 0 0 8px;
+      font-family: var(--iris-sans);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--iris-ink);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .iris-welcome-rules ol {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--iris-ink-soft);
+    }
+    .iris-welcome-rules li { margin-bottom: 6px; }
+    .iris-welcome-rules li:last-child { margin-bottom: 0; }
+    .iris-welcome-rules em {
+      font-style: normal;
+      color: var(--iris-cefic-orange);
+      font-weight: 700;
+    }
+    .iris-welcome-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .iris-welcome-help {
+      font-size: 13px;
+      color: var(--iris-mute);
+    }
+    .iris-welcome-help a {
+      color: var(--iris-cefic-orange);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .iris-welcome-help a:hover { text-decoration: underline; }
+    .iris-welcome-cta {
+      appearance: none;
+      border: none;
+      background: var(--iris-cefic-orange);
+      color: #fff;
+      font-family: var(--iris-sans);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 140ms ease;
+      letter-spacing: 0.01em;
+    }
+    .iris-welcome-cta:hover,
+    .iris-welcome-cta:focus-visible {
+      background: var(--iris-cefic-orange-dark);
+      outline: none;
+    }
+    .iris-welcome-close {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      color: var(--iris-mute);
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .iris-welcome-close:hover,
+    .iris-welcome-close:focus-visible {
+      background: var(--iris-surface);
+      color: var(--iris-ink);
+      outline: none;
+    }
+
+    @media (max-width: 500px) {
+      .iris-header { padding: 8px 14px; gap: 10px; }
+      .iris-wordmark-title { font-size: 18px; }
+      .iris-wordmark-sub { font-size: 10px; }
+      .iris-welcome { padding: 24px 22px 20px; }
+      .iris-welcome h2 { font-size: 22px; }
+    }
   </style>
 
   <script id="sveltia-auth-stub">
     /*
-     * HACK — Sveltia-CMS OAuth bypass via localStorage stub.
+     * HACK: Sveltia-CMS OAuth bypass via localStorage stub.
      *
      * WHY THIS EXISTS:
      *   Sveltia CMS (and its parent Decap) expects GitHub OAuth for the
-     *   `github` backend. Our editors (Moncef Hadhri, Jonathan Mead) do
-     *   NOT have GitHub accounts. They authenticate via Azure Static Web
-     *   Apps + Entra ID (Cefic SSO). The GitHub machine identity lives
-     *   server-side as a fine-grained PAT in the Azure Function, never in
-     *   the browser.
+     *   `github` backend. Our editors (Moncef Hadhri, Jonathan Mead, Cefic
+     *   Comms team) do NOT have GitHub accounts. They authenticate via
+     *   Azure Static Web Apps + Entra ID (Cefic SSO). The GitHub machine
+     *   identity lives server-side as a fine-grained PAT in the Azure
+     *   Function, never in the browser.
      *
      * WHAT THIS SCRIPT DOES:
      *   Before the Sveltia bundle loads, we write a synthetic User record
      *   to localStorage key `sveltia-cms.user`. On boot Sveltia calls
      *   signInAutomatically(), reads that record, and proceeds as if OAuth
-     *   had succeeded. The `token` field is a placeholder string — every
+     *   had succeeded. The `token` field is a placeholder string; every
      *   outgoing request to /api/gh/* is received by our Azure Function,
      *   which ignores the Authorization header and substitutes the real
      *   PAT from its environment.
      *
-     * HOW IT FITS THE CHAIN:
-     *   browser ──(Entra ID)──► Azure SWA ──► /admin/index.html
-     *     │
-     *     │ (this script runs; user stub written)
-     *     ▼
-     *   Sveltia bundle boots, reads stub, starts API calls
-     *     │
-     *     ▼
-     *   /api/gh/* ──► Azure Function (validates x-ms-client-principal,
-     *                  rewrites auth with PAT) ──► api.github.com
-     *
      * FAILURE MODE:
-     *   If Sveltia tightens its User validation in a future release
-     *   (e.g. starts verifying a JWT signature on the token), this hack
-     *   silently breaks — the CMS will show the login screen instead of
-     *   the editor. Mitigations:
+     *   If Sveltia tightens its User validation in a future release the
+     *   CMS falls back to its GitHub sign-in screen. Mitigations:
      *     - version is pinned (see Sveltia CMS script tag below)
      *     - fallback path documented in cms-design.md: migrate to Voie B
-     *       (custom backend via CMS.registerBackend), Azure Function
-     *       stays the same.
+     *       (custom backend via CMS.registerBackend)
      *
      * KEYS USED BY SVELTIA (verified from src/lib/services/user/auth.js):
      *   - sveltia-cms.user  (primary, what we write)
@@ -83,32 +349,137 @@
       try {
         localStorage.setItem('sveltia-cms.user', JSON.stringify(stubUser));
       } catch (e) {
-        // localStorage may be unavailable in private-mode / sandboxed
-        // contexts. The CMS will fall back to its login screen, which
-        // will NOT work (we have no GitHub OAuth app) — surface loudly.
         console.error('[iris-cms] failed to prime auth stub:', e);
       }
     })();
   </script>
 
   <!--
-    Sveltia CMS bundle, pinned. When upgrading:
-      1. Bump the version here
-      2. Update the "pinned 20YY-MM-DD" date in the comment at top of file
-      3. Follow the procedure in cms-design.md § "Sveltia version lock"
+    Sveltia CMS bundle, pinned.
 
     IMPORTANT: no `type="module"` and URL ends in `.js` (not `.mjs`).
     Sveltia v0.156 ships as a classic (non-module) script and auto-initializes
     via `document.currentScript`, which is null for module scripts. It also
     detects itself via `document.querySelector('script[src$="/sveltia-cms.js"]')`
-    — the `.mjs` variant exists on the CDN but does not match that query. Using
+    The `.mjs` variant exists on the CDN but does not match that query. Using
     `type="module"` + `.mjs` was the silent cause of the blank /admin page on
     first deploy (window.CMS defined but init() never called). See
     sveltia-cms src/lib/main.js auto-init block.
+
+    Upgrade procedure: context-prep/cms-design.md § "Sveltia version lock".
   -->
   <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.156.3/dist/sveltia-cms.js"></script>
 </head>
 <body>
-  <!-- Sveltia injects its editor UI into document.body on load. -->
+  <header class="iris-header" role="banner">
+    <a href="https://iris.cefic.org/" class="iris-wordmark" aria-label="Back to Iris site">
+      <span class="iris-wordmark-title">Iris</span>
+      <span class="iris-wordmark-sub">Editorial CMS · Cefic</span>
+    </a>
+    <div class="iris-header-spacer"></div>
+    <button
+      type="button"
+      id="iris-help-btn"
+      class="iris-header-link iris-header-link--primary"
+      aria-label="Open editorial guidance"
+    >
+      Help &amp; guidelines
+    </button>
+    <a href="/.auth/logout?post_logout_redirect_uri=/" class="iris-header-link">Sign out</a>
+  </header>
+
+  <!-- Sveltia injects its editor UI into this element on boot. -->
+  <div id="nc-root"></div>
+
+  <div
+    class="iris-welcome-backdrop"
+    id="iris-welcome"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="iris-welcome-title"
+    aria-describedby="iris-welcome-desc"
+  >
+    <div class="iris-welcome">
+      <button type="button" class="iris-welcome-close" id="iris-welcome-close" aria-label="Close">&times;</button>
+      <p class="iris-welcome-kicker">Welcome</p>
+      <h2 id="iris-welcome-title">You're editing the <span>Iris</span> monthly report</h2>
+      <p id="iris-welcome-desc">
+        Every month, the Iris data pipeline drafts a report on the European chemical industry from Eurostat and Comext sources. This is where that draft gets a human pass before publication. <strong>Your edits commit directly to the site; changes go live in about two minutes.</strong>
+      </p>
+
+      <div class="iris-welcome-audiences">
+        <div class="iris-welcome-audience">
+          <strong>Economic review</strong>
+          The Cefic Economic Analysis team confirms that the figures, framing, and causal language hold up.
+        </div>
+        <div class="iris-welcome-audience">
+          <strong>Editorial review</strong>
+          The Cefic Communications team polishes tone, clarity, and alignment with Cefic voice.
+        </div>
+      </div>
+
+      <div class="iris-welcome-rules">
+        <h3>Three rules to keep in mind</h3>
+        <ol>
+          <li><em>Do not change the numbers.</em> Figures like "42.1%" or "€34.5 bn" are tied to the charts and to the underlying Eurostat data. If a number looks wrong, flag it to Jonathan rather than editing it here.</li>
+          <li><em>Do not touch the chart tags or the "---" separators.</em> They structure the dashboard views. Rephrase around them freely, but leave them intact.</li>
+          <li><em>Tick "Reviewed" when you are done.</em> Once ticked, the next pipeline run preserves your edits instead of overwriting them.</li>
+        </ol>
+      </div>
+
+      <div class="iris-welcome-footer">
+        <p class="iris-welcome-help">
+          Full guide: <a href="/admin/GUIDE.md" target="_blank" rel="noopener">GUIDE.md</a> · Questions: <a href="mailto:jme@cefic.be">jme@cefic.be</a>
+        </p>
+        <button type="button" class="iris-welcome-cta" id="iris-welcome-cta">Open the editor</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * First-visit welcome modal.
+     *
+     * Shows on first load for any editor who has not dismissed it. Re-openable
+     * at any time via the "Help & guidelines" button in the header. Dismissal
+     * is stored per-browser in localStorage under `iris-cms.welcomed`.
+     */
+    (function welcomeInit() {
+      var STORAGE_KEY = 'iris-cms.welcomed';
+      var backdrop = document.getElementById('iris-welcome');
+      var openBtn = document.getElementById('iris-help-btn');
+      var closeBtn = document.getElementById('iris-welcome-close');
+      var ctaBtn = document.getElementById('iris-welcome-cta');
+
+      function openModal() { backdrop.setAttribute('data-open', 'true'); }
+      function closeModal() {
+        backdrop.setAttribute('data-open', 'false');
+        try { localStorage.setItem(STORAGE_KEY, '1'); } catch (e) { /* ignore */ }
+      }
+
+      // Backdrop click closes the modal (but not clicks inside the card).
+      backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) closeModal();
+      });
+      closeBtn.addEventListener('click', closeModal);
+      ctaBtn.addEventListener('click', closeModal);
+      openBtn.addEventListener('click', openModal);
+
+      // Escape key closes.
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && backdrop.getAttribute('data-open') === 'true') closeModal();
+      });
+
+      // First-visit auto-open. Wait until Sveltia has mounted so the modal
+      // appears over a populated CMS rather than over a blank page.
+      try {
+        if (!localStorage.getItem(STORAGE_KEY)) {
+          window.addEventListener('load', function () {
+            setTimeout(openModal, 500);
+          });
+        }
+      } catch (e) { /* localStorage unavailable, skip auto-open */ }
+    })();
+  </script>
 </body>
 </html>
