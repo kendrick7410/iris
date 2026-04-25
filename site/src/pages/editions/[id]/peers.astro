@@ -114,6 +114,7 @@ if (peers) {
       { key: 'chemicals',       label: labels.chemicals,       color: '#0a527a', values: production.chemicals },
       { key: 'pharmaceuticals', label: labels.pharmaceuticals, color: '#3fa4c9', values: production.pharmaceuticals },
       { key: 'basic_metals',    label: labels.basic_metals,    color: '#c65d1e', values: production.basic_metals },
+      { key: 'motor_vehicles',  label: labels.motor_vehicles,  color: '#6b9d52', values: production.motor_vehicles },
       { key: 'manufacturing',   label: labels.manufacturing,   color: '#8a8a8a', values: production.manufacturing, dashed: true },
     ],
   });
@@ -136,18 +137,19 @@ if (peers) {
   });
 
   // Lead paragraph derived from the latest values
-  const last = (arr: (number | null)[]) => {
+  const last = (arr: (number | null)[] | undefined) => {
+    if (!arr) return null;
     for (let i = arr.length - 1; i >= 0; i--) if (arr[i] != null) return arr[i] as number;
     return null;
   };
-  const c = last(production.chemicals);
-  const m = last(production.manufacturing);
-  const p = last(production.pharmaceuticals);
-  const b = last(production.basic_metals);
-  const fmtPct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)} pts`;
-  const gap = (sec: number | null) => (sec != null && c != null ? fmtPct(c - sec) : '–');
+  const c  = last(production.chemicals);
+  const m  = last(production.manufacturing);
+  const p  = last(production.pharmaceuticals);
+  const b  = last(production.basic_metals);
+  const mv = last(production.motor_vehicles);
+  const fmt = (v: number | null) => v?.toFixed(1) ?? '–';
   lead = peers
-    ? `Over the past ${months.length} months, the EU27 chemical industry has held an industrial production index ${gap(m)} from manufacturing total, ${gap(p)} from pharmaceuticals and ${gap(b)} from basic metals. Chemicals close at ${c?.toFixed(1) ?? '–'} (2021=100); pharmaceuticals at ${p?.toFixed(1) ?? '–'}; basic metals at ${b?.toFixed(1) ?? '–'}; manufacturing at ${m?.toFixed(1) ?? '–'}.`
+    ? `Over the past ${months.length} months, EU27 chemical production has trailed total manufacturing and motor vehicles, both running near or above the 2021 baseline, while pharmaceuticals stayed well above it before rolling over from late 2025. Latest readings (2021=100): chemicals ${fmt(c)}, manufacturing ${fmt(m)}, motor vehicles ${fmt(mv)}, pharmaceuticals ${fmt(p)}, basic metals ${fmt(b)}.`
     : '';
 }
 
@@ -164,7 +166,7 @@ const renderTitle = peers
       <div class="iris-peers-eyebrow">02 · Time series</div>
       <h1 class="iris-peers-title">{renderTitle}</h1>
       <div class="iris-peers-subtitle">
-        Edition <a href={`/editions/${entry.id}`}>{monthNameFull}</a> · NACE C / C20 / C21 / C24
+        Edition <a href={`/editions/${entry.id}`}>{monthNameFull}</a> · NACE C / C20 / C21 / C24 / C29
       </div>
     </header>
 
