@@ -1334,6 +1334,67 @@ body.ov-active .iris-footer { display: none; }
 }
 .iris-panel p:last-child { margin-bottom: 0; }
 
+/* MDX-bound prose blocks inside multi-section panels (Sector context, Trade context). */
+.iris-mdx-block {
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--rule);
+}
+.iris-mdx-block:first-child { border-top: 0; padding-top: 0; }
+.iris-mdx-block:last-child  { padding-bottom: 0; }
+.iris-mdx-block-eyebrow {
+  font-family: var(--iris-serif);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cefic-orange);
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+}
+
+/* Scatter panel: full-width card with prose left, figure right (stack on narrow). */
+.iris-scatter-panel {
+  margin-top: 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1.5rem;
+}
+.iris-scatter-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.2fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.iris-scatter-prose p {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0 0 0.8rem;
+}
+.iris-scatter-prose p:last-child { margin-bottom: 0; }
+.iris-scatter-source {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  margin-top: 0.6rem;
+}
+.iris-scatter-figure {
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.iris-scatter-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.iris-trade-context { margin-top: 1.5rem; }
+
+@media (max-width: 900px) {
+  .iris-scatter-body { grid-template-columns: 1fr; }
+}
+
 /* Chart container (figure + caption) */
 .iris-chart {
   margin: 0;

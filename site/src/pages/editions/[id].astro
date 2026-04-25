@@ -40,12 +40,77 @@ const outputFiche  = loadFiche('output');
 const pricesFiche  = loadFiche('prices');
 const salesFiche   = loadFiche('sales');
 
-// Derive view titles from the MDX body H2s. Pipeline order is stable:
-// 0 macro_brief, 1 output, 2 prices, 3 sales, 4 trade_exports, 5 trade_imports.
-const sectionHeadings = [...(entry.body ?? '').matchAll(/^##\s+(.+)$/gm)].map(m => m[1].trim());
+// Parse the MDX body into structured sections so the dashboard panels can
+// be hydrated from editorial content rather than hardcoded prose. Pipeline
+// section order is stable:
+//   0 macro_brief headline, 1 output, 2 prices, 3 sales,
+//   4 trade_exports, 5 trade_imports,
+//   6 trajectory_scatter, 7 concentration_scatter (Phase A).
+type MdxSection = {
+  title: string;
+  paragraphs: string[];
+  images: { src: string; alt: string }[];
+  source: string | null;
+};
+
+function parseMdxSections(body: string | undefined): MdxSection[] {
+  if (!body) return [];
+  return body
+    .split(/\n---+\n/)
+    .map(parseMdxSection)
+    .filter((s): s is MdxSection => s !== null);
+}
+
+function parseMdxSection(block: string): MdxSection | null {
+  const lines = block.trim().split('\n');
+  const titleIdx = lines.findIndex(l => l.startsWith('## '));
+  if (titleIdx < 0) return null;
+  const title = lines[titleIdx].replace(/^##\s+/, '').trim();
+  const rest = lines.slice(titleIdx + 1);
+  const images: { src: string; alt: string }[] = [];
+  let source: string | null = null;
+  const proseLines: string[] = [];
+  for (const line of rest) {
+    const m = line.match(/<img\s+src="([^"]+)"\s+alt="([^"]+)"\s*\/?>/);
+    if (m) {
+      images.push({ src: m[1], alt: m[2] });
+    } else if (/^Source:/i.test(line.trim())) {
+      source = line.trim();
+    } else {
+      proseLines.push(line);
+    }
+  }
+  const paragraphs = proseLines
+    .join('\n')
+    .split(/\n{2,}/)
+    .map(p => p.trim().replace(/\s+/g, ' '))
+    .filter(Boolean);
+  return { title, paragraphs, images, source };
+}
+
+function inlineMd(text: string): string {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+}
+
+const mdxSections = parseMdxSections(entry.body);
+const sectionHeadings = mdxSections.map(s => s.title);
 const overviewTitle  = sectionHeadings[0] ?? `Overview, ${monthName(entry.id)}`;
 const macroTitle     = sectionHeadings[1] ?? `Macro brief, ${monthName(entry.id)}`;
 const drilldownTitle = sectionHeadings[4] ?? `Drill-down, ${monthName(entry.id)}`;
+
+const headlineSection = mdxSections[0] ?? null;
+const macroProseSections = [mdxSections[1], mdxSections[2], mdxSections[3]]
+  .filter((s): s is MdxSection => Boolean(s));
+const tradeProseSections = [mdxSections[4], mdxSections[5]]
+  .filter((s): s is MdxSection => Boolean(s));
+const trajectorySection = mdxSections.find(s =>
+  /trajectory|six years on/i.test(s.title)
+) ?? null;
+const concentrationSection = mdxSections.find(s =>
+  /concentration|strategic exposure/i.test(s.title)
+) ?? null;
 
 // ---------- Smooth inline SVG line chart helper ----------
 type SeriesPoint = { period: string; value: number };
@@ -542,18 +607,13 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
 
         <div class="iris-panel">
           <h3 class="iris-panel-title">Key takeaway</h3>
-          <p>
-            Exports fell <strong>42.1%</strong> in value to €34.5 bn, amid an anomalous February 2025
-            base driven by pre-tariff front-loading.
-          </p>
-          <p>
-            Chemical output declined <strong>3.9% YoY</strong> in February, at 79.3 (2021 index),
-            sitting <strong>18% below pre-crisis levels</strong> (2014-2019 average).
-          </p>
-          <p>
-            Against a normalised 2024 base, exports declined by approximately 10%, a more
-            representative indication of underlying weakness.
-          </p>
+          {headlineSection ? (
+            headlineSection.paragraphs.map(p => (
+              <p set:html={inlineMd(p)} />
+            ))
+          ) : (
+            <p>Headline summary unavailable for this edition.</p>
+          )}
         </div>
       </div>
     </section>
@@ -624,16 +684,18 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
       <div class="iris-cols iris-view-body">
         <div class="iris-panel">
           <h3 class="iris-panel-title">Sector context</h3>
-          <p>
-            Chemical production underperformed total manufacturing (,0.4% in February).
-            Pharmaceuticals fell more sharply at 8.6%, basic metals dropped 0.7%, motor
-            vehicles gained 2.0%.
-          </p>
-          <p>
-            EU27 chemical output averaged <strong>79.1</strong> in the first two months of 2026,
-            down 1.7% versus the same period in 2025. The sector remains structurally 18 points
-            below its 2014-2019 baseline, a gap that has not closed since the 2022 energy shock.
-          </p>
+          {macroProseSections.length > 0 ? (
+            macroProseSections.map(s => (
+              <div class="iris-mdx-block">
+                <div class="iris-mdx-block-eyebrow">{s.title}</div>
+                {s.paragraphs.slice(0, 1).map(p => (
+                  <p set:html={inlineMd(p)} />
+                ))}
+              </div>
+            ))
+          ) : (
+            <p>Sector commentary unavailable for this edition.</p>
+          )}
         </div>
 
         <div class="iris-panel">
@@ -655,6 +717,31 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
           </ul>
         </div>
       </div>
+
+      {trajectorySection && (
+        <div class="iris-scatter-panel">
+          <h3 class="iris-panel-title">{trajectorySection.title}</h3>
+          <div class="iris-scatter-body">
+            <div class="iris-scatter-prose">
+              {trajectorySection.paragraphs.map(p => (
+                <p set:html={inlineMd(p)} />
+              ))}
+              {trajectorySection.source && (
+                <p class="iris-scatter-source">{trajectorySection.source}</p>
+              )}
+            </div>
+            {trajectorySection.images[0] && (
+              <figure class="iris-scatter-figure">
+                <img
+                  src={trajectorySection.images[0].src}
+                  alt={trajectorySection.images[0].alt}
+                  loading="lazy"
+                />
+              </figure>
+            )}
+          </div>
+        </div>
+      )}
     </section>
 
     <!-- ===== DRILL-DOWN ===== -->
@@ -826,6 +913,45 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
               </div>
             </figure>
           ))}
+        </div>
+      )}
+
+      {tradeProseSections.length > 0 && (
+        <div class="iris-panel iris-trade-context">
+          <h3 class="iris-panel-title">Trade context</h3>
+          {tradeProseSections.map(s => (
+            <div class="iris-mdx-block">
+              <div class="iris-mdx-block-eyebrow">{s.title}</div>
+              {s.paragraphs.slice(0, 1).map(p => (
+                <p set:html={inlineMd(p)} />
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {concentrationSection && (
+        <div class="iris-scatter-panel">
+          <h3 class="iris-panel-title">{concentrationSection.title}</h3>
+          <div class="iris-scatter-body">
+            <div class="iris-scatter-prose">
+              {concentrationSection.paragraphs.map(p => (
+                <p set:html={inlineMd(p)} />
+              ))}
+              {concentrationSection.source && (
+                <p class="iris-scatter-source">{concentrationSection.source}</p>
+              )}
+            </div>
+            {concentrationSection.images[0] && (
+              <figure class="iris-scatter-figure">
+                <img
+                  src={concentrationSection.images[0].src}
+                  alt={concentrationSection.images[0].alt}
+                  loading="lazy"
+                />
+              </figure>
+            )}
+          </div>
         </div>
       )}
     </section>
