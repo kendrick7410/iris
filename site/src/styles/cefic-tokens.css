@@ -1353,13 +1353,18 @@ body.ov-active .iris-footer { display: none; }
   line-height: 1.3;
 }
 
-/* Scatter panel: full-width card with prose left, figure right (stack on narrow). */
+/* Scatter panel: full-width card with prose left, figure right (stack on narrow).
+   Flex-shrink:0 so the parent flex column does not collapse the panel below
+   its natural content height; overflow visible because the panel itself is
+   not a scroll container — the view above it scrolls. */
 .iris-scatter-panel {
   margin-top: 1.5rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
   padding: 1.5rem;
+  flex-shrink: 0;
+  overflow: visible;
 }
 .iris-scatter-body {
   display: grid;
@@ -1391,7 +1396,12 @@ body.ov-active .iris-footer { display: none; }
   width: 100%;
   height: auto;
 }
-.iris-trade-context { margin-top: 1.5rem; }
+.iris-trade-context {
+  margin-top: 1.5rem;
+  flex-shrink: 0;
+  overflow: visible;
+  height: auto;
+}
 
 @media (max-width: 900px) {
   .iris-scatter-body { grid-template-columns: 1fr; }
