@@ -1588,6 +1588,7 @@ body.ov-active .iris-footer { display: none; }
   overflow-y: auto;
   font-family: var(--iris-sans);
 }
+.iris-peers-page > * { max-width: 1080px; margin-left: auto; margin-right: auto; }
 .iris-peers-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
@@ -1625,12 +1626,14 @@ body.ov-active .iris-footer { display: none; }
   text-wrap: pretty;
 }
 .iris-peers-chart {
-  margin: 0 0 1.75rem;
-  padding: 1.25rem 1.5rem 1rem;
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem 0.85rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
 }
+.iris-peers-chart .iris-peers-svg { max-height: 380px; }
+.iris-peers-twoup .iris-peers-svg { max-height: 240px; }
 .iris-peers-chart-caption {
   display: flex;
   justify-content: space-between;
