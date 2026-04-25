@@ -23,7 +23,8 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.resolve(__dirname, '..');
+// Script lives at site/scripts/generate-pdfs.mjs, so the repo root is two up.
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
 function parseArgs(argv) {
   const args = { siteUrl: 'http://localhost:4321', month: null, output: 'dist/downloads' };

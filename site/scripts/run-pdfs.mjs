@@ -13,8 +13,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.resolve(__dirname, '..');
-const SITE_DIR = path.join(PROJECT_ROOT, 'site');
+// Script lives at site/scripts/run-pdfs.mjs, so site/ is one up and the
+// repo root is two up.
+const SITE_DIR = path.resolve(__dirname, '..');
+const PROJECT_ROOT = path.resolve(SITE_DIR, '..');
 const PORT = 4327; // out of the way of the dev server (4321)
 const SITE_URL = `http://127.0.0.1:${PORT}`;
 

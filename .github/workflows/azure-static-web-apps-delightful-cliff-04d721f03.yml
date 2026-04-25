@@ -105,7 +105,7 @@ jobs:
           PREVIEW_PID=$!
           # Generate into site/public/downloads so the second Astro build
           # (run by the SWA deploy step) bundles the PDFs into dist/.
-          if ! node ../scripts/generate-pdfs.mjs \
+          if ! node scripts/generate-pdfs.mjs \
                  --site-url http://127.0.0.1:4327 \
                  --output public/downloads; then
             echo "::error::PDF generation failed"

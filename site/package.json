@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "pdf:all": "astro build && node ../scripts/run-pdfs.mjs"
+    "pdf:all": "astro build && node scripts/run-pdfs.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
