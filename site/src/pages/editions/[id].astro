@@ -261,11 +261,14 @@ const {
               );
             })}
           </ul>
-          <a class="iris-panel-cta" href={`/editions/${entry.id}/peers/`}>
-            Open chemicals vs peers, multi-month →
-          </a>
         </div>
       </div>
+
+      <a class="iris-view-cta" href={`/editions/${entry.id}/peers/`}>
+        <span class="iris-view-cta-eyebrow">02 · Time series</span>
+        <span class="iris-view-cta-title">Chemicals versus peers — multi-month line chart</span>
+        <span class="iris-view-cta-arrow">→</span>
+      </a>
 
       {trajectorySection && (
         <div class="iris-scatter-panel">

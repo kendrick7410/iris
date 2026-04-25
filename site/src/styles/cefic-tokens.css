@@ -1349,6 +1349,54 @@ body.ov-active .iris-footer { display: none; }
 }
 .iris-panel-cta:hover { color: var(--ink); border-color: var(--ink); text-decoration: none; }
 
+/* Cross-view CTA banner: a standalone clickable strip in a dashboard
+   view that opens a sibling page (e.g. macro brief → /peers/). Designed
+   to break out of the 1-screen flex column with flex-shrink:0 so the
+   parent view's overflow:auto reveals it cleanly on scroll. */
+.iris-view-cta {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.4rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--cefic-orange);
+  border-radius: var(--radius);
+  margin-top: 1.25rem;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: var(--iris-sans);
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.iris-view-cta:hover {
+  background: var(--surface);
+  border-color: var(--cefic-orange);
+  text-decoration: none;
+}
+.iris-view-cta-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--cefic-orange);
+  white-space: nowrap;
+}
+.iris-view-cta-title {
+  font-family: var(--iris-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.iris-view-cta-arrow {
+  font-size: 1.25rem;
+  color: var(--cefic-orange);
+  transition: transform 0.2s var(--ease);
+}
+.iris-view-cta:hover .iris-view-cta-arrow { transform: translateX(4px); }
+
 /* MDX-bound prose blocks inside multi-section panels (Sector context, Trade context). */
 .iris-mdx-block {
   padding: 0.6rem 0;
