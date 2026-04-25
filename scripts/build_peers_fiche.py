@@ -23,6 +23,12 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = PROJECT_ROOT / "data" / "cache"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
+# Reuse the Eurostat fetcher's API call helper for the YoY extension.
+sys.path.insert(0, str(PROJECT_ROOT))
+from data.fetchers.eurostat import _api_call, _parse_single_dim  # noqa: E402
+
+EXTENDED_HISTORY_MONTHS = 30  # gives us 18 YoY points after subtracting 12
+
 logger = logging.getLogger("iris.build_peers_fiche")
 
 NACE_LABELS = {
@@ -47,6 +53,41 @@ def _load(path: Path) -> dict | None:
     return json.loads(path.read_text())
 
 
+def _shift_month(month: str, delta: int) -> str:
+    """'2026-02' shifted by delta months."""
+    y, m = (int(x) for x in month.split("-"))
+    total = y * 12 + (m - 1) + delta
+    ny, nm = divmod(total, 12)
+    return f"{ny:04d}-{nm + 1:02d}"
+
+
+def _fetch_extended_series(dataset: str, unit: str, s_adj: str,
+                           geo: str, nace: str, since_month: str) -> dict[str, float]:
+    """One-shot Eurostat call with a single geo / single nace, returning
+    `{period: value}` for every published month from `since_month`."""
+    data = _api_call(dataset, {
+        "geo": geo, "nace_r2": nace,
+        "unit": unit, "s_adj": s_adj,
+        "sinceTimePeriod": since_month,
+    })
+    return _parse_single_dim(data)
+
+
+def _yoy_series(series: dict[str, float], months: list[str]) -> list[float | None]:
+    """Compute YoY % per month: 100 * (M / M-12 - 1). None when either side
+    is missing or zero."""
+    out: list[float | None] = []
+    for m in months:
+        anchor = _shift_month(m, -12)
+        cur = series.get(m)
+        prev = series.get(anchor)
+        if cur is None or prev is None or prev == 0:
+            out.append(None)
+        else:
+            out.append(round(100.0 * (cur - prev) / prev, 1))
+    return out
+
+
 def _common_months(*sources: dict | None) -> list[str]:
     """Return the union of months that appear in every present source."""
     sets = []
@@ -61,7 +102,7 @@ def _common_months(*sources: dict | None) -> list[str]:
     return sorted(set.union(*sets))
 
 
-def build(month: str) -> Path:
+def build(month: str, extended_history: bool = True) -> Path:
     cache = CACHE_DIR / month
     prod = _load(cache / "production.json")
     prices = _load(cache / "prices.json")
@@ -93,6 +134,45 @@ def build(month: str) -> Path:
         "chemicals":     _series_for(turn_by_sector, "C20", months),
     }
 
+    # YoY blocks need 12 months of history before the first plotted month.
+    # The main Eurostat fetcher only keeps ~14 months in cache; if we want
+    # YoY across the full window, refetch directly with a longer
+    # `sinceTimePeriod`. Cached on disk by `since_month` so re-runs are
+    # cheap.
+    production_yoy: dict | None = None
+    prices_yoy: dict | None = None
+    sales_yoy: dict | None = None
+    if extended_history:
+        since_month = _shift_month(month, -(EXTENDED_HISTORY_MONTHS - 1))
+        logger.info("Fetching extended 30m history since %s for YoY series…", since_month)
+
+        ext_prod: dict[str, dict[str, float]] = {}
+        for code in ("C", "C20", "C21", "C24", "C29"):
+            ext_prod[code] = _fetch_extended_series(
+                "sts_inpr_m", "I21", "SCA", "EU27_2020", code, since_month,
+            )
+        ext_prices_c20 = _fetch_extended_series(
+            "sts_inppd_m", "I21", "NSA", "EU27_2020", "C20", since_month,
+        )
+        ext_prices_c = _fetch_extended_series(
+            "sts_inppd_m", "I21", "NSA", "EU27_2020", "C", since_month,
+        )
+        ext_turn_c20 = _fetch_extended_series(
+            "sts_intv_m", "I21", "SCA", "EU27_2020", "C20", since_month,
+        )
+
+        production_yoy = {
+            NACE_LABELS[c]["key"]: _yoy_series(ext_prod[c], months)
+            for c in ("C", "C20", "C21", "C24", "C29")
+        }
+        prices_yoy = {
+            "chemicals":     _yoy_series(ext_prices_c20, months),
+            "manufacturing": _yoy_series(ext_prices_c,   months),
+        }
+        sales_yoy = {
+            "chemicals":     _yoy_series(ext_turn_c20, months),
+        }
+
     # Cap at 24 trailing months when the dataset has more (parity with the
     # design canvas page; today the Eurostat fetcher writes 14 months but
     # the schema is forward-compatible).
@@ -101,6 +181,9 @@ def build(month: str) -> Path:
         production = {k: v[-24:] for k, v in production.items()}
         prices_block = {k: v[-24:] for k, v in prices_block.items()}
         sales_block  = {k: v[-24:] for k, v in sales_block.items()}
+        if production_yoy: production_yoy = {k: v[-24:] for k, v in production_yoy.items()}
+        if prices_yoy:     prices_yoy     = {k: v[-24:] for k, v in prices_yoy.items()}
+        if sales_yoy:      sales_yoy      = {k: v[-24:] for k, v in sales_yoy.items()}
 
     current = months[-1] if months else None
     fiche = {
@@ -118,11 +201,19 @@ def build(month: str) -> Path:
             "production": production,
             "prices": prices_block,
             "sales":  sales_block,
+            "production_yoy": production_yoy,
+            "prices_yoy": prices_yoy,
+            "sales_yoy": sales_yoy,
             "current": {
                 "month": current,
                 "chemicals_production": production["chemicals"][-1] if current else None,
                 "chemicals_prices":     prices_block["chemicals"][-1] if current else None,
                 "chemicals_sales":      sales_block["chemicals"][-1]  if current else None,
+                "chemicals_yoy_production":   (production_yoy["chemicals"][-1] if production_yoy and current else None),
+                "manufacturing_yoy_production": (production_yoy["manufacturing"][-1] if production_yoy and current else None),
+                "pharmaceuticals_yoy_production": (production_yoy["pharmaceuticals"][-1] if production_yoy and current else None),
+                "basic_metals_yoy_production": (production_yoy["basic_metals"][-1] if production_yoy and current else None),
+                "motor_vehicles_yoy_production": (production_yoy["motor_vehicles"][-1] if production_yoy and current else None),
             },
             "source": (
                 "Eurostat sts_inpr_m + sts_inppd_m + sts_intv_m, NACE C / C20 / C21 / "
