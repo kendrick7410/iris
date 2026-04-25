@@ -40,6 +40,29 @@ const rest     = sorted.slice(1);
 const featuredSummary = featured ? readSummary(featured.id) : null;
 
 const thumbVariants = ['', '--orange', '--green', '--blue'];
+
+// Cadence is monthly; the next edition's expected publication date is the
+// previous one shifted by ~one month. The site stays a full week ahead of
+// the actual cron run (Tuesday 09:00, --month M-2), so this is an estimate
+// rather than a guarantee.
+const formatLongDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+const formatShortMonth = (id: string) => {
+  const [y, m] = id.split('-');
+  return `${m}/${y}`;
+};
+
+let lastEditionLabel: string | null = null;
+let nextEditionLabel: string | null = null;
+if (featured) {
+  lastEditionLabel = formatShortMonth(featured.id);
+  const lastPub = new Date(featured.data.publication_date);
+  if (!Number.isNaN(lastPub.getTime())) {
+    const next = new Date(lastPub);
+    next.setMonth(next.getMonth() + 1);
+    nextEditionLabel = formatLongDate(next);
+  }
+}
 ---
 <Layout
   title="Iris: Monthly Chemical Trends | Cefic"
@@ -167,6 +190,19 @@ const thumbVariants = ['', '--orange', '--green', '--blue'];
       </div>
     </div>
   </section>
+
+  {lastEditionLabel && nextEditionLabel && (
+    <aside class="iris-release-badge" aria-label="Iris release schedule">
+      <div class="iris-release-badge-row">
+        <span class="iris-release-badge-label">Last version available</span>
+        <span class="iris-release-badge-value">{lastEditionLabel}</span>
+      </div>
+      <div class="iris-release-badge-row">
+        <span class="iris-release-badge-label">Next version expected</span>
+        <span class="iris-release-badge-value">{nextEditionLabel}</span>
+      </div>
+    </aside>
+  )}
 
   <section class="iris-section iris-methodology-teaser">
     <div class="iris-section-header">

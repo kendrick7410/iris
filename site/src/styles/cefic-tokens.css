@@ -1407,6 +1407,53 @@ body.ov-active .iris-footer { display: none; }
   .iris-scatter-body { grid-template-columns: 1fr; }
 }
 
+/* Release schedule badge: fixed bottom-right on the homepage, never obscures
+   the methodology section because we tuck it into the bottom inset of the
+   viewport with a small clear-distance from the edges. */
+.iris-release-badge {
+  position: fixed;
+  right: clamp(1rem, 2vw, 1.75rem);
+  bottom: clamp(1rem, 2vw, 1.75rem);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.85rem 1.05rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--cefic-orange);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--iris-sans);
+  max-width: 18rem;
+  pointer-events: auto;
+}
+.iris-release-badge-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.iris-release-badge-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-faint);
+}
+.iris-release-badge-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+@media (max-width: 640px) {
+  .iris-release-badge {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    max-width: 14rem;
+  }
+  .iris-release-badge-value { font-size: 0.85rem; }
+}
+
 /* Chart container (figure + caption) */
 .iris-chart {
   margin: 0;
