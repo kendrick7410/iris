@@ -922,36 +922,11 @@ const pdfName    = `Iris-${monthName(entry.id).replace(' ', '-')}.pdf`;
           {tradeProseSections.map(s => (
             <div class="iris-mdx-block">
               <div class="iris-mdx-block-eyebrow">{s.title}</div>
-              {s.paragraphs.slice(0, 1).map(p => (
+              {s.paragraphs.map(p => (
                 <p set:html={inlineMd(p)} />
               ))}
             </div>
           ))}
-        </div>
-      )}
-
-      {concentrationSection && (
-        <div class="iris-scatter-panel">
-          <h3 class="iris-panel-title">{concentrationSection.title}</h3>
-          <div class="iris-scatter-body">
-            <div class="iris-scatter-prose">
-              {concentrationSection.paragraphs.map(p => (
-                <p set:html={inlineMd(p)} />
-              ))}
-              {concentrationSection.source && (
-                <p class="iris-scatter-source">{concentrationSection.source}</p>
-              )}
-            </div>
-            {concentrationSection.images[0] && (
-              <figure class="iris-scatter-figure">
-                <img
-                  src={concentrationSection.images[0].src}
-                  alt={concentrationSection.images[0].alt}
-                  loading="lazy"
-                />
-              </figure>
-            )}
-          </div>
         </div>
       )}
     </section>
