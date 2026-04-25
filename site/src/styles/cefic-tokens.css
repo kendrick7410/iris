@@ -1444,6 +1444,43 @@ body.ov-active .iris-footer { display: none; }
   font-weight: 600;
   color: var(--ink);
 }
+.iris-release-badge-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.iris-release-badge-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
+}
+.iris-release-badge-pdf:hover {
+  border-color: var(--cefic-orange);
+  color: var(--cefic-orange);
+  background: var(--surface-alt);
+  text-decoration: none;
+}
+.iris-release-badge-pdf svg { width: 12px; height: 12px; flex-shrink: 0; }
+.iris-release-badge-subscribe {
+  margin-top: 0.25rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--cefic-orange);
+  text-decoration: none;
+}
+.iris-release-badge-subscribe:hover { text-decoration: underline; }
 @media (max-width: 640px) {
   .iris-release-badge {
     right: 0.75rem;
@@ -1452,6 +1489,7 @@ body.ov-active .iris-footer { display: none; }
     max-width: 14rem;
   }
   .iris-release-badge-value { font-size: 0.85rem; }
+  .iris-release-badge-pdf span { display: none; }
 }
 
 /* Chart container (figure + caption) */

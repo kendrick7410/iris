@@ -54,15 +54,33 @@ const formatShortMonth = (id: string) => {
 
 let lastEditionLabel: string | null = null;
 let nextEditionLabel: string | null = null;
+let referenceMonthLabel: string | null = null;
+let featuredPdfUrl: string | null = null;
+let featuredPdfName: string | null = null;
 if (featured) {
   lastEditionLabel = formatShortMonth(featured.id);
+  referenceMonthLabel = monthName(featured.id);
   const lastPub = new Date(featured.data.publication_date);
   if (!Number.isNaN(lastPub.getTime())) {
     const next = new Date(lastPub);
     next.setMonth(next.getMonth() + 1);
     nextEditionLabel = formatLongDate(next);
   }
+  // PDF is only published for some editions (mirrors the dashboard logic).
+  const pdfRelPath = `public/downloads/${featured.id}.pdf`;
+  try {
+    if (fs.statSync(pdfRelPath).isFile()) {
+      featuredPdfUrl = `/downloads/${featured.id}.pdf`;
+      featuredPdfName = `Iris-${monthName(featured.id).replace(' ', '-')}.pdf`;
+    }
+  } catch {
+    /* no PDF for this edition */
+  }
 }
+
+// Subscribe destination — kept as a single constant so the Cefic team can
+// swap the address (or a form URL) without touching the markup.
+const SUBSCRIBE_HREF = 'mailto:iris@cefic.org?subject=Subscribe%20to%20Iris%20updates&body=Please%20add%20me%20to%20the%20Iris%20release%20notification%20list.';
 ---
 <Layout
   title="Iris: Monthly Chemical Trends | Cefic"
@@ -195,12 +213,33 @@ if (featured) {
     <aside class="iris-release-badge" aria-label="Iris release schedule">
       <div class="iris-release-badge-row">
         <span class="iris-release-badge-label">Last version available</span>
-        <span class="iris-release-badge-value">{lastEditionLabel}</span>
+        <div class="iris-release-badge-value-row">
+          <span class="iris-release-badge-value">{lastEditionLabel}</span>
+          {featuredPdfUrl && featuredPdfName && (
+            <a class="iris-release-badge-pdf" href={featuredPdfUrl}
+               download={featuredPdfName} aria-label="Download the latest edition as PDF">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                   stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 2v9M4 7l4 4 4-4M2 14h12" />
+              </svg>
+              <span>PDF</span>
+            </a>
+          )}
+        </div>
       </div>
+      {referenceMonthLabel && (
+        <div class="iris-release-badge-row">
+          <span class="iris-release-badge-label">Reference month</span>
+          <span class="iris-release-badge-value">{referenceMonthLabel}</span>
+        </div>
+      )}
       <div class="iris-release-badge-row">
         <span class="iris-release-badge-label">Next version expected</span>
         <span class="iris-release-badge-value">{nextEditionLabel}</span>
       </div>
+      <a class="iris-release-badge-subscribe" href={SUBSCRIBE_HREF}>
+        Subscribe to release updates →
+      </a>
     </aside>
   )}
 
