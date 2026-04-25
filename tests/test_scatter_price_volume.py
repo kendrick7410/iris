@@ -1,4 +1,4 @@
-"""Unit tests for Scatter 2 — price × volume by sub-sector."""
+"""Unit tests for Scatter 2 — price × volume by country (NACE C20)."""
 from pathlib import Path
 import shutil
 import tempfile
@@ -15,7 +15,8 @@ class TestPriceVolume(unittest.TestCase):
         self.tmp = Path(tempfile.mkdtemp())
         self.cache = self.tmp / "cache" / "2026-02"
         self.cache.mkdir(parents=True)
-        shutil.copy(FIXTURES / "subsectors.json", self.cache / "subsectors.json")
+        shutil.copy(FIXTURES / "production.json", self.cache / "production.json")
+        shutil.copy(FIXTURES / "prices.json", self.cache / "prices.json")
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -26,8 +27,7 @@ class TestPriceVolume(unittest.TestCase):
     def test_structure(self):
         sd = self._compute()
         self.assertEqual(sd.scatter_id, "price_volume")
-        # Fixture omits C2051 to exercise the graceful-drop path.
-        self.assertEqual(len(sd.points), 9)
+        self.assertEqual(len(sd.points), 7)
         self.assertEqual(sd.reference_lines["x_ref"], 0.0)
         self.assertEqual(sd.reference_lines["y_ref"], 0.0)
 
@@ -36,19 +36,24 @@ class TestPriceVolume(unittest.TestCase):
         self.assertGreaterEqual(sd.signal_strength, 0.0)
         self.assertLessEqual(sd.signal_strength, 1.0)
 
-    def test_fertilisers_is_extreme_quadrant(self):
-        """C2015 (fertilisers) is +8.2% vol / +12.5% price → healthy-expansion quadrant."""
+    def test_points_are_countries(self):
         sd = self._compute()
-        c2015 = next(p for p in sd.points if p.label == "2015")
-        self.assertAlmostEqual(c2015.x, 12.5, places=1)
-        self.assertAlmostEqual(c2015.y, 8.2, places=1)
-        self.assertIn("expansion", c2015.annotations["quadrant"])
+        labels = {p.label for p in sd.points}
+        self.assertEqual(labels, {"DE", "FR", "IT", "NL", "ES", "BE", "PL"})
 
-    def test_organic_chemicals_both_negative(self):
-        """C2014 is -5.4% vol / -6.2% price → both-sides contraction."""
+    def test_netherlands_in_demand_weakness_quadrant(self):
+        """NL: prices -9.2% (down), volume -9.6% (down) → both-sides contraction."""
         sd = self._compute()
-        c2014 = next(p for p in sd.points if p.label == "2014")
-        self.assertIn("both-sides", c2014.annotations["quadrant"])
+        nl = next(p for p in sd.points if p.label == "NL")
+        self.assertLess(nl.x, 0)
+        self.assertLess(nl.y, 0)
+        self.assertIn("both-sides", nl.annotations["quadrant"])
+
+    def test_yoy_anchor_recorded(self):
+        sd = self._compute()
+        for p in sd.points:
+            self.assertEqual(p.annotations["yoy_anchor"], "2025-02")
+            self.assertEqual(p.annotations["nace"], "C20")
 
 
 if __name__ == "__main__":

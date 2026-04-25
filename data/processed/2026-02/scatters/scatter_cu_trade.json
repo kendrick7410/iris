@@ -1,125 +1,125 @@
 {
   "scatter_id": "cu_trade",
   "title": "Who holds up, who struggles: capacity utilisation vs trade balance",
-  "x_axis_label": "Manufacturing capacity utilisation, 2026-Q1 (%)",
-  "y_axis_label": "Extra-EU27 chemical trade balance, rolling 3m (€bn)",
+  "x_axis_label": "Manufacturing capacity utilisation, 2025-Q4 (%)",
+  "y_axis_label": "Extra-EU27 chemical trade balance, 2025-Q4 (€bn)",
   "points": [
     {
       "label": "DE",
-      "x": 77.4,
+      "x": 77.7,
       "y": 34.82,
       "annotations": {
         "country_name": "Germany",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": 34.82
       }
     },
     {
       "label": "FR",
-      "x": 79.7,
+      "x": 80.3,
       "y": 33.34,
       "annotations": {
         "country_name": "France",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": 33.34
       }
     },
     {
       "label": "IT",
-      "x": 74.7,
+      "x": 75.0,
       "y": -33.57,
       "annotations": {
         "country_name": "Italy",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": -33.57
       }
     },
     {
       "label": "NL",
-      "x": 78.3,
+      "x": 77.1,
       "y": -5.35,
       "annotations": {
         "country_name": "Netherlands",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": -5.35
       }
     },
     {
       "label": "ES",
-      "x": 80.1,
+      "x": 79.8,
       "y": 6.48,
       "annotations": {
         "country_name": "Spain",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": 6.48
       }
     },
     {
       "label": "BE",
-      "x": 76.9,
+      "x": 78.6,
       "y": 1.8,
       "annotations": {
         "country_name": "Belgium",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": 1.8
       }
     },
     {
       "label": "PL",
-      "x": 78.7,
+      "x": 77.6,
       "y": -2.24,
       "annotations": {
         "country_name": "Poland",
-        "cu_latest_quarter": "2026-Q1",
-        "cu_proxy": "manufacturing",
-        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
-        "balance_window_months": [
+        "period": "2025-Q4",
+        "period_months": [
           "2025-10",
           "2025-11",
           "2025-12"
         ],
+        "cu_proxy": "manufacturing",
+        "cu_note": "Eurostat BCS does not publish country-level CU for NACE C20 specifically; manufacturing total is used as a proxy.",
         "balance_eur_bn": -2.24
       }
     }
@@ -135,6 +135,12 @@
     "cu_proxy": "manufacturing total (C) as NACE C20 not available per country",
     "edition_month": "2026-02",
     "year": 2026,
+    "period": "2025-Q4",
+    "period_months": [
+      "2025-10",
+      "2025-11",
+      "2025-12"
+    ],
     "historical_cu_mean": 81.3
   }
 }

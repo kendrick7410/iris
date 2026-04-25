@@ -1,67 +1,119 @@
 {
   "scatter_id": "price_volume",
-  "title": "Demand issue or price issue: sub-sector YoY price vs volume",
-  "x_axis_label": "Producer price, YoY change (%)",
-  "y_axis_label": "Production volume, YoY change (%)",
+  "title": "Demand issue or price issue: country-level chemical price vs volume YoY",
+  "x_axis_label": "Producer price (NACE C20), YoY change vs 2025-02 (%)",
+  "y_axis_label": "Production volume (NACE C20), YoY change vs 2025-02 (%)",
   "points": [
     {
-      "label": "2011",
-      "x": -5.1,
-      "y": -0.9,
+      "label": "DE",
+      "x": -1.6,
+      "y": -3.5,
       "annotations": {
-        "nace4": "C2011",
-        "sector_name": "Industrial gases",
-        "price_yoy_pct": -5.1,
-        "volume_yoy_pct": -0.9,
+        "country_name": "Germany",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -1.6,
+        "volume_yoy_pct": -3.5,
+        "price_index_current": 119.0,
+        "volume_index_current": 77.3,
         "quadrant": "prices down, volumes down (both-sides contraction)"
       }
     },
     {
-      "label": "2013",
-      "x": 1.7,
-      "y": -0.8,
+      "label": "FR",
+      "x": -3.0,
+      "y": 1.1,
       "annotations": {
-        "nace4": "C2013",
-        "sector_name": "Inorganic basic chemicals",
-        "price_yoy_pct": 1.7,
-        "volume_yoy_pct": -0.8,
-        "quadrant": "prices up, volumes down (demand weakness)"
-      }
-    },
-    {
-      "label": "2014",
-      "x": -8.0,
-      "y": -10.6,
-      "annotations": {
-        "nace4": "C2014",
-        "sector_name": "Organic basic chemicals",
-        "price_yoy_pct": -8.0,
-        "volume_yoy_pct": -10.6,
-        "quadrant": "prices down, volumes down (both-sides contraction)"
-      }
-    },
-    {
-      "label": "2016",
-      "x": -6.0,
-      "y": -8.1,
-      "annotations": {
-        "nace4": "C2016",
-        "sector_name": "Plastics in primary forms",
-        "price_yoy_pct": -6.0,
-        "volume_yoy_pct": -8.1,
-        "quadrant": "prices down, volumes down (both-sides contraction)"
-      }
-    },
-    {
-      "label": "2059",
-      "x": -0.2,
-      "y": 2.8,
-      "annotations": {
-        "nace4": "C2059",
-        "sector_name": "Other chemical products",
-        "price_yoy_pct": -0.2,
-        "volume_yoy_pct": 2.8,
+        "country_name": "France",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -3.0,
+        "volume_yoy_pct": 1.1,
+        "price_index_current": 114.6,
+        "volume_index_current": 93.5,
         "quadrant": "prices down, volumes up (market-share push)"
+      }
+    },
+    {
+      "label": "IT",
+      "x": -0.3,
+      "y": -6.9,
+      "annotations": {
+        "country_name": "Italy",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -0.3,
+        "volume_yoy_pct": -6.9,
+        "price_index_current": 114.9,
+        "volume_index_current": 81.0,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "NL",
+      "x": -9.2,
+      "y": -9.6,
+      "annotations": {
+        "country_name": "Netherlands",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -9.2,
+        "volume_yoy_pct": -9.6,
+        "price_index_current": 108.4,
+        "volume_index_current": 75.5,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "ES",
+      "x": -2.8,
+      "y": -3.3,
+      "annotations": {
+        "country_name": "Spain",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -2.8,
+        "volume_yoy_pct": -3.3,
+        "price_index_current": 110.0,
+        "volume_index_current": 93.6,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "BE",
+      "x": -5.5,
+      "y": -1.2,
+      "annotations": {
+        "country_name": "Belgium",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -5.5,
+        "volume_yoy_pct": -1.2,
+        "price_index_current": 126.4,
+        "volume_index_current": 90.6,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
+      }
+    },
+    {
+      "label": "PL",
+      "x": -1.9,
+      "y": -2.1,
+      "annotations": {
+        "country_name": "Poland",
+        "nace": "C20",
+        "month": "2026-02",
+        "yoy_anchor": "2025-02",
+        "price_yoy_pct": -1.9,
+        "volume_yoy_pct": -2.1,
+        "price_index_current": 118.4,
+        "volume_index_current": 100.9,
+        "quadrant": "prices down, volumes down (both-sides contraction)"
       }
     }
   ],
@@ -69,10 +121,10 @@
     "x_ref": 0.0,
     "y_ref": 0.0
   },
-  "signal_strength": 0.6,
-  "signal_explanation": "3 of 5 sub-sectors outside |3%| YoY on either axis. Higher share = more polarised sector-level story.",
+  "signal_strength": 0.8571,
+  "signal_explanation": "6 of 7 countries outside |3%| YoY on either axis. Higher share = more polarised country-level story.",
   "metadata": {
-    "source": "Eurostat sts_inpr_m + sts_inppd_m (NACE 4-digit, EU27, I21, SCA/NSA)",
+    "source": "Eurostat sts_inpr_m + sts_inppd_m (NACE C20, country-level)",
     "yoy_anchor": "2025-02",
     "edition_month": "2026-02",
     "year": 2026,

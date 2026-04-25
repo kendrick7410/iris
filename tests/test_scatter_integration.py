@@ -38,7 +38,7 @@ class TestScatterIntegration(unittest.TestCase):
         self.baselines.mkdir(parents=True)
 
         # Stage all fixture caches
-        for name in ("production", "bcs", "subsectors", "country_trade_balance"):
+        for name in ("production", "prices", "bcs", "country_trade_balance"):
             shutil.copy(FIXTURES / f"{name}.json", month_cache / f"{name}.json")
         for name in ("precrisis_by_country", "jan2020_by_country"):
             shutil.copy(FIXTURES / f"{name}.json", self.baselines / f"{name}.json")

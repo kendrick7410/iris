@@ -461,6 +461,7 @@ def fetch_country_trade_balance(
     month: str,
     cache_dir: Path,
     window_months: int = 3,
+    window_end_month: str | None = None,
     full_parquet_path: str | None = None,
     chemistry_chapters: tuple[str, ...] = ("28", "29", "30", "31", "32", "33", "34", "35", "38", "39"),
 ) -> Path:
@@ -468,7 +469,16 @@ def fetch_country_trade_balance(
 
     Reads `comext_export_full.parquet` (per-country declarants) filtered to
     chemical CN chapters and extra-EU partners, then sums exports minus
-    imports over the trailing `window_months`.
+    imports over a `window_months`-long window.
+
+    The window ends at:
+      - `window_end_month` when provided (e.g. "2025-12" to align on Q4 2025),
+      - otherwise the edition month.
+
+    The window-end override exists so the cu_trade scatter can pin its
+    trade-balance window on the same quarter as the BCS capacity-utilisation
+    figure. Without alignment the X- and Y-axes would be talking about
+    different periods.
 
     Saves data/cache/{month}/country_trade_balance.json with:
       {
@@ -512,11 +522,14 @@ def fetch_country_trade_balance(
     if df.empty:
         raise RuntimeError("No per-country rows after filtering.")
 
-    # Trailing `window_months` ending at min(edition month, latest in data).
-    try:
-        edition_end = pd.Timestamp(f"{month}-01") + pd.offsets.MonthEnd(0)
-    except Exception:
-        edition_end = df["period"].max()
+    # Window end: explicit override > edition month (clamped to data).
+    if window_end_month is not None:
+        edition_end = pd.Timestamp(f"{window_end_month}-01") + pd.offsets.MonthEnd(0)
+    else:
+        try:
+            edition_end = pd.Timestamp(f"{month}-01") + pd.offsets.MonthEnd(0)
+        except Exception:
+            edition_end = df["period"].max()
     latest_in_data = df["period"].max()
     window_end = min(edition_end, latest_in_data)
     window_start = window_end - pd.DateOffset(months=window_months - 1)

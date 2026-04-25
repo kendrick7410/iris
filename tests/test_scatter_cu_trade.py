@@ -1,5 +1,6 @@
-"""Unit tests for Scatter 1 — CU × trade balance."""
+"""Unit tests for Scatter 1 — CU × trade balance, period-aligned."""
 from pathlib import Path
+import json
 import shutil
 import tempfile
 import unittest
@@ -49,14 +50,35 @@ class TestCuTrade(unittest.TestCase):
         sd = self._compute()
         for p in sd.points:
             self.assertEqual(p.annotations.get("cu_proxy"), "manufacturing")
-            self.assertIn("note", p.annotations.get("cu_note", "").lower()
-                          .replace("manufacturing", "note"))
+            self.assertIn("manufacturing", p.annotations.get("cu_note", ""))
 
     def test_all_x_are_percent_positive(self):
         sd = self._compute()
         for p in sd.points:
             self.assertGreater(p.x, 50.0, "CU should be at least 50%")
             self.assertLess(p.x, 100.0, "CU cannot exceed 100%")
+
+    def test_axis_labels_carry_quarter(self):
+        sd = self._compute()
+        self.assertIn("2025-Q4", sd.x_axis_label)
+        self.assertIn("2025-Q4", sd.y_axis_label)
+        for p in sd.points:
+            self.assertEqual(p.annotations["period"], "2025-Q4")
+            self.assertEqual(
+                p.annotations["period_months"],
+                ["2025-10", "2025-11", "2025-12"],
+            )
+
+    def test_period_mismatch_raises(self):
+        """If bcs.json and country_trade_balance.json cover different periods,
+        compute() must refuse to mix them."""
+        bcs_path = self.cache / "bcs.json"
+        bcs = json.loads(bcs_path.read_text())
+        bcs["latest_quarter"] = "2025-Q3"
+        bcs["quarter_months"] = ["2025-07", "2025-08", "2025-09"]
+        bcs_path.write_text(json.dumps(bcs))
+        with self.assertRaises(RuntimeError):
+            self._compute()
 
 
 if __name__ == "__main__":

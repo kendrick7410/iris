@@ -267,8 +267,35 @@ NACE4_SUBSECTORS = [
 ]
 
 
+def previous_full_quarter(edition_month: str) -> tuple[str, list[str]]:
+    """Return ('YYYY-Qn', ['YYYY-MM', 'YYYY-MM', 'YYYY-MM']) for the latest
+    quarter that fully elapsed before the edition month.
+
+    Used to align quarterly indicators (BCS) with monthly trade aggregations
+    on the same window. For a Feb 2026 edition the answer is Q4 2025
+    (Oct/Nov/Dec 2025), not Q1 2026 which is still in progress.
+    """
+    y, m = (int(x) for x in edition_month.split("-"))
+    if m <= 3:
+        qy, q = y - 1, 4
+    elif m <= 6:
+        qy, q = y, 1
+    elif m <= 9:
+        qy, q = y, 2
+    else:
+        qy, q = y, 3
+    end_month = q * 3
+    months = [
+        f"{qy}-{end_month - 2:02d}",
+        f"{qy}-{end_month - 1:02d}",
+        f"{qy}-{end_month:02d}",
+    ]
+    return f"{qy}-Q{q}", months
+
+
 def fetch_bcs_cu(month: str, cache_dir: Path) -> Path:
-    """Fetch BCS manufacturing capacity utilisation per country.
+    """Fetch BCS manufacturing capacity utilisation per country, pinned to
+    the latest fully-elapsed quarter before the edition month.
 
     Saves data/cache/{month}/bcs.json with:
       {
@@ -276,14 +303,21 @@ def fetch_bcs_cu(month: str, cache_dir: Path) -> Path:
         "indicator": "BS-ICU-PC",
         "note": "manufacturing total; NACE C20 not published per country",
         "latest_quarter": "YYYY-Qn",
+        "quarter_months": ["YYYY-MM", "YYYY-MM", "YYYY-MM"],
         "cu_by_country": {"DE": 74.0, ...}
       }
+
+    The quarter is the latest one that fully ended before `month`, so the
+    cu_trade scatter can align its trade-balance window on the same 3
+    months (the BCS Q1 forecast is intentionally skipped while Q1 is still
+    in progress).
     """
     out = cache_dir / "bcs.json"
     logger.info("Fetching BCS capacity utilisation by country...")
 
-    # BCS is quarterly; aim for the current year's quarters.
-    year = int(month.split("-")[0])
+    target_quarter, quarter_months = previous_full_quarter(month)
+
+    year = int(target_quarter.split("-Q")[0])
     since_q = f"{year - 1}-Q1"
 
     data = _api_call("ei_bsin_q_r2", {
@@ -293,22 +327,33 @@ def fetch_bcs_cu(month: str, cache_dir: Path) -> Path:
         "sinceTimePeriod": since_q,
     })
 
-    # Parse: 2 dims (geo, time) + value map. _parse_multi_dim assumes flat
-    # indexing across (d1 × time). ei_bsin_q_r2 has freq/indic/s_adj as fixed
-    # dims so the varying ones are geo and time only.
     by_country_time = _parse_multi_dim(data, "geo")
 
-    # Pick the latest quarter present in ALL requested countries.
-    all_quarters = set()
+    available = set()
     for series in by_country_time.values():
-        all_quarters.update(k for k, v in series.items() if v is not None)
-    if not all_quarters:
+        available.update(k for k, v in series.items() if v is not None)
+    if not available:
         raise RuntimeError("BCS returned no usable data for the top-7 countries.")
-    latest_q = sorted(all_quarters)[-1]
+    if target_quarter not in available:
+        # Fall back to the latest fully-elapsed quarter that BCS actually has.
+        elapsed = [q for q in sorted(available) if q <= target_quarter]
+        if not elapsed:
+            raise RuntimeError(
+                f"BCS has no quarter ≤ {target_quarter}; available: {sorted(available)}."
+            )
+        target_quarter = elapsed[-1]
+        # Recompute the months for the chosen quarter.
+        qy, qn = target_quarter.split("-Q")
+        end_m = int(qn) * 3
+        quarter_months = [
+            f"{qy}-{end_m - 2:02d}",
+            f"{qy}-{end_m - 1:02d}",
+            f"{qy}-{end_m:02d}",
+        ]
 
     cu_by_country: dict[str, float] = {}
     for ctry in TOP7_COUNTRIES:
-        v = by_country_time.get(ctry, {}).get(latest_q)
+        v = by_country_time.get(ctry, {}).get(target_quarter)
         if v is not None:
             cu_by_country[ctry] = round(float(v), 1)
 
@@ -316,11 +361,15 @@ def fetch_bcs_cu(month: str, cache_dir: Path) -> Path:
         "dataset": "ei_bsin_q_r2",
         "indicator": "BS-ICU-PC",
         "note": "manufacturing total; NACE C20 not published per country",
-        "latest_quarter": latest_q,
+        "latest_quarter": target_quarter,
+        "quarter_months": quarter_months,
         "cu_by_country": cu_by_country,
     }
     out.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    logger.info("BCS CU saved to %s (quarter=%s, %d countries)", out, latest_q, len(cu_by_country))
+    logger.info(
+        "BCS CU saved to %s (quarter=%s, %d countries)",
+        out, target_quarter, len(cu_by_country),
+    )
     return out
 
 
