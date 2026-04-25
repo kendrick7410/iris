@@ -1407,98 +1407,112 @@ body.ov-active .iris-footer { display: none; }
   .iris-scatter-body { grid-template-columns: 1fr; }
 }
 
-/* Release schedule strip: inline below the Latest edition card on the
-   homepage. Horizontal flow on desktop, stacked on mobile. The Cefic
-   orange left border ties it visually to the featured edition above. */
-.iris-release-strip {
+/* Release schedule "at a glance" — bottom-right of the hero, mirroring
+   the cover artboard from the Iris design canvas (key-numbers sidebar).
+   Stacked rows separated by a thin white divider, tracked uppercase
+   labels on the left, big tabular value, small period note on the right. */
+.iris-hero-glance {
+  position: absolute;
+  right: clamp(1.5rem, 6vw, 5rem);
+  bottom: clamp(2rem, 6vw, 4rem);
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  gap: clamp(1rem, 2.5vw, 2rem);
-  align-items: center;
-  margin-top: 1.25rem;
-  padding: 1.1rem 1.5rem;
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--cefic-orange);
-  border-radius: var(--radius);
+  grid-template-columns: minmax(0, auto) auto auto;
+  column-gap: 1.75rem;
+  row-gap: 0;
   font-family: var(--iris-sans);
+  color: rgba(255, 255, 255, 0.95);
+  min-width: 380px;
+  max-width: 460px;
 }
-.iris-release-strip-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
+.iris-hero-glance-row {
+  display: contents;
 }
-.iris-release-strip-label {
-  font-size: 0.7rem;
+.iris-hero-glance-row::before {
+  content: "";
+  grid-column: 1 / -1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  margin-top: 0;
+  align-self: stretch;
+}
+.iris-hero-glance-label {
+  grid-column: 1;
+  align-self: end;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-faint);
-  font-weight: 600;
-}
-.iris-release-strip-value {
-  font-family: var(--iris-serif);
-  font-size: 1.05rem;
+  opacity: 0.7;
+  font-size: 0.66rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.85rem;
   font-weight: 500;
-  color: var(--ink);
-  letter-spacing: -0.01em;
+}
+.iris-hero-glance-value {
+  grid-column: 2;
+  align-self: end;
   font-variant-numeric: tabular-nums;
+  font-size: 1.25rem;
+  font-weight: 500;
+  text-align: right;
+  min-width: 5rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+  color: #fff;
 }
-.iris-release-strip-value-row {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-.iris-release-strip-pdf {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.22rem 0.55rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius-pill);
-  font-family: var(--iris-sans);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  text-decoration: none;
-  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
-}
-.iris-release-strip-pdf:hover {
-  border-color: var(--cefic-orange);
-  color: var(--cefic-orange);
-  background: var(--surface-alt);
-  text-decoration: none;
-}
-.iris-release-strip-pdf svg { width: 12px; height: 12px; flex-shrink: 0; }
-.iris-release-strip-subscribe {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.55rem 1rem;
-  border: 1px solid var(--cefic-orange);
-  border-radius: var(--radius-pill);
-  font-family: var(--iris-sans);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--cefic-orange);
-  text-decoration: none;
+.iris-hero-glance-meta {
+  grid-column: 3;
+  align-self: end;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  padding-top: 0.7rem;
+  padding-bottom: 0.85rem;
   white-space: nowrap;
-  transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
-.iris-release-strip-subscribe:hover {
-  background: var(--cefic-orange);
+.iris-hero-glance-pdf {
   color: #fff;
   text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  padding-bottom: 1px;
+  transition: border-color 0.2s var(--ease), opacity 0.2s var(--ease);
 }
-@media (max-width: 720px) {
-  .iris-release-strip {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
-    padding: 1rem 1.1rem;
+.iris-hero-glance-pdf:hover {
+  border-color: var(--cefic-orange-300);
+  color: var(--cefic-orange-300);
+  text-decoration: none;
+}
+.iris-hero-glance-foot {
+  grid-column: 1 / -1;
+  font-size: 0.62rem;
+  opacity: 0.6;
+  font-style: italic;
+  margin-top: 0.85rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: opacity 0.2s var(--ease), color 0.2s var(--ease);
+}
+.iris-hero-glance-foot:hover {
+  opacity: 1;
+  color: var(--cefic-orange-300);
+  text-decoration: none;
+}
+
+@media (max-width: 1080px) {
+  .iris-hero-glance {
+    position: static;
+    margin: 2rem 0 0;
+    min-width: 0;
+    max-width: 480px;
   }
-  .iris-release-strip-subscribe { justify-content: center; }
+}
+@media (max-width: 540px) {
+  .iris-hero-glance { column-gap: 1rem; }
+  .iris-hero-glance-meta { display: none; }
 }
 
 /* Chart container (figure + caption) */
