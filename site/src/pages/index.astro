@@ -66,16 +66,11 @@ if (featured) {
     next.setMonth(next.getMonth() + 1);
     nextEditionLabel = formatLongDate(next);
   }
-  // PDF is only published for some editions (mirrors the dashboard logic).
-  const pdfRelPath = `public/downloads/${featured.id}.pdf`;
-  try {
-    if (fs.statSync(pdfRelPath).isFile()) {
-      featuredPdfUrl = `/downloads/${featured.id}.pdf`;
-      featuredPdfName = `Iris-${monthName(featured.id).replace(' ', '-')}.pdf`;
-    }
-  } catch {
-    /* no PDF for this edition */
-  }
+  // The CI deploy pipeline always generates a PDF per edition, so we
+  // unconditionally surface the download link. Local dev without
+  // `npm run pdf:all` will 404 the link — acceptable trade-off.
+  featuredPdfUrl = `/downloads/${featured.id}.pdf`;
+  featuredPdfName = `Iris-${monthName(featured.id).replace(' ', '-')}.pdf`;
 }
 
 // Subscribe destination — kept as a single constant so the Cefic team can

@@ -65,6 +65,57 @@ jobs:
           # Log the issuer URL for confidence (tenant ID is public metadata).
           issuer=$(python3 -c "import json; print(json.load(open('site/public/staticwebapp.config.json'))['auth']['identityProviders']['azureActiveDirectory']['registration']['openIdIssuer'])")
           echo "openIdIssuer resolved to: $issuer"
+
+      # ─── Pre-build the Astro site so we can drive the print-layout pages
+      # against a local preview server and produce a fresh PDF per edition.
+      # The site PDF lives in site/public/downloads/{id}.pdf so the Astro
+      # rebuild that runs INSIDE the SWA deploy step picks it up and ships
+      # it as a static asset alongside the rest of the dist/.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-v1.49
+
+      - name: Install site dependencies
+        working-directory: site
+        run: npm ci
+
+      - name: Build Astro site (pre-build for PDF generation)
+        working-directory: site
+        run: npx astro build
+
+      - name: Install Playwright Chromium
+        working-directory: site
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate edition PDFs
+        working-directory: site
+        run: |
+          set -euo pipefail
+          # Boot the preview server in the background, then loop until it
+          # answers a request (the wait-for-server logic is inside the
+          # generator itself, so we just give it a moment to start).
+          npx astro preview --host 127.0.0.1 --port 4327 > /tmp/astro-preview.log 2>&1 &
+          PREVIEW_PID=$!
+          # Generate into site/public/downloads so the second Astro build
+          # (run by the SWA deploy step) bundles the PDFs into dist/.
+          if ! node ../scripts/generate-pdfs.mjs \
+                 --site-url http://127.0.0.1:4327 \
+                 --output public/downloads; then
+            echo "::error::PDF generation failed"
+            cat /tmp/astro-preview.log
+            kill $PREVIEW_PID 2>/dev/null || true
+            exit 1
+          fi
+          kill $PREVIEW_PID 2>/dev/null || true
+          ls -la public/downloads/
+
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1

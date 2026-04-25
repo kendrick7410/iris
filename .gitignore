@@ -17,6 +17,9 @@ site/node_modules/
 site/dist/
 site/.astro/
 
+# Generated PDFs (rebuilt at deploy time by scripts/generate-pdfs.mjs)
+site/public/downloads/*.pdf
+
 # Python
 __pycache__/
 *.py[cod]

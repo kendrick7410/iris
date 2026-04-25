@@ -1,186 +1,111 @@
 ---
+/**
+ * Print layout for an edition. Drives the PDF export via Playwright
+ * (`scripts/generate-pdfs.mjs`). Consumes the same `loadEditionData()`
+ * helper as the dashboard, so the printed pages are guaranteed to mirror
+ * the live site.
+ *
+ * Cefic visual identity (April 2021 guidelines): Light Blue digital
+ * gradient on the cover, the Notch (white logo cartouche), Noto Serif
+ * for headings, Lato for body, sentence case throughout, hex pattern
+ * filigrane on the cover.
+ */
 import '../../../styles/cefic-tokens.css';
 import '../../../styles/print.css';
 import { getCollection, render } from 'astro:content';
-import fs from 'node:fs';
-import path from 'node:path';
+import {
+  loadEditionData,
+  fmtMonth,
+  inlineMd,
+} from '../../../lib/edition-data';
 
 export async function getStaticPaths() {
   const editions = await getCollection('editions');
-  return editions.map(entry => ({
-    params: { id: entry.id },
-    props: { entry },
-  }));
+  return editions.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
-
-const monthName = (id: string) => {
-  const [y, m] = id.split('-');
-  const d = new Date(Number(y), Number(m) - 1, 1);
-  return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-};
-const fmtMonth = (ym: string) => {
-  const [y, m] = ym.split('-');
-  const d = new Date(Number(y), Number(m) - 1, 1);
-  return d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
-};
-
-const PROJECT_ROOT = path.resolve('..');
-const fichesDir = path.join(PROJECT_ROOT, 'data', 'processed', entry.id, 'fiches');
-const loadFiche = (name: string): any | null => {
-  try { return JSON.parse(fs.readFileSync(path.join(fichesDir, `${name}.json`), 'utf8')); }
-  catch { return null; }
-};
-const tradeExports = loadFiche('trade_exports');
-const outputFiche  = loadFiche('output');
-const pricesFiche  = loadFiche('prices');
-const salesFiche   = loadFiche('sales');
-
-// Spark chart builder (mirrors [id].astro, slightly larger for print)
-type SeriesPoint = { period: string; value: number };
-const buildSpark = (series: SeriesPoint[] | null | undefined, stroke: string) => {
-  if (!series || series.length < 2) return null;
-  const W = 640, H = 200, padL = 48, padR = 16, padT = 14, padB = 30;
-  const w = W - padL - padR, h = H - padT - padB;
-  const values = series.map(s => s.value);
-  const vmin = Math.min(...values), vmax = Math.max(...values);
-  const vpad = (vmax - vmin) * 0.12 || 1;
-  const ymin = vmin - vpad, ymax = vmax + vpad;
-  const pts = series.map((s, i) => ({
-    x: padL + (i / (series.length - 1)) * w,
-    y: padT + (1 - (s.value - ymin) / (ymax - ymin)) * h,
-    period: s.period, value: s.value,
-  }));
-  let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
-  for (let i = 1; i < pts.length; i++) {
-    const p0 = pts[i-2] || pts[i-1], p1 = pts[i-1], p2 = pts[i], p3 = pts[i+1] || pts[i];
-    d += ` C ${(p1.x + (p2.x - p0.x)/6).toFixed(2)} ${(p1.y + (p2.y - p0.y)/6).toFixed(2)},`
-      +  ` ${(p2.x - (p3.x - p1.x)/6).toFixed(2)} ${(p2.y - (p3.y - p1.y)/6).toFixed(2)},`
-      +  ` ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
-  }
-  const areaD = d + ` L ${pts[pts.length-1].x} ${padT+h} L ${pts[0].x} ${padT+h} Z`;
-  const yTicks = [0, 0.5, 1].map(f => ({ y: padT + f*h, v: ymin + (ymax-ymin)*(1-f) }));
-  const xTicks = pts.filter((_, i) => i === 0 || i === pts.length - 1 || i % Math.max(1, Math.floor(pts.length/5)) === 0);
-  return { W, H, padL, padR, padT, padB, w, h, pts, d, areaD, yTicks, xTicks,
-           stroke, first: values[0], last: values[values.length-1],
-           periodStart: series[0].period, periodEnd: series[series.length-1].period,
-           deltaPct: ((values[values.length-1] - values[0]) / values[0]) * 100 };
-};
-const outputSpark = buildSpark(outputFiche?.data?.monthly_series, '#F47B20');
-const pricesSpark = buildSpark(pricesFiche?.data?.monthly_series, '#005CAB');
-const salesSpark  = buildSpark(salesFiche?.data?.monthly_series, '#00A99E');
-
-// 60m balance (print version: simpler, fits page)
-type BalancePoint = { period: string; value_eur_bn: number };
-const buildBalance = (series: BalancePoint[] | null | undefined) => {
-  if (!series || series.length < 2) return null;
-  const W = 640, H = 260, padL = 52, padR = 16, padT = 18, padB = 34;
-  const w = W - padL - padR, h = H - padT - padB;
-  const values = series.map(s => s.value_eur_bn);
-  const vmin = Math.min(...values, 0), vmax = Math.max(...values, 0);
-  const vpad = (vmax - vmin) * 0.10 || 1;
-  const ymin = vmin - vpad, ymax = vmax + vpad;
-  const yScale = (v: number) => padT + (1 - (v - ymin) / (ymax - ymin)) * h;
-  const xScale = (i: number) => padL + (i / (series.length - 1)) * w;
-  const zeroY = yScale(0);
-  const pts = series.map((s, i) => ({ x: xScale(i), y: yScale(s.value_eur_bn), period: s.period, value: s.value_eur_bn }));
-  let d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
-  for (let i = 1; i < pts.length; i++) {
-    const p0 = pts[i-2] || pts[i-1], p1 = pts[i-1], p2 = pts[i], p3 = pts[i+1] || pts[i];
-    d += ` C ${(p1.x + (p2.x - p0.x)/6).toFixed(2)} ${(p1.y + (p2.y - p0.y)/6).toFixed(2)},`
-      +  ` ${(p2.x - (p3.x - p1.x)/6).toFixed(2)} ${(p2.y - (p3.y - p1.y)/6).toFixed(2)},`
-      +  ` ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
-  }
-  const xTicks = pts.map((p, i) => ({ p, i })).filter(({ i }) => i === 0 || i === pts.length - 1 || i % 12 === 0);
-  return { W, H, padL, padR, padT, padB, w, h, pts, d, zeroY, xTicks };
-};
-const balance60m = buildBalance(tradeExports?.data?.historical_series?.trade_balance_monthly);
-
-const STRUCTURAL = ['US', 'CN', 'GB'];
-const partnerCards = (() => {
-  if (!tradeExports?.data?.by_partner) return [];
-  const byCode: Record<string, any> = {};
-  tradeExports.data.by_partner.forEach((p: any) => { if (p.partner) byCode[p.partner] = p; });
-  const labels: Record<string, string> = { US: 'United States', CN: 'China', GB: 'United Kingdom' };
-  return STRUCTURAL.filter(c => byCode[c]).map(c => {
-    const p = byCode[c];
-    const delta = Number((p.value_eur_bn - p.previous_year_value_eur_bn).toFixed(2));
-    return {
-      code: c, label: labels[c],
-      value_now: `€${p.value_eur_bn.toFixed(2)} bn`,
-      delta: `${delta >= 0 ? '+' : ''}${delta.toFixed(2)} bn`,
-      yoy: `${p.yoy_pct >= 0 ? '+' : ''}${p.yoy_pct.toFixed(1)}%`,
-      share: `${p.share_pct.toFixed(1)}%`,
-      dir: p.yoy_pct >= 0 ? 'pos' : 'neg',
-    };
-  });
-})();
+const data = loadEditionData(entry);
+const {
+  monthName: monthNameFull,
+  monthShort: monthShortFmt,
+  headlineSection,
+  macroProseSections,
+  tradeProseSections,
+  trajectorySection,
+  overviewTitle,
+  macroTitle,
+  drilldownTitle,
+  kpis,
+  partnerCards,
+  countryPerf,
+  maxMag,
+  outputSpark,
+  pricesSpark,
+  salesSpark,
+  balance60m,
+  partners60m,
+  waterfallUsImp,
+  waterfallCnImp,
+} = data;
 ---
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Iris, {monthName(entry.id)}, print layout</title>
+  <title>{`Iris, ${monthNameFull}, print layout`}</title>
 </head>
 <body class="iris-print-body">
 
   <!-- ===== COVER ===== -->
   <section class="print-page print-cover">
+    <div class="print-cover-gradient" aria-hidden="true"></div>
+    <div class="print-cover-pattern" aria-hidden="true"></div>
+
+    <div class="print-cover-notch" aria-hidden="true">
+      <img src="/cefic-logo.png" alt="" />
+    </div>
+
     <div class="print-cover-head">
-      <div class="print-cover-brand">
-        <img src="/cefic-logo.png" alt="Cefic" />
-        <span class="print-cover-brand-mark">Iris</span>
-      </div>
+      <div class="print-cover-eyebrow">A Cefic publication</div>
+      <div class="print-cover-brand-mark">Iris<span class="print-cover-brand-dot">.</span></div>
       <div class="print-cover-tagline">Monthly Chemical Trends</div>
     </div>
+
     <div class="print-cover-body">
       <div class="print-cover-edition">Edition</div>
-      <h1 class="print-cover-month">{monthName(entry.id)}</h1>
+      <h1 class="print-cover-month">{monthNameFull}</h1>
       <div class="print-cover-meta">
         <span>Published {entry.data.publication_date}</span>
-        <span>A Cefic publication</span>
+        <span>Reference month: {monthNameFull}</span>
       </div>
     </div>
+
     <div class="print-cover-foot">
       Data: Eurostat, Comext. © {new Date().getFullYear()} Cefic, European Chemical Industry Council.
     </div>
   </section>
 
-  <!-- ===== KEY TAKEAWAY ===== -->
-  <section class="print-page">
+  <!-- ===== OVERVIEW ===== -->
+  <section class="print-page print-break print-content-page">
     <header class="print-section-header">
       <div class="print-eyebrow">Overview</div>
-      <h2 class="print-section-title">Key takeaway</h2>
+      <h2 class="print-section-title">{overviewTitle}</h2>
+      <div class="print-section-subtitle">Published {entry.data.publication_date}</div>
     </header>
 
-    <div class="print-kpi-grid">
-      <div class="print-kpi">
-        <div class="print-kpi-label">EU27 chemical exports</div>
-        <div class="print-kpi-value">€34.5 bn</div>
-        <div class="print-kpi-delta is-neg">-42.1%</div>
-        <div class="print-kpi-foot">Jan-Feb 2026 vs 2025</div>
+    {kpis.length > 0 && (
+      <div class="print-kpi-grid">
+        {kpis.map((k) => (
+          <div class="print-kpi">
+            <div class="print-kpi-label">{k.label}</div>
+            <div class="print-kpi-value">{k.value}</div>
+            <div class={`print-kpi-delta is-${k.dir}`}>{k.delta}</div>
+            <div class="print-kpi-foot">{k.foot}</div>
+          </div>
+        ))}
       </div>
-      <div class="print-kpi">
-        <div class="print-kpi-label">Production index</div>
-        <div class="print-kpi-value">79.3</div>
-        <div class="print-kpi-delta is-neg">-3.9%</div>
-        <div class="print-kpi-foot">Feb 2026, 2021=100</div>
-      </div>
-      <div class="print-kpi">
-        <div class="print-kpi-label">Producer prices</div>
-        <div class="print-kpi-value">117.2</div>
-        <div class="print-kpi-delta is-neg">-2.8%</div>
-        <div class="print-kpi-foot">Feb 2026, YoY</div>
-      </div>
-      <div class="print-kpi">
-        <div class="print-kpi-label">Chemical sales</div>
-        <div class="print-kpi-value">90.8</div>
-        <div class="print-kpi-delta is-neg">-7.5%</div>
-        <div class="print-kpi-foot">Jan 2026, YoY</div>
-      </div>
-    </div>
+    )}
 
     {balance60m && (
       <figure class="print-chart">
@@ -188,43 +113,49 @@ const partnerCards = (() => {
           EU27 chemical trade balance, 60-month context.
         </figcaption>
         <svg viewBox={`0 0 ${balance60m.W} ${balance60m.H}`} xmlns="http://www.w3.org/2000/svg" class="print-chart-svg">
+          {balance60m.yTicks.map((t: any) => (
+            <>
+              <line x1={balance60m.padL} x2={balance60m.W - balance60m.padR} y1={t.y} y2={t.y}
+                    stroke="#eee" stroke-width="1" stroke-dasharray="2 3" />
+              <text x={balance60m.padL - 6} y={t.y + 3} text-anchor="end"
+                    font-size="9" fill="#666">{t.v.toFixed(1)}</text>
+            </>
+          ))}
           <line x1={balance60m.padL} x2={balance60m.W - balance60m.padR}
                 y1={balance60m.zeroY} y2={balance60m.zeroY}
                 stroke="#1a1a1a" stroke-width="1.2" />
-          <path d={`${balance60m.d} L ${balance60m.pts[balance60m.pts.length-1].x} ${balance60m.zeroY} L ${balance60m.pts[0].x} ${balance60m.zeroY} Z`}
+          <path d={`${balance60m.d} L ${balance60m.pts[balance60m.pts.length - 1].x} ${balance60m.zeroY} L ${balance60m.pts[0].x} ${balance60m.zeroY} Z`}
                 fill="#00A99E" opacity="0.18" />
           <path d={balance60m.d} fill="none" stroke="#F47B20" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" />
           <circle cx={balance60m.pts[balance60m.pts.length - 1].x}
                   cy={balance60m.pts[balance60m.pts.length - 1].y}
                   r="4" fill="#F47B20" stroke="#fff" stroke-width="1.5" />
-          {balance60m.xTicks.map(({ p, i }: any) => (
+          {balance60m.xTicks.map(({ i, period }: any) => (
             <text x={balance60m.padL + (i / (balance60m.pts.length - 1)) * balance60m.w}
-                  y={balance60m.H - 10} text-anchor="middle"
-                  font-size="9" fill="#555">{fmtMonth(p.period)}</text>
+                  y={balance60m.H - 12} text-anchor="middle"
+                  font-size="9" fill="#666">{fmtMonth(period)}</text>
           ))}
         </svg>
-        <div class="print-chart-source">Source: Cefic analysis based on Eurostat Comext data (2021-2026)</div>
       </figure>
     )}
 
-    <div class="print-takeaway">
-      <p>
-        The EU27 chemical industry reported a 42.1% decline in export value in the first
-        two months of 2026, heavily influenced by pre-tariff front-loading in February 2025
-        that created an abnormal comparison base. Chemical output fell 3.9% year-on-year in
-        February, reaching 79.3 on the 2021 index, while remaining 18% below pre-crisis
-        levels (2014-2019 average). Against a normalised 2024 base, the underlying export
-        decline approximates 10%.
-      </p>
-    </div>
+    {headlineSection && (
+      <div class="print-takeaway">
+        <h3 class="print-takeaway-title">Key takeaway</h3>
+        {headlineSection.paragraphs.map((p: string) => (
+          <p set:html={inlineMd(p)} />
+        ))}
+      </div>
+    )}
   </section>
 
   <!-- ===== MACRO BRIEF ===== -->
-  <section class="print-page print-break">
+  <section class="print-page print-break print-content-page">
     <header class="print-section-header">
       <div class="print-eyebrow">Macro brief</div>
-      <h2 class="print-section-title">Production, prices, sales</h2>
+      <h2 class="print-section-title">{macroTitle}</h2>
+      <div class="print-section-subtitle">Production, prices, sales</div>
     </header>
 
     <div class="print-charts-row">
@@ -251,8 +182,9 @@ const partnerCards = (() => {
               <circle cx={p.x} cy={p.y} r={i === spark.pts.length - 1 ? 3.5 : 1.5}
                       fill={spark.stroke} stroke="#fff" stroke-width={i === spark.pts.length - 1 ? 1.2 : 0} />
             ))}
-            {spark.xTicks.map((p: any, i: number) => (
-              <text x={p.x} y={spark.H - 8} text-anchor="middle"
+            {spark.xTicks.map((p: any) => (
+              <text x={spark.padL + (p.i / (spark.pts.length - 1)) * spark.w}
+                    y={spark.H - 8} text-anchor="middle"
                     font-size="8" fill="#888">{fmtMonth(p.period)}</text>
             ))}
           </svg>
@@ -266,35 +198,119 @@ const partnerCards = (() => {
       ))}
     </div>
 
-    <div class="print-narrative">
-      <p>
-        EU27 chemical production declined by 3.9% in February 2026 compared to February 2025, with
-        the index reaching 79.3 (2021=100). Chemical production underperformed total manufacturing,
-        which declined by just 0.4% in February. Pharmaceuticals fell more, at 8.6%, while basic
-        metals dropped 0.7% and motor vehicles gained 2.0%.
-      </p>
-      <p>
-        EU27 chemical producer prices declined by 2.8% in February 2026 compared to February 2025,
-        reaching an index level of 117.2. The Netherlands experienced the steepest price decline at
-        9.2%, followed by Belgium (5.5%) and France (3.0%).
-      </p>
-      <p>
-        EU27 chemical sales declined 7.5% in January 2026 to 90.8, continuing the sector's
-        compression against the 2021 baseline.
-      </p>
+    <div class="print-cols">
+      {macroProseSections.length > 0 && (
+        <div class="print-panel">
+          <h3 class="print-panel-title">Sector context</h3>
+          {macroProseSections.map((s) => (
+            <div class="print-mdx-block">
+              <div class="print-mdx-eyebrow">{s.title}</div>
+              {s.paragraphs.slice(0, 1).map((p: string) => (
+                <p set:html={inlineMd(p)} />
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {countryPerf.length > 0 && (
+        <div class="print-panel">
+          <h3 class="print-panel-title">Country output, YoY</h3>
+          <ul class="print-bar-list">
+            {countryPerf.map((c) => {
+              const pct = (Math.abs(c.value) / maxMag) * 100;
+              const neg = c.value < 0;
+              return (
+                <li>
+                  <span class="print-bar-label">{c.label}</span>
+                  <span class="print-bar-track">
+                    <span class={`print-bar-fill ${neg ? 'is-neg' : ''}`} style={`width:${pct}%`}></span>
+                  </span>
+                  <span class="print-bar-value">{c.value > 0 ? '+' : ''}{c.value.toFixed(1)}%</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </div>
+
+    {trajectorySection && (
+      <div class="print-scatter-panel print-break">
+        <h3 class="print-panel-title">{trajectorySection.title}</h3>
+        <div class="print-scatter-body">
+          <div class="print-scatter-prose">
+            {trajectorySection.paragraphs.map((p: string) => (
+              <p set:html={inlineMd(p)} />
+            ))}
+            {trajectorySection.source && (
+              <p class="print-scatter-source">{trajectorySection.source}</p>
+            )}
+          </div>
+          {trajectorySection.images[0] && (
+            <figure class="print-scatter-figure">
+              <img src={trajectorySection.images[0].src} alt={trajectorySection.images[0].alt} />
+            </figure>
+          )}
+        </div>
+      </div>
+    )}
   </section>
 
   <!-- ===== DRILL-DOWN ===== -->
-  <section class="print-page print-break">
+  <section class="print-page print-break print-content-page">
     <header class="print-section-header">
       <div class="print-eyebrow">Drill-down</div>
-      <h2 class="print-section-title">Structural partners, US / CN / GB</h2>
+      <h2 class="print-section-title">{drilldownTitle}</h2>
+      <div class="print-section-subtitle">United States · China · United Kingdom</div>
     </header>
+
+    {partners60m && (
+      <figure class="print-chart">
+        <figcaption class="print-chart-caption">
+          EU27 chemical exports by partner, 60-month context.
+        </figcaption>
+        <svg viewBox={`0 0 ${partners60m.W} ${partners60m.H}`} xmlns="http://www.w3.org/2000/svg" class="print-chart-svg">
+          {partners60m.yTicks.map((t: any) => (
+            <>
+              <line x1={partners60m.padL} x2={partners60m.W - partners60m.padR} y1={t.y} y2={t.y}
+                    stroke="#eee" stroke-width="1" stroke-dasharray="2 3" />
+              <text x={partners60m.padL - 6} y={t.y + 3} text-anchor="end"
+                    font-size="9" fill="#666">{t.v.toFixed(1)}</text>
+            </>
+          ))}
+          <g class="print-partner-legend">
+            {partners60m.partners.map((p: any, i: number) => (
+              <>
+                <line x1={partners60m.padL + i * 140} x2={partners60m.padL + i * 140 + 16}
+                      y1={20} y2={20} stroke={p.color} stroke-width="2.5" />
+                <text x={partners60m.padL + i * 140 + 22} y={24}
+                      font-size="9" fill="#1a1a1a">{p.label}</text>
+              </>
+            ))}
+          </g>
+          {partners60m.partners.map((p: any) => (
+            <path d={p.d} fill="none" stroke={p.color} stroke-width={p.weight}
+                  stroke-linecap="round" stroke-linejoin="round" />
+          ))}
+          {partners60m.partners.map((p: any) =>
+            p.current && (
+              <circle cx={p.current.x} cy={p.current.y} r="4" fill={p.color}
+                      stroke="#fff" stroke-width="1.5" />
+            )
+          )}
+          {partners60m.xTicks.map(({ i, period }: any) => (
+            <text x={partners60m.padL + (i / (partners60m.periods - 1)) * partners60m.w}
+                  y={partners60m.H - 14} text-anchor="middle"
+                  font-size="9" fill="#666">{fmtMonth(period)}</text>
+          ))}
+        </svg>
+      </figure>
+    )}
 
     {partnerCards.length > 0 && (
       <div class="print-partner-grid">
-        {partnerCards.map((p: any) => (
+        {partnerCards.map((p) => (
           <div class="print-partner-card">
             <div class="print-partner-head">
               <span class="print-partner-label">{p.label}</span>
@@ -302,59 +318,109 @@ const partnerCards = (() => {
             </div>
             <div class="print-partner-value">{p.value_now}</div>
             <div class={`print-partner-delta is-${p.dir}`}>
-              {p.yoy} <span class="print-partner-abs">({p.delta})</span>
+              {p.yoy_pct} <span class="print-partner-abs">({p.delta_value})</span>
             </div>
-            <div class="print-partner-share">{p.share} of total exports</div>
+            <div class="print-partner-share">{p.share_pct} of total exports</div>
+            {p.top_chapters.length > 0 && (
+              <ul class="print-partner-chapters">
+                {p.top_chapters.map((c) => (
+                  <li>
+                    <span class="print-partner-chapter-label">{c.label}</span>
+                    <span class="print-partner-chapter-value">
+                      {c.value_now}{c.yoy_pct && <em> ({c.yoy_pct})</em>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         ))}
       </div>
     )}
 
-    <div class="print-narrative">
-      <p>
-        From January to February 2026, EU27 chemical exports decreased by 42.1% in value in
-        comparison to the same period in 2025. Exports amounted to €34.5 bn, down by €25.1 bn
-        compared to 2025. The United States alone contributed €19 bn of the decrease, reflecting
-        the unwinding of front-loaded February 2025 shipments ahead of anticipated tariff actions.
-      </p>
-      <p>
-        EU27 chemical imports decreased by 12.0% in value to €33.5 bn. Imports from China rose
-        4.8% to €4.4 bn, and imports from the United States rose 4.7% to €3.7 bn. UK imports
-        declined 13.3% to €1.5 bn.
-      </p>
-    </div>
+    {(waterfallUsImp || waterfallCnImp) && (
+      <div class="print-waterfall-row print-break">
+        {[
+          { spec: waterfallUsImp, country: 'United States', code: 'US' },
+          { spec: waterfallCnImp, country: 'China',         code: 'CN' },
+        ].map(({ spec, country, code }) => spec && (
+          <figure class="print-chart print-chart--half">
+            <figcaption class="print-chart-caption">
+              <strong>Imports from {country}</strong>, CN 8-digit contributions to the year-on-year change.
+            </figcaption>
+            <svg viewBox={`0 0 ${spec.W} ${spec.H}`} xmlns="http://www.w3.org/2000/svg" class="print-chart-svg">
+              <line x1={spec.padL} x2={spec.W - spec.padR}
+                    y1={spec.zeroY} y2={spec.zeroY} stroke="#1a1a1a" stroke-width="0.8" />
+              {spec.bars.map((b: any) => (
+                <g>
+                  <rect x={b.x} y={b.y} width={b.width}
+                        height={Math.max(b.height, 1)} fill={b.color}
+                        opacity={b.kind === 'other' ? 0.6 : 0.92} rx="2" />
+                  <text x={b.cx} y={b.y - 4} text-anchor="middle"
+                        font-size="9" font-weight="600" fill={b.color}>
+                    {b.kind === 'start' || b.kind === 'end'
+                      ? `€${(b.value || 0).toFixed(2)}`
+                      : `${(b.delta ?? 0) >= 0 ? '+' : ''}${(b.delta ?? 0).toFixed(2)}`}
+                  </text>
+                  <text x={b.cx} y={spec.H - spec.padB + 14}
+                        text-anchor="end" font-size="8" fill="#666"
+                        transform={`rotate(-30, ${b.cx}, ${spec.H - spec.padB + 14})`}>
+                    {(b.short || b.label).length > 28
+                      ? (b.short || b.label).slice(0, 26) + '…'
+                      : (b.short || b.label)}
+                  </text>
+                </g>
+              ))}
+            </svg>
+            <div class="print-waterfall-summary">
+              Net change:&nbsp;
+              <strong class={spec.totalDelta >= 0 ? 'is-pos' : 'is-neg'}>
+                {spec.totalDelta >= 0 ? '+' : ''}€{spec.totalDelta.toFixed(2)} bn
+              </strong>
+              <span class="print-waterfall-summary-pct">
+                &nbsp;({((spec.totalDelta / spec.bars[0].value) * 100).toFixed(1)}% YoY)
+              </span>
+            </div>
+          </figure>
+        ))}
+      </div>
+    )}
+
+    {tradeProseSections.length > 0 && (
+      <div class="print-panel print-trade-context print-break">
+        <h3 class="print-panel-title">Trade context</h3>
+        {tradeProseSections.map((s) => (
+          <div class="print-mdx-block">
+            <div class="print-mdx-eyebrow">{s.title}</div>
+            {s.paragraphs.map((p: string) => (
+              <p set:html={inlineMd(p)} />
+            ))}
+          </div>
+        ))}
+      </div>
+    )}
   </section>
 
-  <!-- ===== APPENDIX: FULL EDITION MDX ===== -->
-  <section class="print-page print-break">
-    <header class="print-section-header">
-      <div class="print-eyebrow">Appendix</div>
-      <h2 class="print-section-title">Full edition text</h2>
-    </header>
-    <article class="print-edition-body">
-      <Content />
-    </article>
-  </section>
-
-  <!-- ===== FOOTER / SOURCES ===== -->
-  <section class="print-page print-break">
+  <!-- ===== SOURCES & METHODOLOGY ===== -->
+  <section class="print-page print-break print-content-page">
     <header class="print-section-header">
       <div class="print-eyebrow">Sources and methodology</div>
+      <h2 class="print-section-title">How this edition was built</h2>
     </header>
     <div class="print-narrative">
       <p><strong>Data source.</strong> Eurostat Short-Term Business Statistics (production, prices,
         turnover), seasonally adjusted where available. Trade flows from Comext (EU27 external
         trade), extra-EU only, declarant=EU, flow exports=2 and imports=1.</p>
-      <p><strong>Scope.</strong> NACE C20 chemicals for industrial indicators; Comext chapters 27-40
-        filtered by the Cefic chemistry product map for trade.</p>
-      <p><strong>Window conventions.</strong> YoY (year-on-year), YTD (year-to-date, first N months
-        of the current year vs same window of the prior year), pre-crisis baseline averages
-        2014-2019. Index base: 2021=100 unless otherwise stated.</p>
-      <p><strong>Anomalies.</strong> When the comparison base is distorted (Z-score above 2 sigma
-        against the 12-month rolling mean, or bilateral concentration above 75% of absolute
+      <p><strong>Scope.</strong> NACE C20 chemicals for industrial indicators; Comext chapters
+        28-39 filtered by the Cefic chemistry product map for trade.</p>
+      <p><strong>Window conventions.</strong> YoY (year-on-year), YTD (year-to-date, first N
+        months of the current year vs the same window of the prior year), pre-crisis baseline
+        averages 2014-2019. Index base: 2021=100 unless otherwise stated.</p>
+      <p><strong>Anomalies.</strong> When the comparison base is distorted (Z-score above 2σ
+        against the 12-month rolling mean, or bilateral concentration above 75% of the absolute
         variation), the section carries an explicit base-effect caveat.</p>
       <p><strong>Publication.</strong> Iris is a monthly Cefic publication. Past editions and
-        methodology details at cefic.org.</p>
+        full methodology at iris.cefic.org.</p>
     </div>
   </section>
 
