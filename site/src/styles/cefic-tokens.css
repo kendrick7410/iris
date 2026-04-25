@@ -1626,14 +1626,61 @@ body.ov-active .iris-footer { display: none; }
   text-wrap: pretty;
 }
 .iris-peers-chart {
-  margin: 0 0 1.5rem;
+  margin: 0;
   padding: 1rem 1.25rem 0.85rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
+  display: flex;
+  flex-direction: column;
 }
-.iris-peers-chart .iris-peers-svg { max-height: 380px; }
-.iris-peers-twoup .iris-peers-svg { max-height: 240px; }
+.iris-peers-chart--main .iris-peers-svg { flex: 1; min-height: 0; }
+.iris-peers-chart--small .iris-peers-svg { flex: 1; min-height: 0; }
+
+/* Asymmetric 2/3 + 1/3 layout — main chart spans both rows on the left,
+   the two small charts stack on the right. Heights are coupled so
+   small_1 + gutter + small_2 = main exactly (CSS grid handles that
+   when grid-template-rows is 1fr 1fr and the column shares the row
+   span). */
+.iris-peers-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+  margin: 0 0 1.75rem;
+  /* Drive the two-row stack to a sensible height; the 1fr shares this
+     equally between top and bottom, and the main chart spans both. */
+  height: 500px;
+}
+.iris-peers-chart--main {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+.iris-peers-chart--small-1 {
+  grid-column: 2;
+  grid-row: 1;
+}
+.iris-peers-chart--small-2 {
+  grid-column: 2;
+  grid-row: 2;
+}
+.iris-peers-chart--small .iris-peers-chart-title { font-size: 0.82rem; }
+.iris-peers-chart--small .iris-peers-legend { font-size: 0.7rem; }
+
+@media (max-width: 768px) {
+  .iris-peers-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+    gap: 16px;
+  }
+  .iris-peers-chart--main,
+  .iris-peers-chart--small-1,
+  .iris-peers-chart--small-2 {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
 .iris-peers-chart-caption {
   display: flex;
   justify-content: space-between;
@@ -1677,12 +1724,6 @@ body.ov-active .iris-footer { display: none; }
   font-style: italic;
   margin-top: 0.5rem;
 }
-.iris-peers-twoup {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
 .iris-peers-empty {
   margin: 2rem 0;
   padding: 1.25rem 1.5rem;
@@ -1701,9 +1742,6 @@ body.ov-active .iris-footer { display: none; }
   font-size: 0.85em;
 }
 
-@media (max-width: 900px) {
-  .iris-peers-twoup { grid-template-columns: 1fr; }
-}
 
 /* Chart container (figure + caption) */
 .iris-chart {

@@ -210,7 +210,9 @@ const chemAnnotationLabel = useYoYDisplay
       <>
         <p class="iris-peers-lead">{lead}</p>
 
-        <figure class="iris-peers-chart">
+        <div class="iris-peers-grid">
+
+        <figure class="iris-peers-chart iris-peers-chart--main">
           <figcaption class="iris-peers-chart-caption">
             <div class="iris-peers-chart-title">{mainChartTitle}</div>
             <div class="iris-peers-legend">
@@ -280,9 +282,8 @@ const chemAnnotationLabel = useYoYDisplay
           <div class="iris-peers-source">{peers.source}</div>
         </figure>
 
-        <div class="iris-peers-twoup">
-          {pricesSpec && (
-            <figure class="iris-peers-chart">
+        {pricesSpec && (
+            <figure class="iris-peers-chart iris-peers-chart--small iris-peers-chart--small-1">
               <figcaption class="iris-peers-chart-caption">
                 <div class="iris-peers-chart-title">Producer prices · chemicals vs manufacturing</div>
                 <div class="iris-peers-legend">
@@ -328,7 +329,7 @@ const chemAnnotationLabel = useYoYDisplay
           )}
 
           {salesSpec && (
-            <figure class="iris-peers-chart">
+            <figure class="iris-peers-chart iris-peers-chart--small iris-peers-chart--small-2">
               <figcaption class="iris-peers-chart-caption">
                 <div class="iris-peers-chart-title">Sales index — chemicals (C20)</div>
               </figcaption>
@@ -367,6 +368,7 @@ const chemAnnotationLabel = useYoYDisplay
               </svg>
             </figure>
           )}
+
         </div>
       </>
     ) : (
