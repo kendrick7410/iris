@@ -1211,8 +1211,10 @@ body.ov-active .iris-footer { display: none; }
 }
 .iris-view[data-active="true"] { display: flex; }
 
-/* Drill-down can overflow a single viewport (chart + cards + chart); let it
-   scroll vertically inside the locked dashboard frame. */
+/* Views that carry a scatter panel below the fold scroll vertically inside
+   the locked dashboard frame; the 1-screen rule still applies to the
+   primary content above. */
+.iris-view[data-view="macro"],
 .iris-view[data-view="drilldown"] {
   overflow-y: auto;
   overflow-x: hidden;
