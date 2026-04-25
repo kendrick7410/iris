@@ -518,11 +518,25 @@ export type PeersSeries = {
   };
   prices: { chemicals: (number | null)[]; manufacturing: (number | null)[] };
   sales:  { chemicals: (number | null)[] };
+  production_yoy: {
+    manufacturing: (number | null)[];
+    chemicals: (number | null)[];
+    pharmaceuticals: (number | null)[];
+    basic_metals: (number | null)[];
+    motor_vehicles: (number | null)[];
+  } | null;
+  prices_yoy: { chemicals: (number | null)[]; manufacturing: (number | null)[] } | null;
+  sales_yoy: { chemicals: (number | null)[] } | null;
   current: {
     month: string | null;
     chemicals_production: number | null;
     chemicals_prices: number | null;
     chemicals_sales: number | null;
+    chemicals_yoy_production?: number | null;
+    manufacturing_yoy_production?: number | null;
+    pharmaceuticals_yoy_production?: number | null;
+    basic_metals_yoy_production?: number | null;
+    motor_vehicles_yoy_production?: number | null;
   };
   source: string;
 };
