@@ -135,6 +135,40 @@ const SUBSCRIBE_HREF = 'mailto:iris@cefic.org?subject=Subscribe%20to%20Iris%20up
           <a class="iris-featured-cta" href={`/editions/${featured.id}`}>Open dashboard</a>
         </div>
       </article>
+
+      {lastEditionLabel && nextEditionLabel && (
+        <aside class="iris-release-strip" aria-label="Iris release schedule">
+          <div class="iris-release-strip-cell">
+            <span class="iris-release-strip-label">Last version available</span>
+            <div class="iris-release-strip-value-row">
+              <span class="iris-release-strip-value">{lastEditionLabel}</span>
+              {featuredPdfUrl && featuredPdfName && (
+                <a class="iris-release-strip-pdf" href={featuredPdfUrl}
+                   download={featuredPdfName} aria-label="Download the latest edition as PDF">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                       stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 2v9M4 7l4 4 4-4M2 14h12" />
+                  </svg>
+                  <span>PDF</span>
+                </a>
+              )}
+            </div>
+          </div>
+          {referenceMonthLabel && (
+            <div class="iris-release-strip-cell">
+              <span class="iris-release-strip-label">Reference month</span>
+              <span class="iris-release-strip-value">{referenceMonthLabel}</span>
+            </div>
+          )}
+          <div class="iris-release-strip-cell">
+            <span class="iris-release-strip-label">Next version expected</span>
+            <span class="iris-release-strip-value">{nextEditionLabel}</span>
+          </div>
+          <a class="iris-release-strip-subscribe" href={SUBSCRIBE_HREF}>
+            Subscribe to release updates →
+          </a>
+        </aside>
+      )}
     </section>
   )}
 
@@ -203,40 +237,6 @@ const SUBSCRIBE_HREF = 'mailto:iris@cefic.org?subject=Subscribe%20to%20Iris%20up
       </div>
     </div>
   </section>
-
-  {lastEditionLabel && nextEditionLabel && (
-    <aside class="iris-release-badge" aria-label="Iris release schedule">
-      <div class="iris-release-badge-row">
-        <span class="iris-release-badge-label">Last version available</span>
-        <div class="iris-release-badge-value-row">
-          <span class="iris-release-badge-value">{lastEditionLabel}</span>
-          {featuredPdfUrl && featuredPdfName && (
-            <a class="iris-release-badge-pdf" href={featuredPdfUrl}
-               download={featuredPdfName} aria-label="Download the latest edition as PDF">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                   stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M8 2v9M4 7l4 4 4-4M2 14h12" />
-              </svg>
-              <span>PDF</span>
-            </a>
-          )}
-        </div>
-      </div>
-      {referenceMonthLabel && (
-        <div class="iris-release-badge-row">
-          <span class="iris-release-badge-label">Reference month</span>
-          <span class="iris-release-badge-value">{referenceMonthLabel}</span>
-        </div>
-      )}
-      <div class="iris-release-badge-row">
-        <span class="iris-release-badge-label">Next version expected</span>
-        <span class="iris-release-badge-value">{nextEditionLabel}</span>
-      </div>
-      <a class="iris-release-badge-subscribe" href={SUBSCRIBE_HREF}>
-        Subscribe to release updates →
-      </a>
-    </aside>
-  )}
 
   <section class="iris-section iris-methodology-teaser">
     <div class="iris-section-header">

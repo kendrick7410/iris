@@ -1407,89 +1407,98 @@ body.ov-active .iris-footer { display: none; }
   .iris-scatter-body { grid-template-columns: 1fr; }
 }
 
-/* Release schedule badge: fixed bottom-right on the homepage, never obscures
-   the methodology section because we tuck it into the bottom inset of the
-   viewport with a small clear-distance from the edges. */
-.iris-release-badge {
-  position: fixed;
-  right: clamp(1rem, 2vw, 1.75rem);
-  bottom: clamp(1rem, 2vw, 1.75rem);
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.85rem 1.05rem;
+/* Release schedule strip: inline below the Latest edition card on the
+   homepage. Horizontal flow on desktop, stacked on mobile. The Cefic
+   orange left border ties it visually to the featured edition above. */
+.iris-release-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: clamp(1rem, 2.5vw, 2rem);
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: 1.1rem 1.5rem;
   background: var(--surface);
   border: 1px solid var(--rule);
   border-left: 3px solid var(--cefic-orange);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
   font-family: var(--iris-sans);
-  max-width: 18rem;
-  pointer-events: auto;
 }
-.iris-release-badge-row {
+.iris-release-strip-cell {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.2rem;
+  min-width: 0;
 }
-.iris-release-badge-label {
+.iris-release-strip-label {
   font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: var(--ink-faint);
-}
-.iris-release-badge-value {
-  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--ink);
 }
-.iris-release-badge-value-row {
+.iris-release-strip-value {
+  font-family: var(--iris-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.iris-release-strip-value-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
-.iris-release-badge-pdf {
+.iris-release-strip-pdf {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.25rem 0.55rem;
+  padding: 0.22rem 0.55rem;
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius-pill);
-  font-size: 0.75rem;
+  font-family: var(--iris-sans);
+  font-size: 0.72rem;
   font-weight: 600;
+  letter-spacing: 0.02em;
   color: var(--ink);
   text-decoration: none;
   transition: border-color 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
 }
-.iris-release-badge-pdf:hover {
+.iris-release-strip-pdf:hover {
   border-color: var(--cefic-orange);
   color: var(--cefic-orange);
   background: var(--surface-alt);
   text-decoration: none;
 }
-.iris-release-badge-pdf svg { width: 12px; height: 12px; flex-shrink: 0; }
-.iris-release-badge-subscribe {
-  margin-top: 0.25rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid var(--rule);
-  font-size: 0.78rem;
+.iris-release-strip-pdf svg { width: 12px; height: 12px; flex-shrink: 0; }
+.iris-release-strip-subscribe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--cefic-orange);
+  border-radius: var(--radius-pill);
+  font-family: var(--iris-sans);
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--cefic-orange);
   text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
-.iris-release-badge-subscribe:hover { text-decoration: underline; }
-@media (max-width: 640px) {
-  .iris-release-badge {
-    right: 0.75rem;
-    bottom: 0.75rem;
-    padding: 0.65rem 0.85rem;
-    max-width: 14rem;
+.iris-release-strip-subscribe:hover {
+  background: var(--cefic-orange);
+  color: #fff;
+  text-decoration: none;
+}
+@media (max-width: 720px) {
+  .iris-release-strip {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    padding: 1rem 1.1rem;
   }
-  .iris-release-badge-value { font-size: 0.85rem; }
-  .iris-release-badge-pdf span { display: none; }
+  .iris-release-strip-subscribe { justify-content: center; }
 }
 
 /* Chart container (figure + caption) */
