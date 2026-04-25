@@ -506,6 +506,27 @@ function buildPartnerCards(tradeExports: any): PartnerCard[] {
 // Aggregator
 // ────────────────────────────────────────────────────────────────────────
 
+export type PeersSeries = {
+  months: string[];
+  labels: Record<string, string>;
+  production: {
+    manufacturing: (number | null)[];
+    chemicals: (number | null)[];
+    pharmaceuticals: (number | null)[];
+    basic_metals: (number | null)[];
+    motor_vehicles: (number | null)[];
+  };
+  prices: { chemicals: (number | null)[]; manufacturing: (number | null)[] };
+  sales:  { chemicals: (number | null)[] };
+  current: {
+    month: string | null;
+    chemicals_production: number | null;
+    chemicals_prices: number | null;
+    chemicals_sales: number | null;
+  };
+  source: string;
+};
+
 export type EditionData = {
   entry: CollectionEntry<'editions'>;
   monthName: string;
@@ -538,6 +559,8 @@ export type EditionData = {
   pdfUrl: string;
   pdfName: string;
   pdfExists: boolean;
+  // Peers time-series page (chemicals vs pharma / basic metals / manufacturing).
+  peers: PeersSeries | null;
 };
 
 export function loadEditionData(entry: CollectionEntry<'editions'>): EditionData {
@@ -577,6 +600,9 @@ export function loadEditionData(entry: CollectionEntry<'editions'>): EditionData
   const waterfallCnImp = buildWaterfall(tradeImports?.data?.partner_drilldown?.CN);
 
   const partnerCards = buildPartnerCards(tradeExports);
+
+  const peersFiche = readFiche(id, 'peers_series');
+  const peers: PeersSeries | null = peersFiche?.data ?? null;
 
   // Country YoY: hardcoded ordering for now (the macro fiche has the data
   // but no canonical ordering; keep as-is until we wire the fiche).
@@ -629,5 +655,6 @@ export function loadEditionData(entry: CollectionEntry<'editions'>): EditionData
     pdfUrl,
     pdfName,
     pdfExists,
+    peers,
   };
 }

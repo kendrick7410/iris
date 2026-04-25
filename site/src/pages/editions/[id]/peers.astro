@@ -1,0 +1,330 @@
+---
+/**
+ * Edition page — "Chemicals versus peers — N months".
+ *
+ * Mirrors the design canvas page (components/pages-data.jsx ·
+ * TimeSeriesPage): a single multi-series line chart for industrial
+ * production indices, then a two-up grid below with producer prices
+ * and the sales index. All four sectors come from the same Eurostat
+ * monthly fetch (NACE C / C20 / C21 / C24), so the series are aligned
+ * by construction.
+ *
+ * Real data comes from `data/processed/{id}/fiches/peers_series.json`
+ * (see `scripts/build_peers_fiche.py`).
+ */
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import {
+  loadEditionData,
+  fmtMonth,
+  type PeersSeries,
+} from '../../../lib/edition-data';
+
+export async function getStaticPaths() {
+  const editions = await getCollection('editions');
+  return editions.map(entry => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const data = loadEditionData(entry);
+const { monthName: monthNameFull, peers } = data;
+
+type LineSpec = ReturnType<typeof buildLineChart>;
+
+function buildLineChart(opts: {
+  W: number;
+  H: number;
+  months: string[];
+  series: Array<{
+    key: string;
+    label: string;
+    color: string;
+    values: (number | null)[];
+    dashed?: boolean;
+  }>;
+  yPad?: number;
+}) {
+  const { W, H, months, series } = opts;
+  const yPad = opts.yPad ?? 0.06;
+  const padL = 48,
+    padR = 18,
+    padT = 18,
+    padB = 32;
+  const w = W - padL - padR;
+  const h = H - padT - padB;
+
+  const flat = series.flatMap((s) => s.values.filter((v): v is number => v != null));
+  if (flat.length === 0) return null;
+  const vmin = Math.min(...flat);
+  const vmax = Math.max(...flat);
+  const span = (vmax - vmin) || 1;
+  const ymin = vmin - span * yPad;
+  const ymax = vmax + span * yPad;
+
+  const xScale = (i: number) => padL + (i / Math.max(1, months.length - 1)) * w;
+  const yScale = (v: number) => padT + (1 - (v - ymin) / (ymax - ymin)) * h;
+
+  const drawn = series.map((s) => {
+    const pts = s.values
+      .map((v, i) => (v == null ? null : { x: xScale(i), y: yScale(v), v }))
+      .filter((p): p is { x: number; y: number; v: number } => p !== null);
+    let d = '';
+    if (pts.length >= 2) {
+      d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+      for (let i = 1; i < pts.length; i++) {
+        const p0 = pts[i - 2] || pts[i - 1];
+        const p1 = pts[i - 1];
+        const p2 = pts[i];
+        const p3 = pts[i + 1] || pts[i];
+        const cp1x = p1.x + (p2.x - p0.x) / 6;
+        const cp1y = p1.y + (p2.y - p0.y) / 6;
+        const cp2x = p2.x - (p3.x - p1.x) / 6;
+        const cp2y = p2.y - (p3.y - p1.y) / 6;
+        d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+      }
+    }
+    return { ...s, d, end: pts[pts.length - 1] };
+  });
+
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
+    const v = ymin + (ymax - ymin) * (1 - f);
+    return { v, y: padT + f * h };
+  });
+
+  const tickEvery = Math.max(1, Math.ceil(months.length / 8));
+  const xTicks = months
+    .map((m, i) => ({ m, i }))
+    .filter(({ i }) => i % tickEvery === 0 || i === months.length - 1);
+
+  return { W, H, padL, padR, padT, padB, w, h, drawn, yTicks, xTicks, ymin, ymax };
+}
+
+let mainSpec: LineSpec | null = null;
+let pricesSpec: LineSpec | null = null;
+let salesSpec: LineSpec | null = null;
+let lead = '';
+
+if (peers) {
+  const { production, prices, sales, months, labels } = peers as PeersSeries;
+  mainSpec = buildLineChart({
+    W: 960,
+    H: 360,
+    months,
+    series: [
+      { key: 'chemicals',       label: labels.chemicals,       color: '#0a527a', values: production.chemicals },
+      { key: 'pharmaceuticals', label: labels.pharmaceuticals, color: '#3fa4c9', values: production.pharmaceuticals },
+      { key: 'basic_metals',    label: labels.basic_metals,    color: '#c65d1e', values: production.basic_metals },
+      { key: 'manufacturing',   label: labels.manufacturing,   color: '#8a8a8a', values: production.manufacturing, dashed: true },
+    ],
+  });
+  pricesSpec = buildLineChart({
+    W: 480,
+    H: 220,
+    months,
+    series: [
+      { key: 'chemicals',     label: 'Chemicals PPI',     color: '#2a7d82', values: prices.chemicals },
+      { key: 'manufacturing', label: 'Manufacturing PPI', color: '#8a8a8a', values: prices.manufacturing, dashed: true },
+    ],
+  });
+  salesSpec = buildLineChart({
+    W: 480,
+    H: 220,
+    months,
+    series: [
+      { key: 'chemicals', label: 'Chemicals sales (2021=100)', color: '#7ab8a3', values: sales.chemicals },
+    ],
+  });
+
+  // Lead paragraph derived from the latest values
+  const last = (arr: (number | null)[]) => {
+    for (let i = arr.length - 1; i >= 0; i--) if (arr[i] != null) return arr[i] as number;
+    return null;
+  };
+  const c = last(production.chemicals);
+  const m = last(production.manufacturing);
+  const p = last(production.pharmaceuticals);
+  const b = last(production.basic_metals);
+  const fmtPct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)} pts`;
+  const gap = (sec: number | null) => (sec != null && c != null ? fmtPct(c - sec) : '–');
+  lead = peers
+    ? `Over the past ${months.length} months, the EU27 chemical industry has held an industrial production index ${gap(m)} from manufacturing total, ${gap(p)} from pharmaceuticals and ${gap(b)} from basic metals. Chemicals close at ${c?.toFixed(1) ?? '–'} (2021=100); pharmaceuticals at ${p?.toFixed(1) ?? '–'}; basic metals at ${b?.toFixed(1) ?? '–'}; manufacturing at ${m?.toFixed(1) ?? '–'}.`
+    : '';
+}
+
+const renderTitle = peers
+  ? `Chemicals versus peers — ${peers.months.length} months`
+  : 'Chemicals versus peers';
+---
+<Layout
+  title={`Iris: ${monthNameFull}, peers — chemicals vs manufacturing`}
+  variant="dashboard"
+>
+  <main class="iris-peers-page">
+    <header class="iris-peers-header">
+      <div class="iris-peers-eyebrow">02 · Time series</div>
+      <h1 class="iris-peers-title">{renderTitle}</h1>
+      <div class="iris-peers-subtitle">
+        Edition <a href={`/editions/${entry.id}`}>{monthNameFull}</a> · NACE C / C20 / C21 / C24
+      </div>
+    </header>
+
+    {peers && mainSpec ? (
+      <>
+        <p class="iris-peers-lead">{lead}</p>
+
+        <figure class="iris-peers-chart">
+          <figcaption class="iris-peers-chart-caption">
+            <div class="iris-peers-chart-title">Industrial production index — 2021=100, seasonally adjusted</div>
+            <div class="iris-peers-legend">
+              {mainSpec.drawn.map((s) => (
+                <span class="iris-peers-legend-item">
+                  <span class="iris-peers-legend-swatch"
+                        style={`background: ${s.color}; ${s.dashed ? 'background-image: repeating-linear-gradient(90deg, ' + s.color + ' 0 4px, transparent 4px 7px); background-color: transparent;' : ''}`}></span>
+                  {s.label}
+                </span>
+              ))}
+            </div>
+          </figcaption>
+          <svg viewBox={`0 0 ${mainSpec.W} ${mainSpec.H}`}
+               xmlns="http://www.w3.org/2000/svg"
+               class="iris-peers-svg" preserveAspectRatio="xMidYMid meet">
+            {mainSpec.yTicks.map((t) => (
+              <>
+                <line x1={mainSpec.padL} x2={mainSpec.W - mainSpec.padR} y1={t.y} y2={t.y}
+                      stroke="#e4e1dc" stroke-width="0.8" stroke-dasharray="1 3" />
+                <text x={mainSpec.padL - 8} y={t.y + 3} text-anchor="end"
+                      font-size="9" fill="#8a8a8a">{t.v.toFixed(1)}</text>
+              </>
+            ))}
+            {mainSpec.xTicks.map(({ m, i }) => (
+              <text x={mainSpec.padL + (i / Math.max(1, peers.months.length - 1)) * mainSpec.w}
+                    y={mainSpec.H - 10} text-anchor="middle"
+                    font-size="9" fill="#8a8a8a">{fmtMonth(m)}</text>
+            ))}
+            {mainSpec.drawn.map((s) => (
+              <>
+                <path d={s.d} fill="none" stroke={s.color}
+                      stroke-width={s.dashed ? '1.2' : '1.8'}
+                      stroke-linecap="round" stroke-linejoin="round"
+                      stroke-dasharray={s.dashed ? '3 3' : ''} />
+                {s.end && (
+                  <circle cx={s.end.x} cy={s.end.y} r="3.2" fill={s.color}
+                          stroke="#fff" stroke-width="1.2" />
+                )}
+              </>
+            ))}
+            {mainSpec.drawn[0]?.end && (
+              <g>
+                <circle cx={mainSpec.drawn[0].end.x} cy={mainSpec.drawn[0].end.y}
+                        r="6" fill="none" stroke="#c65d1e" stroke-width="1.2" />
+                <line x1={mainSpec.drawn[0].end.x} y1={mainSpec.drawn[0].end.y}
+                      x2={mainSpec.drawn[0].end.x - 90} y2={mainSpec.drawn[0].end.y + 24}
+                      stroke="#c65d1e" stroke-width="0.8" />
+                <text x={mainSpec.drawn[0].end.x - 95} y={mainSpec.drawn[0].end.y + 28}
+                      font-size="10" fill="#9a4412" text-anchor="end" font-weight="500">
+                  {fmtMonth(peers.current.month ?? '')} · {peers.current.chemicals_production?.toFixed(1) ?? '–'}
+                </text>
+              </g>
+            )}
+          </svg>
+          <div class="iris-peers-source">{peers.source}</div>
+        </figure>
+
+        <div class="iris-peers-twoup">
+          {pricesSpec && (
+            <figure class="iris-peers-chart">
+              <figcaption class="iris-peers-chart-caption">
+                <div class="iris-peers-chart-title">Producer prices · chemicals vs manufacturing</div>
+                <div class="iris-peers-legend">
+                  {pricesSpec.drawn.map((s) => (
+                    <span class="iris-peers-legend-item">
+                      <span class="iris-peers-legend-swatch"
+                            style={`background: ${s.color}; ${s.dashed ? 'background-image: repeating-linear-gradient(90deg, ' + s.color + ' 0 4px, transparent 4px 7px); background-color: transparent;' : ''}`}></span>
+                      {s.label}
+                    </span>
+                  ))}
+                </div>
+              </figcaption>
+              <svg viewBox={`0 0 ${pricesSpec.W} ${pricesSpec.H}`}
+                   xmlns="http://www.w3.org/2000/svg"
+                   class="iris-peers-svg" preserveAspectRatio="xMidYMid meet">
+                {pricesSpec.yTicks.map((t) => (
+                  <>
+                    <line x1={pricesSpec.padL} x2={pricesSpec.W - pricesSpec.padR} y1={t.y} y2={t.y}
+                          stroke="#e4e1dc" stroke-width="0.8" stroke-dasharray="1 3" />
+                    <text x={pricesSpec.padL - 8} y={t.y + 3} text-anchor="end"
+                          font-size="9" fill="#8a8a8a">{t.v.toFixed(1)}</text>
+                  </>
+                ))}
+                {pricesSpec.xTicks.map(({ m, i }) => (
+                  <text x={pricesSpec.padL + (i / Math.max(1, peers.months.length - 1)) * pricesSpec.w}
+                        y={pricesSpec.H - 10} text-anchor="middle"
+                        font-size="9" fill="#8a8a8a">{fmtMonth(m)}</text>
+                ))}
+                {pricesSpec.drawn.map((s) => (
+                  <>
+                    <path d={s.d} fill="none" stroke={s.color}
+                          stroke-width={s.dashed ? '1.2' : '1.8'}
+                          stroke-linecap="round" stroke-linejoin="round"
+                          stroke-dasharray={s.dashed ? '3 3' : ''} />
+                    {s.end && (
+                      <circle cx={s.end.x} cy={s.end.y} r="3" fill={s.color}
+                              stroke="#fff" stroke-width="1.2" />
+                    )}
+                  </>
+                ))}
+              </svg>
+            </figure>
+          )}
+
+          {salesSpec && (
+            <figure class="iris-peers-chart">
+              <figcaption class="iris-peers-chart-caption">
+                <div class="iris-peers-chart-title">Sales index — chemicals (C20)</div>
+              </figcaption>
+              <svg viewBox={`0 0 ${salesSpec.W} ${salesSpec.H}`}
+                   xmlns="http://www.w3.org/2000/svg"
+                   class="iris-peers-svg" preserveAspectRatio="xMidYMid meet">
+                {salesSpec.yTicks.map((t) => (
+                  <>
+                    <line x1={salesSpec.padL} x2={salesSpec.W - salesSpec.padR} y1={t.y} y2={t.y}
+                          stroke="#e4e1dc" stroke-width="0.8" stroke-dasharray="1 3" />
+                    <text x={salesSpec.padL - 8} y={t.y + 3} text-anchor="end"
+                          font-size="9" fill="#8a8a8a">{t.v.toFixed(1)}</text>
+                  </>
+                ))}
+                {salesSpec.xTicks.map(({ m, i }) => (
+                  <text x={salesSpec.padL + (i / Math.max(1, peers.months.length - 1)) * salesSpec.w}
+                        y={salesSpec.H - 10} text-anchor="middle"
+                        font-size="9" fill="#8a8a8a">{fmtMonth(m)}</text>
+                ))}
+                {salesSpec.drawn.map((s) => (
+                  <>
+                    <path d={s.d} fill="none" stroke={s.color}
+                          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    {s.end && (
+                      <>
+                        <circle cx={s.end.x} cy={s.end.y} r="3.2" fill={s.color}
+                                stroke="#fff" stroke-width="1.2" />
+                        <text x={s.end.x - 6} y={s.end.y - 8} text-anchor="end"
+                              font-size="10" fill={s.color} font-weight="600">
+                          {s.end.v.toFixed(1)}
+                        </text>
+                      </>
+                    )}
+                  </>
+                ))}
+              </svg>
+            </figure>
+          )}
+        </div>
+      </>
+    ) : (
+      <div class="iris-peers-empty">
+        Time-series data is not available for this edition. Run
+        <code> python scripts/build_peers_fiche.py --month {entry.id}</code>
+        once the Eurostat cache for this month has been fetched.
+      </div>
+    )}
+  </main>
+</Layout>
