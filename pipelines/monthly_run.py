@@ -411,11 +411,30 @@ def write_manifest(month: str, sections: list, summary_quality: str, fiches: lis
     all_possible = ["output", "prices", "sales", "trade_exports", "trade_imports"]
     skipped = [s for s in all_possible if s not in section_names]
 
-    # Data periods from fiches
+    # Data periods from fiches. Older fiches store the period at
+    # data.current.period; newer ones (macro_brief, peers_series, …) only
+    # have a top-level `period` field. Tolerate both, skip silently when
+    # neither is present so a single odd fiche doesn't kill the manifest.
     data_periods = {}
     for fp in fiches:
-        fiche = json.loads(fp.read_text(encoding="utf-8"))
-        data_periods[fiche["section_type"]] = fiche["data"]["current"]["period"]
+        try:
+            fiche = json.loads(fp.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("write_manifest: skipping unreadable fiche %s: %s", fp, exc)
+            continue
+        section_type = fiche.get("section_type") or fp.stem
+        period = (
+            fiche.get("data", {}).get("current", {}).get("period")
+            if isinstance(fiche.get("data"), dict)
+            else None
+        ) or fiche.get("period")
+        # Some fiches (e.g. macro_brief) wrap period in a dict that carries
+        # the month plus extra metadata; flatten to the month string for
+        # consistency with the other section_type entries.
+        if isinstance(period, dict):
+            period = period.get("month") or period.get("period")
+        if period is not None:
+            data_periods[section_type] = period
 
     macro_prompt_path = PROJECT_ROOT / "editorial" / "prompts" / "macro_brief.md"
     macro_prompt_hash = None
