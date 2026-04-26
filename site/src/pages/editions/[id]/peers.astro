@@ -212,7 +212,12 @@ const chemAnnotationLabel = useYoYDisplay
 
         <div class="iris-peers-grid">
 
-        <figure class="iris-peers-chart iris-peers-chart--main">
+        <figure class="iris-peers-chart iris-peers-chart--main" id="chart-peers-main">
+          <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                  data-chart-target="#chart-peers-main"
+                  data-chart-title={mainChartTitle}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+          </button>
           <figcaption class="iris-peers-chart-caption">
             <div class="iris-peers-chart-title">{mainChartTitle}</div>
             <div class="iris-peers-legend">
@@ -283,7 +288,12 @@ const chemAnnotationLabel = useYoYDisplay
         </figure>
 
         {pricesSpec && (
-            <figure class="iris-peers-chart iris-peers-chart--small iris-peers-chart--small-1">
+            <figure class="iris-peers-chart iris-peers-chart--small iris-peers-chart--small-1" id="chart-peers-prices">
+              <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                      data-chart-target="#chart-peers-prices"
+                      data-chart-title="Producer prices · chemicals vs manufacturing · NACE C20 vs C">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+              </button>
               <figcaption class="iris-peers-chart-caption">
                 <div class="iris-peers-chart-title">Producer prices · chemicals vs manufacturing</div>
                 <div class="iris-peers-legend">
@@ -329,7 +339,12 @@ const chemAnnotationLabel = useYoYDisplay
           )}
 
           {salesSpec && (
-            <figure class="iris-peers-chart iris-peers-chart--small iris-peers-chart--small-2">
+            <figure class="iris-peers-chart iris-peers-chart--small iris-peers-chart--small-2" id="chart-peers-sales">
+              <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                      data-chart-target="#chart-peers-sales"
+                      data-chart-title="Sales index, chemicals (NACE C20) · 2021 = 100">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+              </button>
               <figcaption class="iris-peers-chart-caption">
                 <div class="iris-peers-chart-title">Sales index — chemicals (C20)</div>
               </figcaption>

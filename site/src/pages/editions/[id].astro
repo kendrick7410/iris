@@ -284,6 +284,11 @@ const {
             </div>
             {trajectorySection.images[0] && (
               <figure class="iris-scatter-figure">
+                <button class="iris-chart-zoom" type="button" aria-label="Zoom"
+                        data-chart-src={trajectorySection.images[0].src}
+                        data-chart-title={trajectorySection.title}>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+                </button>
                 <img
                   src={trajectorySection.images[0].src}
                   alt={trajectorySection.images[0].alt}

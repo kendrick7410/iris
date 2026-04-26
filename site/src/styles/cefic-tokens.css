@@ -1451,12 +1451,15 @@ body.ov-active .iris-footer { display: none; }
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--surface);
+  position: relative;
 }
 .iris-scatter-figure img {
   display: block;
   width: 100%;
   height: auto;
 }
+.iris-scatter-figure:hover .iris-chart-zoom,
+.iris-scatter-figure .iris-chart-zoom:focus-visible { opacity: 1; }
 .iris-trade-context {
   margin-top: 1.5rem;
   flex-shrink: 0;
@@ -1633,7 +1636,12 @@ body.ov-active .iris-footer { display: none; }
   background: var(--surface);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
+/* Fullscreen zoom button (shared with .iris-chart) is absolutely
+   positioned, so this anchors it to the figure corner. */
+.iris-peers-chart:hover .iris-chart-zoom,
+.iris-peers-chart .iris-chart-zoom:focus-visible { opacity: 1; }
 .iris-peers-chart--main .iris-peers-svg { flex: 1; min-height: 0; }
 .iris-peers-chart--small .iris-peers-svg { flex: 1; min-height: 0; }
 
