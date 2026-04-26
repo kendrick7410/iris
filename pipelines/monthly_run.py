@@ -13,6 +13,7 @@ Exit codes: 0 = success, 1 = error, 2 = data incomplete
 import hashlib
 import json
 import logging
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -32,11 +33,19 @@ from analysis.indicators import build_fiches, build_macro_brief_fiche
 from editorial_engine.draft import draft_section
 from editorial_engine.summary import draft_summary
 from editorial_engine.macro_brief import draft_macro_brief
+from editorial_engine.validator import (
+    Flag, ValidationReport, compute_flags, compute_flags_inter,
+)
+from editorial_engine.validator.report import (
+    write_json as write_validation_json,
+    write_markdown as write_validation_md,
+    inject_into_mdx as inject_validation_into_mdx,
+)
 from charts.render import render_charts
 
 logger = logging.getLogger("iris")
 
-STEPS = ["fetch", "process", "draft", "visualize", "build", "commit"]
+STEPS = ["fetch", "process", "draft", "validate", "visualize", "build", "commit"]
 SECTION_ORDER = ["output", "prices", "sales", "trade_exports", "trade_imports"]
 PIPELINE_VERSION = "0.2.0"   # L5 — macro brief enabled; v1 editions stay at 0.1.0
 
@@ -280,6 +289,84 @@ def _consolidate(opening_path: Path, section_paths: list, drafts_dir: Path, mont
     return out
 
 
+def step_validate(month: str, sections: list, fiches: list, variant: str | None = None) -> dict:
+    """Step 3.6: Editorial validator.
+
+    Reads each drafted section + its source fiche, runs the validator, and
+    writes a JSON + Markdown report under editorial/drafts/{month}/.
+    Never blocks the pipeline. Returns the summary dict for the caller.
+
+    LLM pattern judge runs only when env var IRIS_VALIDATOR_USE_LLM is set
+    (so dev runs and CI default to the cheap deterministic pass).
+    """
+    use_llm = os.environ.get("IRIS_VALIDATOR_USE_LLM") in ("1", "true", "yes")
+    drafts_dir = _drafts_dir(month, variant)
+    fiches_dir = PROJECT_ROOT / "data" / "processed" / month / "fiches"
+
+    if not sections:
+        # Pipeline ran with --only validate or another step path that bypassed
+        # step_draft; recover the section paths from disk.
+        sections_dir = drafts_dir / "sections"
+        sections = sorted(sections_dir.glob("*.md")) if sections_dir.exists() else []
+
+    section_texts: dict[str, str] = {}
+    section_fiches: dict[str, dict] = {}
+    flags: list = []
+    llm_log = drafts_dir / "validator_llm_log.jsonl"
+
+    for section_path in sections:
+        section_type = Path(section_path).stem  # e.g. trade_exports
+        text = Path(section_path).read_text(encoding="utf-8")
+        # Strip YAML frontmatter so the validator sees prose only.
+        body = text.split("---", 2)[-1] if text.startswith("---") else text
+        section_texts[section_type] = body
+
+        fiche_path = fiches_dir / f"{section_type}.json"
+        fiche_data: dict = {}
+        if fiche_path.exists():
+            try:
+                fiche_data = json.loads(fiche_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                logger.warning("Validator: could not parse fiche %s: %s", fiche_path, exc)
+        section_fiches[section_type] = fiche_data
+
+        flags += compute_flags(
+            body, fiche_data, section_type,
+            edition_month=month, use_llm=use_llm, llm_log_path=llm_log,
+        )
+
+    flags += compute_flags_inter(section_texts, section_fiches)
+
+    report = ValidationReport(
+        edition_month=month,
+        validated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        sections_validated=sorted(section_texts.keys()),
+        flags=flags,
+    )
+    json_path = write_validation_json(report, drafts_dir)
+    md_path = write_validation_md(report, drafts_dir)
+
+    # Splice the flag block into the canonical MDX so Sveltia surfaces it
+    # to Moncef in the CMS. Variants don't write the canonical MDX, so we
+    # skip injection in that case.
+    injected = False
+    if not variant:
+        injected = inject_validation_into_mdx(report, _edition_mdx_path(month))
+
+    summary = report.summary()
+    logger.info(
+        "Validation: %d critical, %d warning, %d info across %d sections (LLM=%s)",
+        summary["critical_count"], summary["warning_count"],
+        summary["info_count"], summary["sections_validated"],
+        "on" if use_llm else "off",
+    )
+    logger.info(
+        "Validator reports → %s, %s%s",
+        json_path, md_path, " · injected into edition MDX" if injected else "",
+    )
+    return summary
+
+
 def step_visualize(month: str, fiches: list) -> list:
     """Step 4: Render charts."""
     fiches_dir = PROJECT_ROOT / "data" / "processed" / month / "fiches"
@@ -444,6 +531,15 @@ def main(month, dry_run, only_step, force, variant):
             sections = []
             edition_path = _drafts_dir(month, variant) / "edition.md"
             summary_quality = "unknown"
+
+        # 3.6 VALIDATE — editorial validator (signals only, never blocks)
+        if not only_step or only_step == "validate":
+            logger.info("--- STEP 3.6: VALIDATE ---")
+            try:
+                step_validate(month, sections, fiches, variant)
+            except Exception as exc:
+                # The validator must never break the pipeline. Log + continue.
+                logger.warning("Validator failed (non-blocking): %s", exc, exc_info=True)
 
         # 4. VISUALIZE
         if not only_step or only_step == "visualize":
