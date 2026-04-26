@@ -1583,12 +1583,12 @@ body.ov-active .iris-footer { display: none; }
   position: fixed;
   top: var(--nav-height);
   bottom: 0; left: 0; right: 0;
-  padding: clamp(1rem, 2vw, 2rem) clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(1rem, 2vw, 2rem) clamp(2rem, 3vw, 3rem);
   background: var(--surface);
   overflow-y: auto;
   font-family: var(--iris-sans);
 }
-.iris-peers-page > * { max-width: 1080px; margin-left: auto; margin-right: auto; }
+.iris-peers-page > * { max-width: 1500px; margin-left: 0; margin-right: 0; }
 .iris-peers-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
@@ -1621,7 +1621,7 @@ body.ov-active .iris-footer { display: none; }
   font-size: 1.05rem;
   line-height: 1.55;
   color: var(--ink-soft);
-  max-width: 60rem;
+  max-width: 45rem;
   margin: 0 0 1.75rem;
   text-wrap: pretty;
 }
@@ -1646,11 +1646,11 @@ body.ov-active .iris-footer { display: none; }
   display: grid;
   grid-template-columns: 2fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 20px;
+  gap: 24px;
   margin: 0 0 1.75rem;
   /* Drive the two-row stack to a sensible height; the 1fr shares this
      equally between top and bottom, and the main chart spans both. */
-  height: 500px;
+  height: 560px;
 }
 .iris-peers-chart--main {
   grid-column: 1;
@@ -1668,6 +1668,7 @@ body.ov-active .iris-footer { display: none; }
 .iris-peers-chart--small .iris-peers-legend { font-size: 0.7rem; }
 
 @media (max-width: 768px) {
+  .iris-peers-page { padding: 1rem 1rem 2rem; }
   .iris-peers-grid {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
