@@ -500,6 +500,8 @@
   border-radius: 3pt;
   overflow: hidden;
   background: #fff;
+  max-width: 75%;
+  justify-self: start;
 }
 .print-scatter-figure img {
   display: block;

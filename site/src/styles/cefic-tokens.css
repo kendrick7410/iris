@@ -1455,6 +1455,11 @@ body.ov-active .iris-footer { display: none; }
   overflow: hidden;
   background: var(--surface);
   position: relative;
+  /* Scatters sit ~75% of the right grid cell so they read at a calmer
+     scale next to the prose; the lightbox zoom still opens the full
+     SVG so detail stays accessible. */
+  max-width: 75%;
+  justify-self: start;
 }
 .iris-scatter-figure img {
   display: block;
