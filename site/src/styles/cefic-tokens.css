@@ -1124,7 +1124,10 @@ body.ov-active .iris-footer { display: none; }
   position: fixed;
   top: var(--nav-height);
   bottom: 0; left: 0; right: 0;
-  padding: clamp(1rem, 2vw, 2rem) clamp(1.5rem, 4vw, 3rem);
+  padding-left: clamp(16px, 4vw, 80px);
+  padding-right: clamp(16px, 4vw, 80px);
+  padding-top: clamp(1rem, 2vw, 2rem);
+  padding-bottom: clamp(1rem, 2vw, 2rem);
   overflow: hidden;
   background: var(--surface);
   display: flex;
@@ -1586,12 +1589,15 @@ body.ov-active .iris-footer { display: none; }
   position: fixed;
   top: var(--nav-height);
   bottom: 0; left: 0; right: 0;
-  padding: clamp(1rem, 2vw, 2rem) clamp(2rem, 3vw, 3rem);
+  padding-left: clamp(16px, 4vw, 80px);
+  padding-right: clamp(16px, 4vw, 80px);
+  padding-top: clamp(1rem, 2vw, 2rem);
+  padding-bottom: clamp(1rem, 2vw, 2rem);
   background: var(--surface);
   overflow-y: auto;
   font-family: var(--iris-sans);
 }
-.iris-peers-page > * { max-width: 1500px; margin-left: 0; margin-right: 0; }
+.iris-peers-page > * { width: 100%; max-width: none; margin-left: 0; margin-right: 0; }
 .iris-peers-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
@@ -1624,7 +1630,8 @@ body.ov-active .iris-footer { display: none; }
   font-size: 1.05rem;
   line-height: 1.55;
   color: var(--ink-soft);
-  max-width: 45rem;
+  width: 100%;
+  max-width: none;
   margin: 0 0 1.75rem;
   text-wrap: pretty;
 }
@@ -1676,7 +1683,6 @@ body.ov-active .iris-footer { display: none; }
 .iris-peers-chart--small .iris-peers-legend { font-size: 0.7rem; }
 
 @media (max-width: 768px) {
-  .iris-peers-page { padding: 1rem 1rem 2rem; }
   .iris-peers-grid {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
