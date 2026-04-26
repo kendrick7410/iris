@@ -2,6 +2,40 @@
 month: 2026-02
 publication_date: 2026-04-23
 pipeline_version: 0.3.0
+# ↓ validator (auto-generated, edit nothing here) ↓
+validation:
+  generated_at: "2026-04-26T10:43:03+00:00"
+  summary:
+    critical: 1
+    warning: 3
+    info: 0
+    sections_validated: 5
+  flags:
+    - section: output
+      severity: warning
+      flag_id: non_cefic_jargon
+      message: "'significant' reads as vague intensifier jargon, foreign to the Cefic register."
+      citation: "…icles gained 2.0%.  Country trends show significant variation across the EU27. The Netherla…"
+      suggested_resolution: "Replace with a figure-anchored statement"
+    - section: prices
+      severity: warning
+      flag_id: missing_long_term_perspective
+      message: "Section discusses recent variation only; no anchor to pre-crisis (2014-2019), 12-month rolling, or a multi-year baseline."
+      pattern_ref: "SYNTHESIS.md pattern 6"
+      suggested_resolution: "Add a comparison to the historical baseline or rolling average."
+    - section: trade_exports
+      severity: critical
+      flag_id: numerical_inconsistency
+      message: "Prose cites €25.10 bn but no fiche value within ±0.05 bn"
+      citation: "5 bn in the first two months of 2026, down by €25.1 bn compared to 2025."
+      suggested_resolution: "Verify against the source fiche; revise prose if drifted."
+    - section: trade_imports
+      severity: warning
+      flag_id: missing_long_term_perspective
+      message: "Section discusses recent variation only; no anchor to pre-crisis (2014-2019), 12-month rolling, or a multi-year baseline."
+      pattern_ref: "SYNTHESIS.md pattern 6"
+      suggested_resolution: "Add a comparison to the historical baseline or rolling average."
+# ↑ validator ↑
 ---
 
 ## EU27 chemical export value down ~10% YoY in Jan-Feb 2026 against normal base, after 2025 pre-tariff spike
