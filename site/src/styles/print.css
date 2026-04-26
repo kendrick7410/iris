@@ -54,7 +54,10 @@
   height: 261mm; /* A4 minus margins */
   position: relative;
   color: #ffffff;
-  padding: 16mm;
+  /* Padding must be >= the Playwright @page margin (18mm) so text stays
+     inside the printable area once the cover is bled to the page edge
+     via the negative margin below. 22mm gives a small safety buffer. */
+  padding: 22mm;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -80,12 +83,12 @@
   z-index: 2;
 }
 
-/* The Notch — white logo cartouche, top-right (cf. p.47 guidelines). */
+/* The Notch — white logo cartouche. Positioned in the normal flow at
+   the top of print-cover-head so it inherits the cover's 22mm padding;
+   absolute positioning here is unreliable in Playwright/Chrome when the
+   cover carries negative full-bleed margins (the notch ended up clipped
+   on the left edge in earlier renders). */
 .print-cover-notch {
-  position: absolute;
-  top: 16mm;
-  right: 16mm;
-  z-index: 3;
   background: #ffffff;
   padding: 8pt 12pt;
   width: 32mm;
