@@ -33,6 +33,7 @@ const {
   macroProseSections,
   tradeProseSections,
   trajectorySection,
+  cuTradeSection,
   overviewTitle,
   macroTitle,
   drilldownTitle,
@@ -352,6 +353,27 @@ const peersSales = peers
           {trajectorySection.images[0] && (
             <figure class="print-scatter-figure">
               <img src={trajectorySection.images[0].src} alt={trajectorySection.images[0].alt} />
+            </figure>
+          )}
+        </div>
+      </div>
+    )}
+
+    {cuTradeSection && (
+      <div class="print-scatter-panel print-break">
+        <h3 class="print-panel-title">{cuTradeSection.title}</h3>
+        <div class="print-scatter-body">
+          <div class="print-scatter-prose">
+            {cuTradeSection.paragraphs.map((p: string) => (
+              <p set:html={inlineMd(p)} />
+            ))}
+            {cuTradeSection.source && (
+              <p class="print-scatter-source">{cuTradeSection.source}</p>
+            )}
+          </div>
+          {cuTradeSection.images[0] && (
+            <figure class="print-scatter-figure">
+              <img src={cuTradeSection.images[0].src} alt={cuTradeSection.images[0].alt} />
             </figure>
           )}
         </div>

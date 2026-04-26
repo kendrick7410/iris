@@ -551,6 +551,7 @@ export type EditionData = {
   macroProseSections: MdxSection[];
   tradeProseSections: MdxSection[];
   trajectorySection: MdxSection | null;
+  cuTradeSection: MdxSection | null;
   concentrationSection: MdxSection | null;
   // Titles
   overviewTitle: string;
@@ -598,6 +599,8 @@ export function loadEditionData(entry: CollectionEntry<'editions'>): EditionData
   );
   const trajectorySection =
     mdxSections.find((s) => /trajectory|six years on/i.test(s.title)) ?? null;
+  const cuTradeSection =
+    mdxSections.find((s) => /capacity utilisation|capacity utilization|who holds up/i.test(s.title)) ?? null;
   const concentrationSection =
     mdxSections.find((s) => /concentration|strategic exposure/i.test(s.title)) ?? null;
 
@@ -651,6 +654,7 @@ export function loadEditionData(entry: CollectionEntry<'editions'>): EditionData
     macroProseSections,
     tradeProseSections,
     trajectorySection,
+    cuTradeSection,
     concentrationSection,
     overviewTitle: sectionHeadings[0] ?? `Overview, ${monthName(id)}`,
     macroTitle: sectionHeadings[1] ?? `Macro brief, ${monthName(id)}`,
