@@ -66,8 +66,8 @@ function buildLineChart(opts: {
 
   const drawn = series.map((s) => {
     const pts = s.values
-      .map((v, i) => (v == null ? null : { x: xScale(i), y: yScale(v), v }))
-      .filter((p): p is { x: number; y: number; v: number } => p !== null);
+      .map((v, i) => (v == null ? null : { x: xScale(i), y: yScale(v), v, m: months[i] }))
+      .filter((p): p is { x: number; y: number; v: number; m: string } => p !== null);
     let d = '';
     if (pts.length >= 2) {
       d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
@@ -83,7 +83,7 @@ function buildLineChart(opts: {
         d += ` C ${cp1x.toFixed(2)} ${cp1y.toFixed(2)}, ${cp2x.toFixed(2)} ${cp2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
       }
     }
-    return { ...s, d, end: pts[pts.length - 1] };
+    return { ...s, d, pts, end: pts[pts.length - 1] };
   });
 
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
@@ -147,7 +147,8 @@ if (peers) {
     H: 220,
     months,
     series: [
-      { key: 'chemicals', label: 'Chemicals sales (2021=100)', color: '#7ab8a3', values: sales.chemicals },
+      { key: 'chemicals',     label: 'Chemicals sales',     color: '#7ab8a3', values: sales.chemicals },
+      { key: 'manufacturing', label: 'Manufacturing sales', color: '#8a8a8a', values: sales.manufacturing, dashed: true },
     ],
   });
 
@@ -232,7 +233,7 @@ const chemAnnotationLabel = useYoYDisplay
           </figcaption>
           <svg viewBox={`0 0 ${mainSpec.W} ${mainSpec.H}`}
                xmlns="http://www.w3.org/2000/svg"
-               class="iris-peers-svg" preserveAspectRatio="xMidYMid meet">
+               class="iris-peers-svg iris-chart-hover" preserveAspectRatio="xMidYMid meet">
             {mainSpec.yTicks.map((t) => (
               <>
                 <line x1={mainSpec.padL} x2={mainSpec.W - mainSpec.padR} y1={t.y} y2={t.y}
@@ -283,7 +284,20 @@ const chemAnnotationLabel = useYoYDisplay
                 </text>
               </g>
             )}
+            {mainSpec.drawn.map((s) =>
+              s.pts.map((p) => (
+                <rect class="spark-hover-rect"
+                      x={p.x - 5} y={p.y - 8} width={10} height={16}
+                      fill="transparent"
+                      data-period={fmtMonth(p.m)}
+                      data-value={useYoYDisplay ? `${p.v >= 0 ? '+' : ''}${p.v.toFixed(1)}` : p.v.toFixed(1)}
+                      data-unit={useYoYDisplay ? '%' : ''}
+                      data-label={s.label}
+                      data-color={s.color} />
+              ))
+            )}
           </svg>
+          <div class="iris-chart-tooltip" aria-hidden="true"></div>
           <div class="iris-peers-source">{peers.source}</div>
         </figure>
 
@@ -308,7 +322,7 @@ const chemAnnotationLabel = useYoYDisplay
               </figcaption>
               <svg viewBox={`0 0 ${pricesSpec.W} ${pricesSpec.H}`}
                    xmlns="http://www.w3.org/2000/svg"
-                   class="iris-peers-svg" preserveAspectRatio="xMidYMid meet">
+                   class="iris-peers-svg iris-chart-hover" preserveAspectRatio="xMidYMid meet">
                 {pricesSpec.yTicks.map((t) => (
                   <>
                     <line x1={pricesSpec.padL} x2={pricesSpec.W - pricesSpec.padR} y1={t.y} y2={t.y}
@@ -334,7 +348,20 @@ const chemAnnotationLabel = useYoYDisplay
                     )}
                   </>
                 ))}
+                {pricesSpec.drawn.map((s) =>
+                  s.pts.map((p) => (
+                    <rect class="spark-hover-rect"
+                          x={p.x - 5} y={p.y - 8} width={10} height={16}
+                          fill="transparent"
+                          data-period={fmtMonth(p.m)}
+                          data-value={p.v.toFixed(1)}
+                          data-unit="(2021=100)"
+                          data-label={s.label}
+                          data-color={s.color} />
+                  ))
+                )}
               </svg>
+              <div class="iris-chart-tooltip" aria-hidden="true"></div>
             </figure>
           )}
 
@@ -346,11 +373,20 @@ const chemAnnotationLabel = useYoYDisplay
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
               </button>
               <figcaption class="iris-peers-chart-caption">
-                <div class="iris-peers-chart-title">Sales index — chemicals (C20)</div>
+                <div class="iris-peers-chart-title">Sales index · chemicals vs manufacturing</div>
+                <div class="iris-peers-legend">
+                  {salesSpec.drawn.map((s) => (
+                    <span class="iris-peers-legend-item">
+                      <span class="iris-peers-legend-swatch"
+                            style={`background: ${s.color}; ${s.dashed ? 'background-image: repeating-linear-gradient(90deg, ' + s.color + ' 0 4px, transparent 4px 7px); background-color: transparent;' : ''}`}></span>
+                      {s.label}
+                    </span>
+                  ))}
+                </div>
               </figcaption>
               <svg viewBox={`0 0 ${salesSpec.W} ${salesSpec.H}`}
                    xmlns="http://www.w3.org/2000/svg"
-                   class="iris-peers-svg" preserveAspectRatio="xMidYMid meet">
+                   class="iris-peers-svg iris-chart-hover" preserveAspectRatio="xMidYMid meet">
                 {salesSpec.yTicks.map((t) => (
                   <>
                     <line x1={salesSpec.padL} x2={salesSpec.W - salesSpec.padR} y1={t.y} y2={t.y}
@@ -367,20 +403,29 @@ const chemAnnotationLabel = useYoYDisplay
                 {salesSpec.drawn.map((s) => (
                   <>
                     <path d={s.d} fill="none" stroke={s.color}
-                          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                          stroke-width={s.dashed ? '1.2' : '1.8'}
+                          stroke-linecap="round" stroke-linejoin="round"
+                          stroke-dasharray={s.dashed ? '3 3' : ''} />
                     {s.end && (
-                      <>
-                        <circle cx={s.end.x} cy={s.end.y} r="3.2" fill={s.color}
-                                stroke="#fff" stroke-width="1.2" />
-                        <text x={s.end.x - 6} y={s.end.y - 8} text-anchor="end"
-                              font-size="10" fill={s.color} font-weight="600">
-                          {s.end.v.toFixed(1)}
-                        </text>
-                      </>
+                      <circle cx={s.end.x} cy={s.end.y} r="3" fill={s.color}
+                              stroke="#fff" stroke-width="1.2" />
                     )}
                   </>
                 ))}
+                {salesSpec.drawn.map((s) =>
+                  s.pts.map((p) => (
+                    <rect class="spark-hover-rect"
+                          x={p.x - 5} y={p.y - 8} width={10} height={16}
+                          fill="transparent"
+                          data-period={fmtMonth(p.m)}
+                          data-value={p.v.toFixed(1)}
+                          data-unit="(2021=100)"
+                          data-label={s.label}
+                          data-color={s.color} />
+                  ))
+                )}
               </svg>
+              <div class="iris-chart-tooltip" aria-hidden="true"></div>
             </figure>
           )}
 

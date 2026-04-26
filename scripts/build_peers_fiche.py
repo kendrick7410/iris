@@ -132,6 +132,7 @@ def build(month: str, extended_history: bool = True) -> Path:
     }
     sales_block = {
         "chemicals":     _series_for(turn_by_sector, "C20", months),
+        "manufacturing": _series_for(turn_by_sector, "C",   months),
     }
 
     # YoY blocks need 12 months of history before the first plotted month.
@@ -160,6 +161,9 @@ def build(month: str, extended_history: bool = True) -> Path:
         ext_turn_c20 = _fetch_extended_series(
             "sts_intv_m", "I21", "SCA", "EU27_2020", "C20", since_month,
         )
+        ext_turn_c = _fetch_extended_series(
+            "sts_intv_m", "I21", "SCA", "EU27_2020", "C", since_month,
+        )
 
         production_yoy = {
             NACE_LABELS[c]["key"]: _yoy_series(ext_prod[c], months)
@@ -171,6 +175,7 @@ def build(month: str, extended_history: bool = True) -> Path:
         }
         sales_yoy = {
             "chemicals":     _yoy_series(ext_turn_c20, months),
+            "manufacturing": _yoy_series(ext_turn_c,   months),
         }
 
     # Cap at 24 trailing months when the dataset has more (parity with the

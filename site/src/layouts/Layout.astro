@@ -136,7 +136,7 @@ const bodyClass = variant === 'dashboard' ? 'ov-active' : '';
     // Chart hover tooltips (data labels on .iris-chart-hover SVGs)
     (function () {
       document.querySelectorAll('.iris-chart-hover').forEach((svg) => {
-        const figure  = svg.closest('.iris-chart');
+        const figure  = svg.closest('.iris-chart, .iris-peers-chart');
         const tooltip = figure?.querySelector('.iris-chart-tooltip');
         if (!figure || !tooltip) return;
 

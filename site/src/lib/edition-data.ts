@@ -517,7 +517,7 @@ export type PeersSeries = {
     motor_vehicles: (number | null)[];
   };
   prices: { chemicals: (number | null)[]; manufacturing: (number | null)[] };
-  sales:  { chemicals: (number | null)[] };
+  sales:  { chemicals: (number | null)[]; manufacturing: (number | null)[] };
   production_yoy: {
     manufacturing: (number | null)[];
     chemicals: (number | null)[];
@@ -526,7 +526,7 @@ export type PeersSeries = {
     motor_vehicles: (number | null)[];
   } | null;
   prices_yoy: { chemicals: (number | null)[]; manufacturing: (number | null)[] } | null;
-  sales_yoy: { chemicals: (number | null)[] } | null;
+  sales_yoy: { chemicals: (number | null)[]; manufacturing: (number | null)[] } | null;
   current: {
     month: string | null;
     chemicals_production: number | null;
