@@ -47,19 +47,13 @@ const thumbVariants = ['', '--orange', '--green', '--blue'];
 // rather than a guarantee.
 const formatLongDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-const formatShortMonth = (id: string) => {
-  const [y, m] = id.split('-');
-  return `${m}/${y}`;
-};
 
 let lastEditionLabel: string | null = null;
 let nextEditionLabel: string | null = null;
-let referenceMonthLabel: string | null = null;
 let featuredPdfUrl: string | null = null;
 let featuredPdfName: string | null = null;
 if (featured) {
-  lastEditionLabel = formatShortMonth(featured.id);
-  referenceMonthLabel = monthName(featured.id);
+  lastEditionLabel = monthName(featured.id);
   const lastPub = new Date(featured.data.publication_date);
   if (!Number.isNaN(lastPub.getTime())) {
     const next = new Date(lastPub);
@@ -121,13 +115,6 @@ const SUBSCRIBE_HREF = 'mailto:iris@cefic.org?subject=Subscribe%20to%20Iris%20up
             ) : 'Live'}
           </span>
         </div>
-        {referenceMonthLabel && (
-          <div class="iris-hero-glance-row">
-            <span class="iris-hero-glance-label">Reference month</span>
-            <span class="iris-hero-glance-value">{referenceMonthLabel}</span>
-            <span class="iris-hero-glance-meta">Eurostat · Comext</span>
-          </div>
-        )}
         <div class="iris-hero-glance-row">
           <span class="iris-hero-glance-label">Next version expected</span>
           <span class="iris-hero-glance-value">{nextEditionLabel}</span>
