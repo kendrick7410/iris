@@ -476,7 +476,9 @@
 }
 .print-scatter-body {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  /* Match the dashboard ratio: chart cell shrinks to ~75% of its
+     previous footprint, prose cell widens. */
+  grid-template-columns: 1.45fr 0.9fr;
   gap: 12pt;
   align-items: start;
   margin-top: 6pt;
@@ -500,8 +502,7 @@
   border-radius: 3pt;
   overflow: hidden;
   background: #fff;
-  max-width: 75%;
-  justify-self: start;
+  justify-self: end;
 }
 .print-scatter-figure img {
   display: block;

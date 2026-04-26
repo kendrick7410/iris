@@ -1432,7 +1432,11 @@ body.ov-active .iris-footer { display: none; }
 }
 .iris-scatter-body {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.2fr);
+  /* Chart cell shrinks to ~75% of its previous footprint, prose cell
+     widens accordingly. The right edge of both prose and chart stays at
+     the same visual position as before; the chart's left edge moves
+     right, the prose grows right into the freed space. */
+  grid-template-columns: minmax(260px, 1.45fr) minmax(280px, 0.9fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -1455,11 +1459,10 @@ body.ov-active .iris-footer { display: none; }
   overflow: hidden;
   background: var(--surface);
   position: relative;
-  /* Scatters sit ~75% of the right grid cell so they read at a calmer
-     scale next to the prose; the lightbox zoom still opens the full
+  /* The chart fills its (now narrower) grid cell, anchored to the right
+     edge of the previous layout. The lightbox zoom still opens the full
      SVG so detail stays accessible. */
-  max-width: 75%;
-  justify-self: start;
+  justify-self: end;
 }
 .iris-scatter-figure img {
   display: block;
