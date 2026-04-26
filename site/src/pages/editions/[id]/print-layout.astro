@@ -47,7 +47,110 @@ const {
   partners60m,
   waterfallUsImp,
   waterfallCnImp,
+  peers,
 } = data;
+
+// Print-side helper for the Time series section. Mirrors the live
+// `buildLineChart` in pages/editions/[id]/peers.astro but at print
+// dimensions (smaller padding, page-friendly aspect ratio).
+function buildPrintLineChart(opts: {
+  W: number;
+  H: number;
+  months: string[];
+  series: Array<{
+    key: string;
+    label: string;
+    color: string;
+    values: (number | null)[];
+    dashed?: boolean;
+  }>;
+  yPad?: number;
+}) {
+  const { W, H, months, series } = opts;
+  const yPad = opts.yPad ?? 0.06;
+  const padL = 36, padR = 12, padT = 14, padB = 24;
+  const w = W - padL - padR;
+  const h = H - padT - padB;
+  const flat = series.flatMap((s) => s.values.filter((v): v is number => v != null));
+  if (flat.length === 0) return null;
+  const vmin = Math.min(...flat);
+  const vmax = Math.max(...flat);
+  const span = (vmax - vmin) || 1;
+  const ymin = vmin - span * yPad;
+  const ymax = vmax + span * yPad;
+  const xScale = (i: number) => padL + (i / Math.max(1, months.length - 1)) * w;
+  const yScale = (v: number) => padT + (1 - (v - ymin) / (ymax - ymin)) * h;
+  const drawn = series.map((s) => {
+    const pts = s.values
+      .map((v, i) => (v == null ? null : { x: xScale(i), y: yScale(v), v }))
+      .filter((p): p is { x: number; y: number; v: number } => p !== null);
+    let d = '';
+    if (pts.length >= 2) {
+      d = `M ${pts[0].x.toFixed(2)} ${pts[0].y.toFixed(2)}`;
+      for (let i = 1; i < pts.length; i++) {
+        const p1 = pts[i - 1];
+        const p2 = pts[i];
+        d += ` L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+        void p1;
+      }
+    }
+    return { ...s, d, end: pts[pts.length - 1] };
+  });
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
+    const v = ymin + (ymax - ymin) * (1 - f);
+    return { v, y: padT + f * h };
+  });
+  const tickEvery = Math.max(1, Math.ceil(months.length / 6));
+  const xTicks = months
+    .map((m, i) => ({ m, i }))
+    .filter(({ i }) => i % tickEvery === 0 || i === months.length - 1);
+  return { W, H, padL, padR, padT, padB, w, h, drawn, yTicks, xTicks, ymin, ymax };
+}
+
+const peersUseYoY = Boolean(
+  peers?.production_yoy && peers.production_yoy.chemicals?.some((v: number | null) => v != null),
+);
+const peersMain = peers
+  ? buildPrintLineChart({
+      W: 720, H: 280, months: peers.months, yPad: 0.15,
+      series: peersUseYoY
+        ? [
+            { key: 'chemicals',       label: peers.labels.chemicals,       color: '#0a527a', values: peers.production_yoy!.chemicals },
+            { key: 'pharmaceuticals', label: peers.labels.pharmaceuticals, color: '#3fa4c9', values: peers.production_yoy!.pharmaceuticals },
+            { key: 'basic_metals',    label: peers.labels.basic_metals,    color: '#c65d1e', values: peers.production_yoy!.basic_metals },
+            { key: 'motor_vehicles',  label: peers.labels.motor_vehicles,  color: '#6b9d52', values: peers.production_yoy!.motor_vehicles },
+            { key: 'manufacturing',   label: peers.labels.manufacturing,   color: '#8a8a8a', values: peers.production_yoy!.manufacturing, dashed: true },
+          ]
+        : [
+            { key: 'chemicals',       label: peers.labels.chemicals,       color: '#0a527a', values: peers.production.chemicals },
+            { key: 'pharmaceuticals', label: peers.labels.pharmaceuticals, color: '#3fa4c9', values: peers.production.pharmaceuticals },
+            { key: 'basic_metals',    label: peers.labels.basic_metals,    color: '#c65d1e', values: peers.production.basic_metals },
+            { key: 'motor_vehicles',  label: peers.labels.motor_vehicles,  color: '#6b9d52', values: peers.production.motor_vehicles },
+            { key: 'manufacturing',   label: peers.labels.manufacturing,   color: '#8a8a8a', values: peers.production.manufacturing, dashed: true },
+          ],
+    })
+  : null;
+const peersZeroY = peersMain && peersUseYoY && peersMain.ymin <= 0 && peersMain.ymax >= 0
+  ? peersMain.padT + (1 - (0 - peersMain.ymin) / (peersMain.ymax - peersMain.ymin)) * peersMain.h
+  : null;
+const peersPrices = peers
+  ? buildPrintLineChart({
+      W: 360, H: 200, months: peers.months,
+      series: [
+        { key: 'chemicals',     label: 'Chemicals PPI',     color: '#2a7d82', values: peers.prices.chemicals },
+        { key: 'manufacturing', label: 'Manufacturing PPI', color: '#8a8a8a', values: peers.prices.manufacturing, dashed: true },
+      ],
+    })
+  : null;
+const peersSales = peers
+  ? buildPrintLineChart({
+      W: 360, H: 200, months: peers.months,
+      series: [
+        { key: 'chemicals',     label: 'Chemicals sales',     color: '#7ab8a3', values: peers.sales.chemicals },
+        { key: 'manufacturing', label: 'Manufacturing sales', color: '#8a8a8a', values: peers.sales.manufacturing, dashed: true },
+      ],
+    })
+  : null;
 ---
 <html lang="en">
 <head>
@@ -255,6 +358,166 @@ const {
       </div>
     )}
   </section>
+
+  <!-- ===== TIME SERIES (Chemicals vs peers) ===== -->
+  {peers && peersMain && (
+    <section class="print-page print-break print-content-page">
+      <header class="print-section-header">
+        <div class="print-eyebrow">Time series</div>
+        <h2 class="print-section-title">Chemicals versus peers — {peers.months.length} months</h2>
+        <div class="print-section-subtitle">NACE C / C20 / C21 / C24 / C29 · EU27, I21, SCA where available</div>
+      </header>
+
+      <p class="print-peers-lead">
+        Over the past {peers.months.length} months, EU27 chemical production has trailed total
+        manufacturing and motor vehicles, both running near or above the 2021 baseline, while
+        pharmaceuticals stayed well above it before rolling over from late 2025.
+      </p>
+
+      <figure class="print-chart">
+        <figcaption class="print-chart-caption">
+          {peersUseYoY
+            ? 'Industrial production · YoY % change · NACE C / C20 / C21 / C24 / C29'
+            : 'Industrial production index · 2021=100 · NACE C / C20 / C21 / C24 / C29'}
+        </figcaption>
+        <div class="print-peers-legend">
+          {peersMain.drawn.map((s) => (
+            <span class="print-peers-legend-item">
+              <span class="print-peers-legend-swatch"
+                    style={`background:${s.color}; ${s.dashed ? 'background-image: repeating-linear-gradient(90deg,' + s.color + ' 0 4px, transparent 4px 7px); background-color: transparent;' : ''}`}></span>
+              {s.label}
+            </span>
+          ))}
+        </div>
+        <svg viewBox={`0 0 ${peersMain.W} ${peersMain.H}`} xmlns="http://www.w3.org/2000/svg" class="print-chart-svg">
+          {peersMain.yTicks.map((t: any) => (
+            <>
+              <line x1={peersMain.padL} x2={peersMain.W - peersMain.padR} y1={t.y} y2={t.y}
+                    stroke="#eee" stroke-width="1" stroke-dasharray="2 3" />
+              <text x={peersMain.padL - 6} y={t.y + 3} text-anchor="end"
+                    font-size="9" fill="#666">
+                {peersUseYoY ? `${t.v >= 0 ? '+' : ''}${t.v.toFixed(1)}%` : t.v.toFixed(1)}
+              </text>
+            </>
+          ))}
+          {peersZeroY != null && (
+            <>
+              <line x1={peersMain.padL} x2={peersMain.W - peersMain.padR}
+                    y1={peersZeroY} y2={peersZeroY} stroke="#1a1a1a" stroke-width="1.1" />
+              <text x={peersMain.W - peersMain.padR - 4} y={peersZeroY - 4} text-anchor="end"
+                    font-size="9" fill="#1a1a1a" font-weight="600">0%</text>
+            </>
+          )}
+          {peersMain.xTicks.map(({ m, i }: any) => (
+            <text x={peersMain.padL + (i / Math.max(1, peers.months.length - 1)) * peersMain.w}
+                  y={peersMain.H - 8} text-anchor="middle"
+                  font-size="9" fill="#666">{fmtMonth(m)}</text>
+          ))}
+          {peersMain.drawn.map((s: any) => (
+            <>
+              <path d={s.d} fill="none" stroke={s.color}
+                    stroke-width={s.dashed ? '1.2' : '1.8'}
+                    stroke-linecap="round" stroke-linejoin="round"
+                    stroke-dasharray={s.dashed ? '3 3' : ''} />
+              {s.end && (
+                <circle cx={s.end.x} cy={s.end.y} r="2.6" fill={s.color}
+                        stroke="#fff" stroke-width="1.2" />
+              )}
+            </>
+          ))}
+        </svg>
+      </figure>
+
+      <div class="print-peers-twoup">
+        {peersPrices && (
+          <figure class="print-chart">
+            <figcaption class="print-chart-caption">Producer prices · chemicals vs manufacturing</figcaption>
+            <div class="print-peers-legend">
+              {peersPrices.drawn.map((s) => (
+                <span class="print-peers-legend-item">
+                  <span class="print-peers-legend-swatch"
+                        style={`background:${s.color}; ${s.dashed ? 'background-image: repeating-linear-gradient(90deg,' + s.color + ' 0 4px, transparent 4px 7px); background-color: transparent;' : ''}`}></span>
+                  {s.label}
+                </span>
+              ))}
+            </div>
+            <svg viewBox={`0 0 ${peersPrices.W} ${peersPrices.H}`} xmlns="http://www.w3.org/2000/svg" class="print-chart-svg">
+              {peersPrices.yTicks.map((t: any) => (
+                <>
+                  <line x1={peersPrices.padL} x2={peersPrices.W - peersPrices.padR} y1={t.y} y2={t.y}
+                        stroke="#eee" stroke-width="1" stroke-dasharray="2 3" />
+                  <text x={peersPrices.padL - 6} y={t.y + 3} text-anchor="end"
+                        font-size="8" fill="#888">{t.v.toFixed(1)}</text>
+                </>
+              ))}
+              {peersPrices.xTicks.map(({ m, i }: any) => (
+                <text x={peersPrices.padL + (i / Math.max(1, peers.months.length - 1)) * peersPrices.w}
+                      y={peersPrices.H - 8} text-anchor="middle"
+                      font-size="8" fill="#888">{fmtMonth(m)}</text>
+              ))}
+              {peersPrices.drawn.map((s: any) => (
+                <>
+                  <path d={s.d} fill="none" stroke={s.color}
+                        stroke-width={s.dashed ? '1.2' : '1.8'}
+                        stroke-linecap="round" stroke-linejoin="round"
+                        stroke-dasharray={s.dashed ? '3 3' : ''} />
+                  {s.end && (
+                    <circle cx={s.end.x} cy={s.end.y} r="2.5" fill={s.color}
+                            stroke="#fff" stroke-width="1.2" />
+                  )}
+                </>
+              ))}
+            </svg>
+          </figure>
+        )}
+        {peersSales && (
+          <figure class="print-chart">
+            <figcaption class="print-chart-caption">Sales index · chemicals vs manufacturing</figcaption>
+            <div class="print-peers-legend">
+              {peersSales.drawn.map((s) => (
+                <span class="print-peers-legend-item">
+                  <span class="print-peers-legend-swatch"
+                        style={`background:${s.color}; ${s.dashed ? 'background-image: repeating-linear-gradient(90deg,' + s.color + ' 0 4px, transparent 4px 7px); background-color: transparent;' : ''}`}></span>
+                  {s.label}
+                </span>
+              ))}
+            </div>
+            <svg viewBox={`0 0 ${peersSales.W} ${peersSales.H}`} xmlns="http://www.w3.org/2000/svg" class="print-chart-svg">
+              {peersSales.yTicks.map((t: any) => (
+                <>
+                  <line x1={peersSales.padL} x2={peersSales.W - peersSales.padR} y1={t.y} y2={t.y}
+                        stroke="#eee" stroke-width="1" stroke-dasharray="2 3" />
+                  <text x={peersSales.padL - 6} y={t.y + 3} text-anchor="end"
+                        font-size="8" fill="#888">{t.v.toFixed(1)}</text>
+                </>
+              ))}
+              {peersSales.xTicks.map(({ m, i }: any) => (
+                <text x={peersSales.padL + (i / Math.max(1, peers.months.length - 1)) * peersSales.w}
+                      y={peersSales.H - 8} text-anchor="middle"
+                      font-size="8" fill="#888">{fmtMonth(m)}</text>
+              ))}
+              {peersSales.drawn.map((s: any) => (
+                <>
+                  <path d={s.d} fill="none" stroke={s.color}
+                        stroke-width={s.dashed ? '1.2' : '1.8'}
+                        stroke-linecap="round" stroke-linejoin="round"
+                        stroke-dasharray={s.dashed ? '3 3' : ''} />
+                  {s.end && (
+                    <circle cx={s.end.x} cy={s.end.y} r="2.5" fill={s.color}
+                            stroke="#fff" stroke-width="1.2" />
+                  )}
+                </>
+              ))}
+            </svg>
+          </figure>
+        )}
+      </div>
+
+      {peers.source && (
+        <p class="print-peers-source">{peers.source}</p>
+      )}
+    </section>
+  )}
 
   <!-- ===== DRILL-DOWN ===== -->
   <section class="print-page print-break print-content-page">

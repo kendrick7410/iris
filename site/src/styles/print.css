@@ -97,10 +97,11 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2pt 6pt rgba(0, 0, 0, 0.08);
+  margin-bottom: 14pt;
 }
 .print-cover-notch img { width: 100%; height: auto; max-height: 12mm; }
 
-.print-cover-head { padding-top: 6mm; }
+.print-cover-head { padding-top: 0; }
 .print-cover-eyebrow {
   font-size: 9pt;
   letter-spacing: 0.14em;
@@ -531,6 +532,45 @@
   margin: 0 0 6pt;
 }
 .print-takeaway p:last-child { margin-bottom: 0; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   TIME SERIES — Chemicals versus peers
+   ───────────────────────────────────────────────────────────────────── */
+.print-peers-lead {
+  font-family: "Noto Serif", serif;
+  font-size: 10pt;
+  line-height: 1.55;
+  color: #2a2a2a;
+  margin: 0 0 12pt;
+}
+.print-peers-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10pt;
+  font-size: 7.5pt;
+  color: #666666;
+  margin-bottom: 4pt;
+}
+.print-peers-legend-item { display: inline-flex; align-items: center; gap: 3pt; }
+.print-peers-legend-swatch {
+  display: inline-block;
+  width: 12pt;
+  height: 3pt;
+  border-radius: 1pt;
+}
+.print-peers-twoup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10pt;
+  margin-top: 10pt;
+}
+.print-peers-twoup .print-chart-svg { max-height: 70mm; }
+.print-peers-source {
+  font-size: 7.5pt;
+  color: #999999;
+  margin-top: 8pt;
+  font-style: italic;
+}
 
 /* ─────────────────────────────────────────────────────────────────────
    NARRATIVE (Sources page)
